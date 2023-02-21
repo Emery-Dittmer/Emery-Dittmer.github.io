@@ -1,1 +1,2 @@
 # Emery-Dittmer.github.io
+<meta http-equiv="refresh" content="0; URL=https://www.linkedin.com/in/emery-dittmer/" />
