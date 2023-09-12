@@ -1,4 +1,5 @@
 import React from 'react';
+import Image, { StaticImageData } from 'next/image';
 
 function CertificationCard({
   name,
@@ -7,14 +8,14 @@ function CertificationCard({
   link,
 }: {
   name: string;
-  image: string;
+  image: StaticImageData;
   company: string;
   link: string;
 }) {
   return (
     <div className="certification-card">
       <div className="image-container">
-        {image}
+      <Image src={image} alt={name} width={100} height={40} unoptimized />
       </div>
       <div className="certification-details">
         <h3 className="certification-name">{name}</h3>

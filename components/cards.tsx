@@ -22,7 +22,7 @@ import Demand_supply from "@/assets/projects/demandinvtory.png";
 
 
 
-export default async function Cards() {
+export default function Cards() {
   return (
     <>
               {/* Section header */}
@@ -60,13 +60,7 @@ const features = [
     linkText: 'link text',
     linkUrl:'link' ,
     large: false,
-    mediaSrc: <Image
-    src = {windturbine}
-    alt="Wind Turbine"
-    width={100}
-    height={40}
-    unoptimized
-    />,
+    mediaSrc: windturbine
   },
   {
     title: 'Developed a Fraud Risk Detection Tool',
@@ -75,13 +69,7 @@ const features = [
     linkText: '',
     linkUrl:'' ,
     large: false,
-    mediaSrc: <Image
-    src= {fraud_risk}
-    alt="Deploy with Vercel"
-    width={100}
-    height={40}
-    unoptimized
-    />,
+    mediaSrc: fraud_risk
   },
   {
     title: 'Large Government Department Financial Model' ,
@@ -91,13 +79,7 @@ const features = [
     linkText: 'link text',
     linkUrl:'google.com' ,
     large: false,
-    mediaSrc: <Image
-    src={accrual_forecast}
-    alt="Deploy with Vercel"
-    width={100}
-    height={40}
-    unoptimized
-    />,
+    mediaSrc: accrual_forecast
   },
   {
     title: 'Journal Entry Reversal Finder' ,
@@ -107,13 +89,7 @@ const features = [
     linkText: 'link text',
     linkUrl:'' ,
     large: false,
-    mediaSrc: <Image
-    src={reversal_finder}
-    alt="Deploy with Vercel"
-    width={100}
-    height={40}
-    unoptimized
-    />,
+    mediaSrc: reversal_finder
   },
   {
     title: 'Advising Workshop Effectiveness Analytics ' ,
@@ -123,13 +99,7 @@ const features = [
     linkText: 'link text',
     linkUrl:'' ,
     large: false,
-    mediaSrc: <Image
-    src={workshop}
-    alt="Deploy with Vercel"
-    width={100}
-    height={40}
-    unoptimized
-    />,
+    mediaSrc: workshop
   },
   {
     title:  'Supply Forecasting Tool' ,
@@ -139,13 +109,7 @@ const features = [
     linkText: 'link text',
     linkUrl:'' ,
     large: false,
-    mediaSrc: <Image
-    src={inventory_drain}
-    alt="Deploy with Vercel"
-    width={100}
-    height={40}
-    unoptimized
-    />,
+    mediaSrc: inventory_drain
   },
   {
     title: 'Demand and Inventory Balancing Model' ,
@@ -155,13 +119,7 @@ const features = [
     linkText: 'link text',
     linkUrl:'' ,
     large: false,
-    mediaSrc: <Image
-    src={Demand_supply}
-    alt="Deploy with Vercel"
-    width={100}
-    height={40}
-    unoptimized
-    />,
+    mediaSrc: Demand_supply
   }
  
 ];

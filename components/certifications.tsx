@@ -13,7 +13,7 @@ import Tableau_specialist from "@/assets/certifications/Tableau-Specialist.png";
 
 
 
-export default async function Certifications({ data }: { data: Array<{ section: string; certification: Array<{ name: string; image: string; company: string; link: string }> }> }) {
+export default function Certifications({ data }: { data?: Array<{ section: string; certification: Array<{ name: string; image: string; company: string; link: string }> }> }) {
   return (
     <>
     <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -21,7 +21,7 @@ export default async function Certifications({ data }: { data: Array<{ section: 
     <h3 className="h2 text-center"> Certifications </h3>
     <div className="flex items-center justify-center">
       <div className="text-center my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-auto md:grid-cols-1 xl:px-0">
-        <div className="certifications grid grid-cols-3 gap-auto">
+        <div className="certifications max-w-sm mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 items-start md:max-w-2xl lg:max-w-none">
           {certs.map((sectionData) => (
             <div className="certifications-section" key={sectionData.section}>
               <h2 className="section-title">{sectionData.section}</h2>
@@ -51,81 +51,63 @@ const certs = [
  
   //     ]
   // },
-  {
+    {
       'section': 'Analytics',
       'certification': [
-          {'name': 'Alteryx Designer Advanced Certification', 'image': <Image
-          src = {alteryx_advanced}
-          alt="Wind Turbine"
-          width={100}
-          height={40}
-          unoptimized
-          />,'company':'Issued by: Alteryx' , 'link': 'https://www.credly.com/users/emery-dittmer/badges'},
-         
-          {'name': 'Alteryx Designer Core Certification', 'image': <Image
-          src = {alteryx_core}
-          alt="Wind Turbine"
-          width={100}
-          height={40}
-          unoptimized
-          />,'company':'Issued by: Alteryx' , 'link': 'https://www.credly.com/users/emery-dittmer/badges'},
-         
+        {
+          'name': 'Alteryx Designer Advanced Certification',
+          'image': alteryx_advanced, // Update with the correct image import
+          'company': 'Issued by: Alteryx',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+        },
+        {
+          'name': 'Alteryx Designer Core Certification',
+          'image': alteryx_core, // Update with the correct image import
+          'company': 'Issued by: Alteryx',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+        },
       ]
-  },
-  {
+    },
+    {
       'section': 'Visualization',
       'certification': [
-          {'name': 'Microsoft Certified: Power BI Data Analyst Associates', 'image': <Image
-          src = {power_BI}
-          alt="Wind Turbine"
-          width={100}
-          height={40}
-          unoptimized
-          />,'company':'Issued by: Microsoft' , 'link': 'https://www.credly.com/users/emery-dittmer/badges'},
-          
-          {'name': ' Tableau Desktop Specialist', 'image': <Image
-          src = {Tableau_specialist}
-          alt="Wind Turbine"
-          width={100}
-          height={40}
-          unoptimized
-          />,'company':'Issued by: Tableau' , 'link': 'https://www.credly.com/users/emery-dittmer/badges'},
-        
-          
+        {
+          'name': 'Microsoft Certified: Power BI Data Analyst Associates',
+          'image': power_BI, // Update with the correct image import
+          'company': 'Issued by: Microsoft',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+        },
+        {
+          'name': 'Tableau Desktop Specialist',
+          'image': Tableau_specialist, // Update with the correct image import
+          'company': 'Issued by: Tableau',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+        },
       ]
-  },
-  // {
-  //     'section': 'Development',
-  //     'certification': [
-  //         {'name': 'SQL- MySQL for Data Analytcs and Buisness Intelligence', 'image': mysql,'company':'Issued by: Udemy' , 'link': 'https://www.credly.com/users/emery-dittmer/badges'},
-  //     ]
-  // },
-  {
+    },
+    {
       'section': 'Buisness Essentials',
       'certification': [
-          {'name': 'Certified Associate in Project Management (CAPM)', 'image': <Image
-          src = {CAPM}
-          alt="Wind Turbine"
-          width={100}
-          height={40}
-          unoptimized
-          />,'company':'Issued by: Project Management Institute' , 'link': 'https://www.credly.com/users/emery-dittmer/badges'},
-          
-          {'name': 'Microsoft Certified: Azure Fundamentals', 'image': <Image
-          src = {azure_fundamentals}
-          alt="Wind Turbine"
-          width={100}
-          height={40}
-          unoptimized
-          />,'company':'Issued by: Microsoft' , 'link': 'https://www.credly.com/users/emery-dittmer/badges'},
-          
-          {'name': 'Inclusive Mindset', 'image': <Image
-          src = {inclusive_mindset}
-          alt="Wind Turbine"
-          width={100}
-          height={40}
-          unoptimized
-          />,'company':'Issued by: PwC' , 'link': 'https://www.credly.com/users/emery-dittmer/badges'}
+        {
+          'name': 'Certified Associate in Project Management (CAPM)',
+          'image': CAPM, // Update with the correct image import
+          'company': 'Issued by: Project Management Institute',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+        },
+        {
+          'name': 'Microsoft Certified: Azure Fundamentals',
+          'image': azure_fundamentals, // Update with the correct image import
+          'company': 'Issued by: Microsoft',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+        },
+        {
+          'name': 'Inclusive Mindset',
+          'image': inclusive_mindset, // Update with the correct image import
+          'company': 'Issued by: PwC',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+        },
       ]
-  },
-]
+    },
+    // Add more sections and certification data as needed
+  ];
+  

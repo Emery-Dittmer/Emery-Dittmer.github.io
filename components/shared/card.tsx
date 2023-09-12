@@ -1,6 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import Balancer from "react-wrap-balancer";
+import Image, { StaticImageData } from 'next/image';
 
 export default function Card({
   title,
@@ -8,20 +9,16 @@ export default function Card({
   company,
   large,
   mediaSrc,
-  mediaAlt,
   linkText,
   linkUrl,
-  demoUrl,
 }: {
   company: string;
   title: string;
   description: string;
   large?: boolean;
-  mediaSrc: string;
-  mediaAlt: string;
+  mediaSrc: StaticImageData;
   linkText: string;
   linkUrl: string;
-  demoUrl: string;
 }) {
   return (
     <div
@@ -31,7 +28,7 @@ export default function Card({
     >
       <div className="max-h-60 overflow-hidden flex justify-center items-center mt-4">
         <div className="max-h-60 overflow-hidden flex justify-center items-center">
-          {mediaSrc}
+        <Image src={mediaSrc} alt={title} width={100} height={40} unoptimized />
         </div>
       </div>
       <div className="mx-auto max-w-md text-center p-4">
@@ -76,12 +73,6 @@ export default function Card({
           </a>
         </div>
         <div className="mt-2">
-          <a
-            href={demoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-gray-500 hover:text-blue-900 blue-link"
-          ></a>
         </div>
         <div className="mt-2 text-xs text-gray-400">{company}</div>
       </div>
