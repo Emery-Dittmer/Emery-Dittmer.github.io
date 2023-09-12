@@ -1,0 +1,267 @@
+.form-input:focus,
+.form-textarea:focus,
+.form-multiselect:focus,
+.form-select:focus,
+.form-checkbox:focus,
+.form-radio:focus {
+    @apply ring-0;
+}
+
+/* Hamburger button */
+.hamburger svg > *:nth-child(1),
+.hamburger svg > *:nth-child(2),
+.hamburger svg > *:nth-child(3) {
+    transform-origin: center;
+    transform: rotate(0deg);
+}
+
+.hamburger svg > *:nth-child(1) {
+    transition: y 0.1s 0.25s ease-in, transform 0.22s cubic-bezier(0.55, 0.055, 0.675, 0.19), opacity 0.1s ease-in;
+}
+
+.hamburger svg > *:nth-child(2) {
+    transition: transform 0.22s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+}
+
+.hamburger svg > *:nth-child(3) {
+    transition: y 0.1s 0.25s ease-in, transform 0.22s cubic-bezier(0.55, 0.055, 0.675, 0.19), width 0.1s 0.25s ease-in;
+}        
+
+.hamburger.active svg > *:nth-child(1) {
+    opacity: 0;
+    y: 11;
+    transform: rotate(225deg);
+    transition: y 0.1s ease-out, transform 0.22s 0.12s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.1s 0.12s ease-out;
+}
+    
+.hamburger.active svg > *:nth-child(2) {
+    transform: rotate(225deg);
+    transition: transform 0.22s 0.12s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+    
+.hamburger.active svg > *:nth-child(3) {
+    y: 11;
+    transform: rotate(135deg);
+    transition: y 0.1s ease-out, transform 0.22s 0.12s cubic-bezier(0.215, 0.61, 0.355, 1), width 0.1s ease-out;   
+}
+
+.header.shrink {
+    height: 60px; /* Adjust this value to set the height when shrunk */
+    /* Add other styles as needed */
+  }
+
+/* Pulsing animation */
+@keyframes pulseLoop {
+    0% { opacity: 0; transform: scale(0.1) translateZ(0); }
+    40% { opacity: 1; }
+    60% { opacity: 1; }
+    100% { opacity: 0; transform: scale(2) translateZ(0); }
+}
+.pulse {
+    transform: scale(0.1);
+    opacity: 0;
+    transform-origin: center;
+    animation: pulseLoop 8000ms linear infinite;                                   
+}
+.pulse-1 {
+    animation-delay: -2000ms;
+}
+.pulse-2 {
+    animation-delay: -4000ms;
+}
+.pulse-3 {
+    animation-delay: -6000ms;
+}
+
+/* Custom AOS distance */
+@media screen {
+    html:not(.no-js) body [data-aos=fade-up] {
+        -webkit-transform: translate3d(0, 10px, 0);
+        transform: translate3d(0, 10px, 0);
+    }
+
+    html:not(.no-js) body [data-aos=fade-down] {
+        -webkit-transform: translate3d(0, -10px, 0);
+        transform: translate3d(0, -10px, 0);
+    }
+
+    html:not(.no-js) body [data-aos=fade-right] {
+        -webkit-transform: translate3d(-10px, 0, 0);
+        transform: translate3d(-10px, 0, 0);
+    }
+
+    html:not(.no-js) body [data-aos=fade-left] {
+        -webkit-transform: translate3d(10px, 0, 0);
+        transform: translate3d(10px, 0, 0);
+    }
+
+    html:not(.no-js) body [data-aos=fade-up-right] {
+        -webkit-transform: translate3d(-10px, 10px, 0);
+        transform: translate3d(-10px, 10px, 0);
+    }
+
+    html:not(.no-js) body [data-aos=fade-up-left] {
+        -webkit-transform: translate3d(10px, 10px, 0);
+        transform: translate3d(10px, 10px, 0);
+    }
+
+    html:not(.no-js) body [data-aos=fade-down-right] {
+        -webkit-transform: translate3d(-10px, -10px, 0);
+        transform: translate3d(-10px, -10px, 0);
+    }
+
+    html:not(.no-js) body [data-aos=fade-down-left] {
+        -webkit-transform: translate3d(10px, -10px, 0);
+        transform: translate3d(10px, -10px, 0);
+    }
+
+    html:not(.no-js) body [data-aos=zoom-in-up] {
+        -webkit-transform: translate3d(0, 10px, 0) scale(.6);
+        transform: translate3d(0, 10px, 0) scale(.6);
+    }
+
+    html:not(.no-js) body [data-aos=zoom-in-down] {
+        -webkit-transform: translate3d(0, -10px, 0) scale(.6);
+        transform: translate3d(0, -10px, 0) scale(.6);
+    }
+
+    html:not(.no-js) body [data-aos=zoom-in-right] {
+        -webkit-transform: translate3d(-10px, 0, 0) scale(.6);
+        transform: translate3d(-10px, 0, 0) scale(.6);
+    }
+
+    html:not(.no-js) body [data-aos=zoom-in-left] {
+        -webkit-transform: translate3d(10px, 0, 0) scale(.6);
+        transform: translate3d(10px, 0, 0) scale(.6);
+    }
+
+    html:not(.no-js) body [data-aos=zoom-out-up] {
+        -webkit-transform: translate3d(0, 10px, 0) scale(1.2);
+        transform: translate3d(0, 10px, 0) scale(1.2);
+    }
+
+    html:not(.no-js) body [data-aos=zoom-out-down] {
+        -webkit-transform: translate3d(0, -10px, 0) scale(1.2);
+        transform: translate3d(0, -10px, 0) scale(1.2);
+    }
+
+    html:not(.no-js) body [data-aos=zoom-out-right] {
+        -webkit-transform: translate3d(-10px, 0, 0) scale(1.2);
+        transform: translate3d(-10px, 0, 0) scale(1.2);
+    }
+
+    html:not(.no-js) body [data-aos=zoom-out-left] {
+        -webkit-transform: translate3d(10px, 0, 0) scale(1.2);
+        transform: translate3d(10px, 0, 0) scale(1.2);
+    }
+}
+
+
+.wrapper {
+    margin-top: 20px; /* Adjust the value as needed */
+  }
+
+  .wrapper {
+    padding-top: 10px; /* Adjust the value as needed */
+  }
+
+.white-text {
+    color: white; /* Set the text color to white */
+  }
+
+.text-purple {
+    color: purple; /* Set the text color to purple */
+  } 
+
+.transparent-bg {
+    background: transparent; /* Set the background to transparent */
+     /* Add a white border */
+  }
+
+.transparent-card {
+    background-color: transparent;
+    color: white;
+    
+    /* Add any other styles you need */
+  }
+
+.single-line-spacing {
+    line-height: 1.3;
+  }
+
+/* CSS for CertificationCard component */
+
+
+.certifications-section {
+    /* Add a left border to the section */
+     /* Adjust the thickness and color as needed */
+    padding: 16px; /* Add padding to separate the border from content */
+    font-size: 1.5rem;
+    font-weight: bold
+  }
+
+.certifications-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(6px, 1fr)); /* Adjust the minmax size as needed */
+    gap: 16px; /* Adjust the gap between certifications as needed */
+    justify-items: center; /* Center certifications horizontally within the grid */
+    
+  }
+
+.certification-card {
+    /* Set a fixed width for each card */
+    width: 200px; /* You can adjust the width to your liking */
+    margin: 16px; /* Add margin for spacing between cards */
+    display: flex; /* Use flexbox to arrange cards horizontally */
+    flex-direction: column; /* Stack content vertically within each card */
+    justify-content: center; /* Center cards vertically within the container */
+    align-items: center; /* Center content horizontally within each card */
+    text-align: center; /* Center text within each card */
+  
+    /* Style the card container */
+    
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Style the image container */
+  .image-container {
+    display: flex; /* Use flexbox to center the image */
+    justify-content: center; /* Center image horizontally */
+    width: 100%;
+  }
+  
+  /* Style the card image */
+  .certification-card img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Style the certification name */
+  .certification-name {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 8px 0;
+  }
+  
+  /* Style the certification company */
+  .certification-company {
+    font-size: .7rem;
+    color: #555;
+  }
+  
+  /* Style the "View Details" link */
+  .certification-link {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: color 0.3s;
+  }
+  
+  .certification-link:hover {
+    color: #0056b3;
+  }
+
+  
