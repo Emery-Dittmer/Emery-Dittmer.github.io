@@ -1,7 +1,7 @@
 {
   "name": "open-pro-next",
   "version": "0.1.0",
-  "homepage": "https://emery-dittmer.github.io/react-gh-pages",
+  "homepage": "https://emery-dittmer.github.io/",
   "private": true,
   "scripts": {
     "predeploy": "npm run build",

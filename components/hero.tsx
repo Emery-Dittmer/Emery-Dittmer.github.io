@@ -40,19 +40,19 @@ export default function Hero() {
                     <span className="ml-2">Projects</span>
                   </div>
                 </a>
-                <a className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto" href="assets/docs/Dittmer Emery Resume.pdf" download="Dittmer Emery Resume.pdf">
+                <a className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto" href="https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/Dittmer%20Emery%20Resume.pdf" download="Dittmer Emery Resume.pdf">
                   <div className="flex items-center space-x-2">
                     <Resume/>
                     <span className="ml-2">Resume</span>
                   </div>
                 </a>
-                <a className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto" href="assets/docs/Dittmer Emery Resume.pdf" download="Dittmer Emery Resume.pdf">
+                <a className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto" href="https://github.com/Emery-Dittmer" download="Dittmer Emery Resume.pdf">
                   <div className="flex items-center space-x-2">
                     <Github/>
                     <span className="ml-2">Github</span>
                   </div>
                 </a>
-                <a className="btn text-white bg-purple-600 hover:bg-purple-700 w-full sm:w-auto" href="Projects">
+                <a className="btn text-white bg-purple-600 hover:bg-purple-700 w-full sm:w-auto" href="https://www.linkedin.com/in/emery-dittmer/">
                   <div className="flex items-center space-x-2">
                     <Linkedin/>
                     <span className="ml-2">Linkedin</span>
