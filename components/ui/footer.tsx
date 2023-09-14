@@ -21,7 +21,7 @@ export default function Footer() {
                 <h6 className="text-gray-200 font-medium mb-1">Skills</h6>
                 <ul>
                   <li className="mb-1">
-                    <Link href="https://www.credly.com/users/emery-dittmer/badges" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Certifications</Link>
+                    <Link href="/Certifications" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Certifications</Link>
                   </li>
                   <li className="mb-1">
                     <Link href="/Skills" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Skills</Link>
