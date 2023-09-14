@@ -8,6 +8,8 @@ import Image from "next/image";
 import { nFormatter } from "@/lib/utils";
 import EmeryHeadshot from '@/assets/images/emery_dittmer alt.jpg';
 import movie from "@/assets/projects/movies.png";
+import network from "@/assets/projects/network.png";
+
 import windturbine from "@/assets/projects/windturbine.png";
 import fraud_risk from "@/assets/projects/fraudtool.png";
 
@@ -53,24 +55,7 @@ export default function Cards() {
 }
 
 const features = [
-  {
-    title: 'Network Analysis',
-    company: 'Academic Project',
-    description: 'A team and I investigated the network within the USPTO advice network. We uncovered that many recipriocal networks exist but that these networks do not have divisoona along race or gender lines.',
-    linkText: 'See the report here',
-    linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/turbine_recycling.pdf' ,
-    large: false,
-    mediaSrc: movie
-  },
-  {
-    title: 'Movie theatre Revenue Forecasting',
-    company: 'Academic Project',
-    description: 'A team and I investigated the optimal pricing models for movie theatres post pandemic and various revenue strategies. The different strategies demonstrated increased marginal growth form a pure ticket revenue and concenssion persepectove',
-    linkText: 'See the report here',
-    linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/turbine_recycling.pdf' ,
-    large: false,
-    mediaSrc: movie
-  },  
+
   {
     title: 'Wind Turbine Blade Recycling Facility',
     company: 'Academic Project',
@@ -99,6 +84,24 @@ const features = [
     large: false,
     mediaSrc: accrual_forecast
   },
+  {
+    title: 'Network Analysis',
+    company: 'Academic Project',
+    description: 'A team and I investigated the network within the USPTO advice network. We uncovered that many recipriocal networks exist but that these networks do not have divisoona along race or gender lines.',
+    linkText: 'See the report here',
+    linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/Networkanalysis.pdf' ,
+    large: false,
+    mediaSrc: network
+  },
+  {
+    title: 'Movie theatre Revenue Forecasting',
+    company: 'Academic Project',
+    description: 'A team and I investigated the optimal pricing models for movie theatres post pandemic and various revenue strategies. The different strategies demonstrated increased marginal growth form a pure ticket revenue and concenssion persepectove',
+    linkText: 'See the report here',
+    linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/Revenue%20managment.pdf' ,
+    large: false,
+    mediaSrc: movie
+  },  
   {
     title: 'Journal Entry Reversal Finder' ,
     company: 'Professional Project',
