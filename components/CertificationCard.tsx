@@ -15,7 +15,7 @@ function CertificationCard({
   return (
     <div className="certification-card">
       <div className="image-container">
-      <Image src={image} alt={name} width={100} height={40} unoptimized />
+      <Image src={image} alt={name} width={100} height={30} unoptimized />
       </div>
       <div className="certification-details">
         <h3 className="certification-name">{name}</h3>

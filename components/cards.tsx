@@ -7,6 +7,7 @@ import ComponentGrid from "@/components/shared/component-grid";
 import Image from "next/image";
 import { nFormatter } from "@/lib/utils";
 import EmeryHeadshot from '@/assets/images/emery_dittmer alt.jpg';
+import movie from "@/assets/projects/movies.png";
 import windturbine from "@/assets/projects/windturbine.png";
 import fraud_risk from "@/assets/projects/fraudtool.png";
 
@@ -52,13 +53,30 @@ export default function Cards() {
 }
 
 const features = [
-  
+  {
+    title: 'Network Analysis',
+    company: 'Academic Project',
+    description: 'A team and I investigated the network within the USPTO advice network. We uncovered that many recipriocal networks exist but that these networks do not have divisoona along race or gender lines.',
+    linkText: 'See the report here',
+    linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/turbine_recycling.pdf' ,
+    large: false,
+    mediaSrc: movie
+  },
+  {
+    title: 'Movie theatre Revenue Forecasting',
+    company: 'Academic Project',
+    description: 'A team and I investigated the optimal pricing models for movie theatres post pandemic and various revenue strategies. The different strategies demonstrated increased marginal growth form a pure ticket revenue and concenssion persepectove',
+    linkText: 'See the report here',
+    linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/turbine_recycling.pdf' ,
+    large: false,
+    mediaSrc: movie
+  },  
   {
     title: 'Wind Turbine Blade Recycling Facility',
     company: 'Academic Project',
     description: 'A team and I investigated the optimal location of wind turbine recycling facilities throughout Ontario. We aimed to minimize the fixed cost of facility construction with the variable cost of transportation. This methodology lays the groundwork for future research and Canada\'s leadership in the global green economy. ',
-    linkText: 'link text',
-    linkUrl:'link' ,
+    linkText: 'See the report here',
+    linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/turbine_recycling.pdf' ,
     large: false,
     mediaSrc: windturbine
   },
@@ -76,8 +94,8 @@ const features = [
     company: 'Professional Project',
     description: 'I helped develop a financial prediction tool to plan 50 years of capital asset replacements. A BI dashboard helped to display the accrual ceiling and budget requirements. The government department saved an estimated $500 million in redundant assets over the next 50 years.*',
     picture: '',
-    linkText: 'link text',
-    linkUrl:'google.com' ,
+    linkText: '',
+    linkUrl:'' ,
     large: false,
     mediaSrc: accrual_forecast
   },
@@ -86,7 +104,7 @@ const features = [
     company: 'Professional Project',
     description:  'I developed an Alteryx workflow that detected journal entry reversals and produced a report. Audit procedures are complex but detecting and matching reversed journal entries saves teams time and money.*',
     picture: '',
-    linkText: 'link text',
+    linkText: '',
     linkUrl:'' ,
     large: false,
     mediaSrc: reversal_finder
@@ -96,7 +114,7 @@ const features = [
     company: 'Professional Project',
     description: 'I prepared a dashboard and report using data from advisor workshops. The dashboard segmented the number of people attending the workshops by location, subject, and other marketing factors. The insights allowed RBC to increase workshop value and effectiveness by changing to a geographic and demographic approach to the times and subjects offered.*',
     picture: '',
-    linkText: 'link text',
+    linkText: '',
     linkUrl:'' ,
     large: false,
     mediaSrc: workshop
@@ -106,7 +124,7 @@ const features = [
     company: 'Professional Project',
     description: 'I developed a forecasting tool to track inventory and alert of critical supply shortages. I was responsible for critical substrate and rare earth coating materials.  The tool queried from several SQL databases of inventory, manufacturing usage, orders, and sales forecasting to keep track of critical supplies and upcoming shortages. The program would visualize the forecasted needs and send automated alerts for material needs when inventory is too low.*',
     picture: '',
-    linkText: 'link text',
+    linkText: '',
     linkUrl:'' ,
     large: false,
     mediaSrc: inventory_drain
@@ -116,7 +134,7 @@ const features = [
     company: 'Professional Project',
     description: 'Working on POS data and inventory availability, I built a model that minimized the inventory requirements for the predicted sales of products such as razors, toothbrushes, and coffee machines. I was able to reallocate inventory space to higher volatility and profit items. This increased annual revenue.*',
     picture: '',
-    linkText: 'link text',
+    linkText: '',
     linkUrl:'' ,
     large: false,
     mediaSrc: Demand_supply
