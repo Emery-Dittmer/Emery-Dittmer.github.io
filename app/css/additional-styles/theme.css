@@ -243,6 +243,19 @@
     font-size: 1rem;
     font-weight: bold;
     margin: 8px 0;
+    white-space: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    height: 2.4em; /* Adjust this value to control the height of two lines */
+    /* Adjust line height for readability */
+    line-height: 1.2em;
+  }
+
+  
+  .two-line {
+    /* Number of lines you want to display */
+    max-height: none; /* You can adjust this value to control the number of lines */
   }
   
   /* Style the certification company */
@@ -264,4 +277,10 @@
     color: #0056b3;
   }
 
+
+.certification-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
   

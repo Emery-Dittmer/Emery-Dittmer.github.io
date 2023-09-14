@@ -13,7 +13,7 @@ import Tableau_specialist from "@/assets/certifications/Tableau-Specialist.png";
 
 
 
-export default function Certifications({ data }: { data?: Array<{ section: string; certification: Array<{ name: string; image: string; company: string; link: string }> }> }) {
+export default function Certifications({ data }: { data?: Array<{ section: string; certification: Array<{ name: string; image: string; company: string; link: string; linktxt:string; h:number; }> }> }) {
   return (
     <>
     <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -59,12 +59,16 @@ const certs = [
           'image': alteryx_advanced, // Update with the correct image import
           'company': 'Issued by: Alteryx',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
         },
         {
           'name': 'Alteryx Designer Core Certification',
           'image': alteryx_core, // Update with the correct image import
           'company': 'Issued by: Alteryx',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
         },
       ]
     },
@@ -76,12 +80,16 @@ const certs = [
           'image': power_BI, // Update with the correct image import
           'company': 'Issued by: Microsoft',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
         },
         {
           'name': 'Tableau Desktop Specialist',
           'image': Tableau_specialist, // Update with the correct image import
           'company': 'Issued by: Tableau',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
         },
       ]
     },
@@ -93,18 +101,24 @@ const certs = [
           'image': CAPM, // Update with the correct image import
           'company': 'Issued by: Project Management Institute',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
         },
         {
           'name': 'Microsoft Certified: Azure Fundamentals',
           'image': azure_fundamentals, // Update with the correct image import
           'company': 'Issued by: Microsoft',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
         },
         {
           'name': 'Inclusive Mindset',
           'image': inclusive_mindset, // Update with the correct image import
           'company': 'Issued by: PwC',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
         },
       ]
     },

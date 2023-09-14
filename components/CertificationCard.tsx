@@ -6,19 +6,23 @@ function CertificationCard({
   image,
   company,
   link,
+  linktxt,
+  h,
 }: {
   name: string;
   image: StaticImageData;
   company: string;
   link: string;
+  linktxt: string;
+  h: number;
 }) {
   return (
     <div className="certification-card">
       <div className="image-container">
-      <Image src={image} alt={name} width={100} height={30} unoptimized />
+      <Image src={image} alt={name} height={h} unoptimized />
       </div>
       <div className="certification-details">
-        <h3 className="certification-name">{name}</h3>
+        <h3 className="certification-name two-line">{name}</h3>
         <p className="certification-company">{company}</p>
         <a
           href={link}
@@ -26,7 +30,7 @@ function CertificationCard({
           target="_blank"
           rel="noopener noreferrer"
         >
-          View Details
+          {linktxt}
         </a>
       </div>
     </div>
