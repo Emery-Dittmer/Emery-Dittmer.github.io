@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
-import FeatImage01 from '@/public/images/sf.jpeg'
-import FeatImage02 from '@/public/images/montreal.jpg'
+import FeatImage01 from '@/public/images/SF.jpeg'
+import FeatImage02 from '@/public/images/Montreal.jpg'
 import FeatImage03 from '@/public/images/features-03-image-03.png'
 
 export default function Zigzag() {
