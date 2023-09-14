@@ -21,12 +21,6 @@ import alteryx from "@/assets/logos/Alteryx_Logo.png";
 import orange from "@/assets/logos/orange_logo.png";
 import esri from "@/assets/logos/esri_logo.png";
 
-
-import azure_fundamentals from "@/assets/logos/Azure_fundamentals.png";
-import Tableau_specialist from "@/assets/logos/Tableau-Specialist.png";
-
-
-
 export default function Skills({ data }: { data?: Array<{ section: string; certification: Array<{ name: string; image: string; company: string; link: string }> }> }) {
   return (
     <>
