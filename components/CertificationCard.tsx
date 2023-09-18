@@ -19,10 +19,11 @@ function CertificationCard({
   return (
     <div className="certification-card">
       <div className="image-container">
-      <Image src={image} alt={name} height={h} unoptimized />
+        <Image src={image} alt={name} height={h} unoptimized />
       </div>
+      
       <div className="certification-details">
-        <h3 className="certification-name two-line">{name}</h3>
+        <h3 className="certification-name two-line ">{name}</h3>
         <p className="certification-company">{company}</p>
         <a
           href={link}

@@ -24,7 +24,8 @@ export default function Features() {
               <h4 className="h4 mb-2">Data Strategy</h4>
               <p className="text-lg text-gray-400 text-center">
                 Data strategy, with a focus on delivering value for business users, involves defining the processes, technology, and rules necessary for managing information assets effectively.
-                <em><strong className="white-text">
+                &nbsp;
+                <em><strong className="white-text"> 
                 Emery brings over 4 years of successful data strategy implementation.
                 </strong></em>
                 </p>
@@ -40,6 +41,7 @@ export default function Features() {
               <h4 className="h4 mb-2">Data Visulisations</h4>
               <p className="text-lg text-gray-400 text-center">
                 Data visualization, geared toward business users, is the art of representing data graphically, aiding in understanding complex information at a glance.
+                &nbsp;
                 <em><strong className="white-text">
                 Emery brings over 6 years of successful data visulaisation.
                 <p></p>
@@ -63,8 +65,9 @@ export default function Features() {
               <h4 className="h4 mb-2">Project Management</h4>
               <p className="text-lg text-gray-400 text-center">
                 Project management, with a business user's perspective in mind, is the systematic planning and organization of resources to achieve project goals efficiently.
+                &nbsp;
                 <em><strong className="white-text">
-                Emery brings over  years of successful data strategy implementation.
+                Emery brings over 3 years of successful data strategy implementation.
                 <p></p>
 {/*                 <a href="/Visualizations" className="text-purple underline">
                 Click here for details.
@@ -85,7 +88,8 @@ export default function Features() {
               <h4 className="h4 mb-2">Ethical Frameworks</h4>
               <p className="text-lg text-gray-400 text-center">
               Ethical frameworks in data, designed to benefit business users, address the principles and guidelines for handling data responsibly and ethically.
-              <em><strong className="white-text">
+                &nbsp;
+                <em><strong className="white-text">
                 Emery brings over 4 years of successful data strategy implementation.
                 </strong></em>
                 </p>
@@ -103,6 +107,7 @@ export default function Features() {
               <h4 className="h4 mb-2">Statistics & Mathemetics</h4>
               <p className="text-lg text-gray-400 text-center">
                 Data analysis through statistics, tailored for business users, involves using statistical methods to extract meaningful insights from data.
+                &nbsp;
                 <em><strong className="white-text">
                 Emery brings over 4 years of successful data strategy implementation.
                 </strong></em>
@@ -122,6 +127,7 @@ export default function Features() {
               <h4 className="h4 mb-2">Continous Development</h4>
               <p className="text-lg text-gray-400 text-center">
                 Continuous improvement, with a focus on enhancing processes and practices, adds significant value for business users by refining workflows and achieving better outcomes.
+                &nbsp;
                 <em><strong className="white-text">
                 Emery brings over 4 years of successful data strategy implementation.
                 <p></p>

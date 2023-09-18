@@ -2,7 +2,8 @@ import Image from 'next/image'
 
 import FeatImage01 from '@/public/images/SF.jpeg'
 import FeatImage02 from '@/public/images/Montreal.jpg'
-import FeatImage03 from '@/public/images/features-03-image-03.png'
+import FeatImage03 from '@/public/images/Ottawa.jpg' 
+import FeatImage04 from '@/public/images/Montreal2.jpg' 
 
 export default function Zigzag() {
   return (
@@ -43,19 +44,25 @@ export default function Zigzag() {
                       <svg className="w-3 h-3 fill-current text-green-500 mr-2 shrink-0" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10.28 2.28L3.989 8.575 1.695 6.28A1 1 0 00.28 7.695l3 3a1 1 0 001.414 0l7-7A1 1 0 0010.28 2.28z" />
                       </svg>
-                      <span>Learn Determination</span>
+                      <span>Learn determination, patience & an analytical mindset</span>
+                    </li>
+                    <li className="flex items-center mb-2">
+                      <svg className="w-3 h-3 fill-current text-green-500 mr-2 shrink-0" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.28 2.28L3.989 8.575 1.695 6.28A1 1 0 00.28 7.695l3 3a1 1 0 001.414 0l7-7A1 1 0 0010.28 2.28z" />
+                      </svg>
+                      <span>Find a passion in surfing</span>
                     </li>
                     <li className="flex items-center">
                       <svg className="w-3 h-3 fill-current text-green-500 mr-2 shrink-0" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10.28 2.28L3.989 8.575 1.695 6.28A1 1 0 00.28 7.695l3 3a1 1 0 001.414 0l7-7A1 1 0 0010.28 2.28z" />
                       </svg>
-                      <span>Obtain high school diploma</span>
+                      <span>Become a waiter and learn </span>
                     </li>
                     <li className="flex items-center">
                       <svg className="w-3 h-3 fill-current text-green-500 mr-2 shrink-0" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10.28 2.28L3.989 8.575 1.695 6.28A1 1 0 00.28 7.695l3 3a1 1 0 001.414 0l7-7A1 1 0 0010.28 2.28z" />
                       </svg>
-                      <span>Obtain French high schhol diploma</span>
+                      <span>Obtain French & English high schhol diploma</span>
                     </li>
                   </ul>
                 </div>
@@ -109,7 +116,7 @@ export default function Zigzag() {
                 <div className="md:pr-4 lg:pr-12 xl:pr-16">
                   <div className="font-architects-daughter text-xl text-purple-600 mb-2">Professional Growth </div>
                   <h3 className="h3 mb-3">2019 - Moving to Ottawa</h3>
-                  <p className="text-xl text-gray-400 mb-4">I moved to Ottawa to start a new life in Canada. Chemistry prooved difficult to start with but many were looking for oppotunities with optimization and analytics.</p>
+                  <p className="text-xl text-gray-400 mb-4">I moved to Ottawa to start a new life in Canada. Chemistry was not my calling but many were looking for oppotunities with optimization and analytics.</p>
                   <ul className="text-lg text-gray-400 -mb-2">
                     <li className="flex items-center mb-2">
                       <svg className="w-3 h-3 fill-current text-green-500 mr-2 shrink-0" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
@@ -139,14 +146,14 @@ export default function Zigzag() {
             <div className="md:grid md:grid-cols-12 md:gap-6 items-center">
               {/* Image */}
               <div className="max-w-xl md:max-w-none md:w-full mx-auto md:col-span-5 lg:col-span-6 mb-8 md:mb-0 rtl" data-aos="fade-up">
-                <Image className="max-w-full mx-auto md:max-w-none h-auto" src={FeatImage02} width={540} height={405} alt="Features 02" />
+                <Image className="max-w-full mx-auto md:max-w-none h-auto" src={FeatImage04} width={540} height={405} alt="Features 02" />
               </div>
               {/* Content */}
               <div className="max-w-xl md:max-w-none md:w-full mx-auto md:col-span-7 lg:col-span-6" data-aos="fade-left">
                 <div className="md:pl-4 lg:pl-12 xl:pl-16">
                   <div className="font-architects-daughter text-xl text-purple-600 mb-2">New Skills</div>
                   <h3 className="h3 mb-3">2022 - Montreal & McGill (Again)</h3>
-                  <p className="text-xl text-gray-400 mb-4">After working for a short time I decided to augment my skills to learn and grow within data & analytics.</p>
+                  <p className="text-xl text-gray-400 mb-4">After working I decided to augment my skills to learn and grow within data & analytics.</p>
                   <ul className="text-lg text-gray-400 -mb-2">
                     <li className="flex items-center mb-2">
                       <svg className="w-3 h-3 fill-current text-green-500 mr-2 shrink-0" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">

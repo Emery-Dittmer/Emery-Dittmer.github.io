@@ -210,18 +210,13 @@
 
 .certification-card {
     /* Set a fixed width for each card */
-    width: 200px; /* You can adjust the width to your liking */
     margin: 16px; /* Add margin for spacing between cards */
     display: flex; /* Use flexbox to arrange cards horizontally */
     flex-direction: column; /* Stack content vertically within each card */
     justify-content: center; /* Center cards vertically within the container */
     align-items: center; /* Center content horizontally within each card */
     text-align: center; /* Center text within each card */
-  
-    /* Style the card container */
-    
     border-radius: 8px;
-    padding: 8px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   }
   
@@ -247,21 +242,22 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
-    height: 2.4em; /* Adjust this value to control the height of two lines */
+    height: 3rem; /* Adjust this value to control the height of two lines */
     /* Adjust line height for readability */
-    line-height: 1.2em;
+    line-height: 1em;
   }
 
   
   .two-line {
     /* Number of lines you want to display */
-    max-height: none; /* You can adjust this value to control the number of lines */
+    max-height: 3rem; /* You can adjust this value to control the number of lines */
   }
   
   /* Style the certification company */
   .certification-company {
     font-size: .7rem;
     color: #555;
+    
   }
   
   /* Style the "View Details" link */
@@ -278,9 +274,16 @@
   }
 
 
-.certification-item {
+  .certification-item {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
   
+
+  .certifications-grid {
+    display: flex; /* Use flex container */
+    flex-wrap: wrap; /* Allow items to wrap to the next line if they exceed the container's width */
+    justify-content: space-between; /* Space items evenly along the main axis */
+    align-items: flex-start; /* Align items to the top */
+  }

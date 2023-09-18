@@ -16,8 +16,8 @@ import Tableau_specialist from "@/assets/certifications/Tableau-Specialist.png";
 export default function Certifications({ data }: { data?: Array<{ section: string; certification: Array<{ name: string; image: string; company: string; link: string; linktxt:string; h:number; }> }> }) {
   return (
     <>
-    <div className="max-w-6xl mx-auto px-4 sm:px-6">
-    <div className="py-12 md:py-20 border-t border-gray-800"></div></div>
+    <div className="max-w-sm mx-auto grid mx-auto">
+    <div className="py-1 md:py-2 border-t border-gray-800"></div></div>
     <h3 className="h2 text-center"> Certifications </h3>
     <div className="flex items-center justify-center">
       <div className="text-center my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-auto md:grid-cols-1 xl:px-0">
@@ -25,7 +25,7 @@ export default function Certifications({ data }: { data?: Array<{ section: strin
           {certs.map((sectionData) => (
             <div className="certifications-section" key={sectionData.section}>
               <h2 className="section-title">{sectionData.section}</h2>
-              <div className="certifications-grid grid grid-cols-2 gap-auto">
+              <div className="certifications-grid grid grid-cols-2 gap-auto max-w-sm">
                 {sectionData.certification.map((certification) => (
                   <CertificationCard key={certification.name} {...certification} />
                 ))}
