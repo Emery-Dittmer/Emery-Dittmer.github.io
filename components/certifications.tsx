@@ -61,6 +61,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': 'View Details',
           h: 100,
+          year: '2021',
         },
         {
           'name': 'Alteryx Designer Core Certification',
@@ -69,6 +70,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': 'View Details',
           h: 100,
+          year: '2021',
         },
       ]
     },
@@ -82,6 +84,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': 'View Details',
           h: 100,
+          year: '2022',
         },
         {
           'name': 'Tableau Desktop Specialist',
@@ -90,6 +93,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': 'View Details',
           h: 100,
+          year: '2022',
         },
       ]
     },
@@ -103,6 +107,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': 'View Details',
           h: 100,
+          year: '2021',
         },
         {
           'name': 'Microsoft Certified: Azure Fundamentals',
@@ -111,6 +116,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': 'View Details',
           h: 100,
+          year: '2023',
         },
         {
           'name': 'Inclusive Mindset',
@@ -119,6 +125,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': 'View Details',
           h: 100,
+          year: '2022',
         },
       ]
     },

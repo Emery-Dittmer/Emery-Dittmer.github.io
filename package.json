@@ -26,12 +26,16 @@
     "lucide-react": "^0.265.0",
     "next": "^13.4.13",
     "radix-ui": "^1.0.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.8.0",
+    "react-dom": "^18.2.0",
+    "react-elastic-carousel": "^0.11.5",
+    "react-icons": "^4.11.0",
     "react-markdown": "^8.0.7",
     "react-responsive-carousel": "^3.2.23",
     "react-wrap-balancer": "^1.0.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "yet-another-react-lightbox": "^3.12.2"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",

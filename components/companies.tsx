@@ -16,8 +16,8 @@ export default function Companies({ data }: { data?: Array<{ section: string; ce
   return (
     <>
     <div className="max-w-6xl mx-auto px-4 sm:px-6">
-    <div className="py-12 md:py-20 border-t border-gray-800"></div></div>
-    <h3 className="h2 text-center"> Companies </h3>
+    <div className="py-12 md:py-10 border-t border-gray-800"></div></div>
+    <h3 className="h2 text-center"> Previous Companies </h3>
     <div className="flex items-center justify-center">
       <div className="text-center my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-auto md:grid-cols-1 xl:px-0">
         <div className="certifications max-w-sm mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 items-start md:max-w-2xl lg:max-w-none">
@@ -58,18 +58,20 @@ const certs = [
         {
           'name': 'Philips Canada',
           'image': philips, // Update with the correct image import
-          'company': 'POS Analyst (2018)',
+          'company': 'POS Analyst',
           'link': '',
           'linktxt': '',
           h: 50,
+          year: '2018',
         },
         {
           'name': 'Iridian Spectral Technologies',
           'image': iridian, // Update with the correct image import
-          'company': 'Supply Cahin Manager (2019-2020)',
+          'company': 'Supply Cahin Manager',
           'link': '',
           'linktxt': '',
           h: 50,
+          year: '2019-2020',
         },
 
       ]
@@ -84,6 +86,7 @@ const certs = [
           'link': '',
           'linktxt': '',
           h: 50,
+          year: '2020-2021',
         },
         {
           'name': 'Price waterhouse Coopers',
@@ -92,6 +95,7 @@ const certs = [
           'link': '',
           'linktxt': '',
           h: 50,
+          year: '2020-2023',
         },
       ]
     },
@@ -101,10 +105,11 @@ const certs = [
         {
           'name': 'KPI Digital',
           'image': kpi, // Update with the correct image import
-          'company': 'UI/UX expert (academic project 2022-2023)',
+          'company': 'UI/UX expert (academic project)',
           'link': '',
           'linktxt': '',
           h: 50,
+          year: '2022-2023',
         },
         {
           'name': 'McGill University',
@@ -113,6 +118,7 @@ const certs = [
           'link': '',
           'linktxt': '',
           h: 50,
+          year: '2023',
         }
       ]
     },

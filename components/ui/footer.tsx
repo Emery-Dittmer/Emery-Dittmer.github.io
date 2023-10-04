@@ -42,10 +42,10 @@ export default function Footer() {
 
               {/* 4th block */}
               <div className="text-sm">
-                <h6 className="text-gray-200 font-medium mb-1">Speaking</h6>
+                <h6 className="text-gray-200 font-medium mb-1">Extracurriculars</h6>
                 <ul>
                   <li className="mb-1">
-                    <Link href="https://www.linkedin.com/feed/update/urn:li:activity:6973765588292616194/" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Alteryx Keynote</Link>
+                    <Link href="/CoolStuff" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Cool Stuff</Link>
                   </li>
 
                 </ul>

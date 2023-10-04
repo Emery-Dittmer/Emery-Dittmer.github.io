@@ -8,6 +8,7 @@ function CertificationCard({
   link,
   linktxt,
   h,
+  year,
 }: {
   name: string;
   image: StaticImageData;
@@ -15,6 +16,7 @@ function CertificationCard({
   link: string;
   linktxt: string;
   h: number;
+  year: string;
 }) {
   return (
     <div className="certification-card">
@@ -25,6 +27,7 @@ function CertificationCard({
       <div className="certification-details">
         <h3 className="certification-name two-line ">{name}</h3>
         <p className="certification-company">{company}</p>
+        <p className="certification-year">{year}</p>
         <a
           href={link}
           className="certification-link"
@@ -33,6 +36,8 @@ function CertificationCard({
         >
           {linktxt}
         </a>
+
+        
       </div>
     </div>
   );

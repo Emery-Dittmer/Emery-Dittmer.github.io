@@ -287,3 +287,11 @@
     justify-content: space-between; /* Space items evenly along the main axis */
     align-items: flex-start; /* Align items to the top */
   }
+
+  .certification-year {
+    text-decoration: none;
+    color: #555;
+    font-size: .7rem;
+    font-weight: bold;
+    transition: color 0.3s; 
+  }

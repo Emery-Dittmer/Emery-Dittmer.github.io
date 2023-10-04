@@ -7,7 +7,7 @@ import figma from "@/assets/logos/figma.png";
 import penpot from "@/assets/logos/penpot.png";
 import afinity from "@/assets/logos/affinity_logo.png";
 import powerbi from "@/assets/logos/PowerBI_logo.png";
-import tableau from "@/assets/logos/PowerBI_logo.png";
+import tableau from "@/assets/logos/tableau_logo.png";
 import looker from "@/assets/logos/looker_logo.png";
 
 
@@ -69,6 +69,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'Afinity Designer',
@@ -77,6 +78,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'Penpot',
@@ -85,6 +87,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'Power BI',
@@ -93,6 +96,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'Tableau',
@@ -101,6 +105,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'Looker Studio',
@@ -109,6 +114,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
       ]
     },
@@ -122,6 +128,7 @@ const certs = [
           'link': 'Flexible Coding',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'VBA',
@@ -130,6 +137,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'R',
@@ -138,6 +146,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'SQL',
@@ -146,6 +155,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
       ]
     },
@@ -159,6 +169,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'Alteryx',
@@ -167,6 +178,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'Orange',
@@ -175,6 +187,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
         {
           'name': 'ESRI',
@@ -183,6 +196,7 @@ const certs = [
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 50,
+          year: '',
         },
       ]
     },
