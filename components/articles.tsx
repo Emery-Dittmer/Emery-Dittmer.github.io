@@ -15,8 +15,8 @@ export default class NextJsCarousel extends Component {
                       <a href='https://www.linkedin.com/pulse/death-brick-mortar-retail-caused-covid-emery-dittmer/'>
                       <p className="legend"> COVID on Retail</p>
                       </a>
-  
                   </div>
+                  
                   <div>
                       <img src="https://media.licdn.com/dms/image/C4D12AQH9DUdk-WYddQ/article-cover_image-shrink_600_2000/0/1647195212134?e=1701907200&v=beta&t=WCIY9SucQw1mqsAwlGuSc50jxGzXhCaWkF2ydUjNLpw" alt="image2" />
                       <a href='https://www.linkedin.com/pulse/note-physical-location-workers-effect-retention-emery-dittmer/'>
