@@ -44,12 +44,12 @@ export default function Features() {
                 &nbsp;
                 <em><strong className="white-text">
                 Emery brings over 6 years of successful data visulaisation.
-                <p></p>
+                
 {/*                 <a href="/Visualizations" className="text-purple underline">
                 Click here for details.
                 </a> */}
                 </strong></em>
-                </p>
+              </p>
             </div>
 
             {/* 3rd item */}
@@ -68,12 +68,12 @@ export default function Features() {
                 &nbsp;
                 <em><strong className="white-text">
                 Emery brings over 3 years of successful data strategy implementation.
-                <p></p>
+              
 {/*                 <a href="/Visualizations" className="text-purple underline">
                 Click here for details.
                 </a> */}
                 </strong></em>
-                </p>
+              </p>
             </div>
 
             {/* 4th item */}
@@ -130,7 +130,7 @@ export default function Features() {
                 &nbsp;
                 <em><strong className="white-text">
                 Emery brings over 4 years of successful data strategy implementation.
-                <p></p>
+                
 {/*                 <a href="/visualizations" className="text-purple underline">
                 Click here for details.
                 </a> */}

@@ -17,7 +17,6 @@ import Certifications from '@/components/certifications'
 export default function Home() {
   return (
     <>
-      
       <Hero />
       <Features />
       <Certifications />
