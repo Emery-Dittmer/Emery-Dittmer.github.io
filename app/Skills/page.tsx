@@ -15,6 +15,7 @@ export const metadata = {
   import Certifications from '@/components/certifications'
   import Companies from '@/components/companies'
   import Skills from '@/components/skills'
+  import Feature_Full from '@/components/features_full'
 
   
   export default function Home() {
@@ -23,6 +24,7 @@ export const metadata = {
         <p>test</p>
         <Skills />
         <Companies />
+        <Feature_Full />
         <Newsletter />
       </>
     )

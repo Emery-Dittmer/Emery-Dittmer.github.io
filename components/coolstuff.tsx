@@ -10,6 +10,7 @@ import airbnb  from "@/assets/coolstuff/airbnblogo.png";
 import bike  from "@/assets/coolstuff/bike.png";
 import book  from "@/assets/coolstuff/book.png";
 import guitar  from "@/assets/coolstuff/guitar.png";
+import data_mangrove from "@/assets/coolstuff/data_mangrove.png";
 
 // import  from "@/assets/coolstuff/";
 // import  from "@/assets/coolstuff/";
@@ -63,6 +64,15 @@ const certs = [
     {
       'section': 'Keynote / Speaking',
       'certification': [
+        {
+          'name': 'Data Mangrove In Costa Rica',
+          'image': data_mangrove, // Update with the correct image import
+          'company': 'McGill University',
+          'link': 'https://observador.cr/inteligencia-artificial-ayudara-a-salvar-monos-de-una-muerte-por-atropello-o-electrocucion/',
+          'linktxt': 'Article Here',
+          h: 100,
+          year: '2023',
+        },
         {
           'name': 'History & Civics Guest Lecturer',
           'image': LFSF, // Update with the correct image import

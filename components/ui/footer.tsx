@@ -31,10 +31,13 @@ export default function Footer() {
 
               {/* 3rd block */}
               <div className="text-sm">
-                <h6 className="text-gray-200 font-medium mb-1">Articles</h6>
+                <h6 className="text-gray-200 font-medium mb-1">Creative</h6>
                 <ul>
                   <li className="mb-1">
                     <Link href="/Articles" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Articles</Link>
+                  </li>
+                  <li className="mb-1">
+                    <Link href="/Articles" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Visualizations</Link>
                   </li>
 
                 </ul>

@@ -31,7 +31,7 @@ export default function Newsletter() {
             <form className="w-full lg:w-1/2">
               <div className="flex flex-col sm:flex-row justify-center max-w-xs mx-auto sm:max-w-mg lg:max-w-none">
                 <a className="btn text-purple-700 bg-purple-100 hover:bg-white shadow px-20 py-3 text-lg font-bold" href="https://calendly.com/emery-dittmer/"> 
-                Calendry Link
+                Calendly Link
                 </a>
               </div>
               {/* Success message */}
