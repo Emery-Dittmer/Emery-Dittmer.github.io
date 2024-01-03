@@ -13,10 +13,12 @@ export const metadata = {
   import Zigzag from '@/components/journey'
   import Testimonials from '@/components/testimonials'
   import Certifications from '@/components/certifications'
+  import Visuals from '@/components/visuals'
   
   export default function Home() {
     return (
       <>
+        <Visuals />
         <Newsletter />
       </>
     )
