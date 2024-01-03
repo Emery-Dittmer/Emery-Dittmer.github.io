@@ -37,7 +37,7 @@ export default function Footer() {
                     <Link href="/Articles" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Articles</Link>
                   </li>
                   <li className="mb-1">
-                    <Link href="/Articles" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Visualizations</Link>
+                    <Link href="/Visualizations" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Visualizations</Link>
                   </li>
 
                 </ul>
