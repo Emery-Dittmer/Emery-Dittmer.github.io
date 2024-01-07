@@ -23,7 +23,7 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav }) => 
         </Link>
       </li>
       <li>
-        <Link href="/signin" className="flex font-medium w-full text-purple-600 hover:text-gray-200 py-2 justify-center" onClick={closeMobileNav}>
+        <Link href="https://www.linkedin.com/in/emery-dittmer/" className="flex font-medium w-full text-purple-600 hover:text-gray-200 py-2 justify-center" onClick={closeMobileNav}>
           Linkedin
         </Link>
       </li>
