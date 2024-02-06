@@ -2,7 +2,7 @@ import React from 'react';
 import CertificationCard from './CertificationCard'; // Import the CertificationCard component
 import Image from "next/image";
 
-
+import bishops from "@/assets/coolstuff/Bishops.png";
 import LFSF from "@/assets/coolstuff/LFSF.jpg";
 import alteryx from "@/assets/coolstuff/Alteryx.png";
 import running from "@/assets/coolstuff/running.png";
@@ -10,7 +10,7 @@ import airbnb  from "@/assets/coolstuff/airbnblogo.png";
 import bike  from "@/assets/coolstuff/bike.png";
 import book  from "@/assets/coolstuff/book.png";
 import guitar  from "@/assets/coolstuff/guitar.png";
-import data_mangrove from "@/assets/coolstuff/data_mangrove.png";
+import data_mangrove from "@/assets/coolstuff/data_mangrove.svg";
 
 // import  from "@/assets/coolstuff/";
 // import  from "@/assets/coolstuff/";
@@ -65,6 +65,15 @@ const certs = [
       'section': 'Keynote / Speaking',
       'certification': [
         {
+          'name': 'Power Bi Teaching',
+          'image': bishops, // Update with the correct image import
+          'company': 'Bishops University',
+          'link': '',
+          'linktxt': '',
+          h: 100,
+          year: '2023',
+        },
+        {
           'name': 'Data Mangrove In Costa Rica',
           'image': data_mangrove, // Update with the correct image import
           'company': 'McGill University',
@@ -83,22 +92,22 @@ const certs = [
           year: '2020',
         },
         {
-          'name': 'Alteryx Q3 User Group Montreal Keynote Speaker',
+          'name': 'Alteryx Q3 User Group Keynote Speaker',
           'image': alteryx, // Update with the correct image import
           'company': 'Alteryx Montreal User Group',
-          'link': '',
-          'linktxt': '',
+          'link': 'https://www.linkedin.com/feed/update/urn:li:activity:6973765588292616194',
+          'linktxt': 'Article Here',
           h: 100,
-          year: '2020',
+          year: '2022',
         },
         {
-          'name': 'Alteryx Q2 User Group Toronto Keynote Speaker',
+          'name': 'Alteryx Q2 User Group Keynote Speaker',
           'image': alteryx, // Update with the correct image import
           'company': 'Alteryx Toronto User Group',
           'link': '',
           'linktxt': '',
           h: 100,
-          year: '2020',
+          year: '2023',
         },
       ]
     },
@@ -126,16 +135,16 @@ const certs = [
           'link': '',
           'linktxt': '',
           h: 100,
-          year: '2020',
+          year: '2017-18',
         },
         {
           'name': 'Bike Repairs',
           'image': bike, // Update with the correct image import
-          'company': 'Issued by: Microsoft',
+          'company': 'Self Employed',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 100,
-          year: '2020',
+          year: '2015-18',
         }
       ]
     },
@@ -145,20 +154,20 @@ const certs = [
         {
           'name': 'Self - Teaching Guitar',
           'image': guitar, // Update with the correct image import
-          'company': 'Issued by: Microsoft',
+          'company': '',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 100,
-          year: '2020',
+          year: '',
         },
         {
           'name': 'Reading',
           'image': book, // Update with the correct image import
-          'company': 'Issued by: PwC',
+          'company': '',
           'link': 'https://www.credly.com/users/emery-dittmer/badges',
           'linktxt': '',
           h: 100,
-          year: '2020',
+          year: '',
         },
       ]
     },

@@ -21,10 +21,10 @@ export default function Footer() {
                 <h6 className="text-gray-200 font-medium mb-1">Skills</h6>
                 <ul>
                   <li className="mb-1">
-                    <Link href="/Certifications" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Certifications</Link>
+                    <Link href="/Certifications/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Certifications</Link>
                   </li>
                   <li className="mb-1">
-                    <Link href="/Skills" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Skills</Link>
+                    <Link href="/Skills/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Skills</Link>
                   </li>
                 </ul>
               </div>
@@ -34,10 +34,10 @@ export default function Footer() {
                 <h6 className="text-gray-200 font-medium mb-1">Creative</h6>
                 <ul>
                   <li className="mb-1">
-                    <Link href="/Articles" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Articles</Link>
+                    <Link href="/Articles/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Articles</Link>
                   </li>
                   <li className="mb-1">
-                    <Link href="/Visualizations" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Visualizations</Link>
+                    <Link href="/Visualizations/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Visualizations</Link>
                   </li>
 
                 </ul>
@@ -48,7 +48,7 @@ export default function Footer() {
                 <h6 className="text-gray-200 font-medium mb-1">Extracurriculars</h6>
                 <ul>
                   <li className="mb-1">
-                    <Link href="/CoolStuff" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Cool Stuff</Link>
+                    <Link href="/CoolStuff/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Cool Stuff</Link>
                   </li>
 
                 </ul>

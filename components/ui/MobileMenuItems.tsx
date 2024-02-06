@@ -9,16 +9,16 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav }) => 
   return (
     <ul className="bg-gray-800 px-4 py-2">
       <li>
-      <Link href="/Projects" className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>          Projects
+      <Link href="/Projects/en" className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>          Projects
         </Link>
       </li>
       <li>
-        <Link href="/Journey" className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
+        <Link href="/Journey/en" className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
           Journey
         </Link>
       </li>
       <li>
-        <Link href="/Skills" className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
+        <Link href="/Skills/en" className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
           Skills
         </Link>
       </li>

@@ -27,7 +27,7 @@ export default function Header() {
               
               <li>
                 <Link 
-                  href="/Projects"
+                  href="/Projects/en"
                   className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
                   >
                   Projects
@@ -36,7 +36,7 @@ export default function Header() {
 
               <li>
                 <Link
-                  href="/Journey"
+                  href="/Journey/en"
                   className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
                   >
                   Journey

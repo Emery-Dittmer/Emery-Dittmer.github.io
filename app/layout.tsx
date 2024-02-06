@@ -19,7 +19,7 @@ const architects_daughter = Architects_Daughter({
 })
 
 export const metadata = {
-  title: 'Emery Portfolio',
+  title: 'Portfolio of emery Dittmer',
   description: 'Created using next app',
 }
 
