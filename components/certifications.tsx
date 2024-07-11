@@ -10,6 +10,8 @@ import CAPM from "@/assets/certifications/CAPM.png";
 import power_BI from "@/assets/certifications/Power_BI_Cert.png";
 import azure_fundamentals from "@/assets/certifications/Azure_fundamentals.png";
 import Tableau_specialist from "@/assets/certifications/Tableau-Specialist.png";
+import Fabric_eng from "@/assets/certifications/fabric_eng1.png";
+
 
 
 
@@ -52,7 +54,7 @@ const certs = [
   //     ]
   // },
     {
-      'section': 'Analytics',
+      'section': 'Data Analytics',
       'certification': [
         {
           'name': 'Alteryx Designer Advanced Certification',
@@ -81,7 +83,7 @@ const certs = [
           'name': 'Microsoft Certified: Power BI Data Analyst Associates',
           'image': power_BI, // Update with the correct image import
           'company': 'Issued by: Microsoft',
-          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'link': 'https://learn.microsoft.com/en-us/users/emerydittmer-5529/credentials/certification/data-analyst-associate?tab=credentials-tab',
           'linktxt': 'View Details',
           h: 100,
           year: '2022',
@@ -95,6 +97,20 @@ const certs = [
           h: 100,
           year: '2022',
         },
+      ]
+    },
+    {
+      'section': 'Data Engineering',
+      'certification': [
+        {
+          'name': 'Microsoft Certified: Fabric Analytics Engineer Associate',
+          'image': Fabric_eng, // Update with the correct image import
+          'company': 'Issued by: Microsoft',
+          'link': 'https://learn.microsoft.com/en-us/users/emerydittmer-5529/credentials/certification/fabric-analytics-engineer-associate?tab=credentials-tab',
+          'linktxt': 'View Details',
+          h: 100,
+          year: '2024',
+        }
       ]
     },
     {
@@ -113,7 +129,7 @@ const certs = [
           'name': 'Microsoft Certified: Azure Fundamentals',
           'image': azure_fundamentals, // Update with the correct image import
           'company': 'Issued by: Microsoft',
-          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'link': 'https://learn.microsoft.com/en-us/users/emerydittmer-5529/credentials/certification/azure-fundamentals?tab=credentials-tab',
           'linktxt': 'View Details',
           h: 100,
           year: '2023',

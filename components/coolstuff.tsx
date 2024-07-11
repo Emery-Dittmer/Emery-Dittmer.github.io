@@ -11,6 +11,9 @@ import bike  from "@/assets/coolstuff/bike.png";
 import book  from "@/assets/coolstuff/book.png";
 import guitar  from "@/assets/coolstuff/guitar.png";
 import data_mangrove from "@/assets/coolstuff/data_mangrove.svg";
+import data_sphere from "@/assets/coolstuff/datasphere_lab_logo.jpg";
+
+
 
 // import  from "@/assets/coolstuff/";
 // import  from "@/assets/coolstuff/";
@@ -64,6 +67,15 @@ const certs = [
     {
       'section': 'Keynote / Speaking',
       'certification': [
+        {
+          'name': 'Speaking Series: Visulization in the modern World',
+          'image': data_sphere, // Update with the correct image import
+          'company': 'Data Sphere Lab',
+          'link': 'https://www.linkedin.com/posts/datasphere-lab_register-here-datasphere-lab-seminar-series-activity-7214609184703582210-hute?',
+          'linktxt': 'Link here',
+          h: 100,
+          year: '2024',
+        },
         {
           'name': 'Power Bi Teaching',
           'image': bishops, // Update with the correct image import
