@@ -11,6 +11,8 @@ import power_BI from "@/assets/certifications/Power_BI_Cert.png";
 import azure_fundamentals from "@/assets/certifications/Azure_fundamentals.png";
 import Tableau_specialist from "@/assets/certifications/Tableau-Specialist.png";
 import Fabric_eng from "@/assets/certifications/fabric_eng1.png";
+import data_iku from "@/assets/certifications/dataiku_logo.jpg";
+import PSMI from "@/assets/certifications/PSMI.png";
 
 
 
@@ -73,6 +75,15 @@ const certs = [
           'linktxt': 'View Details',
           h: 100,
           year: '2021',
+        },
+        {
+          'name': 'Dataiku Core Designer',
+          'image': data_iku, // Update with the correct image import
+          'company': 'Issued by: Dataiku',
+          'link': 'https://verify.skilljar.com/c/r5n822wv4aha',
+          'linktxt': 'View Details',
+          h: 100,
+          year: '2024',
         },
       ]
     },
@@ -142,6 +153,15 @@ const certs = [
           'linktxt': 'View Details',
           h: 100,
           year: '2022',
+        },
+        {
+          'name': 'Professional Scrum Master I',
+          'image': PSMI, // Update with the correct image import
+          'company': 'Issued by: Scrum.org',
+          'link': 'https://www.credly.com/badges/efa29987-91ee-472a-867b-8b49bc431665/',
+          'linktxt': 'View Details',
+          h: 100,
+          year: '2024',
         },
       ]
     },
