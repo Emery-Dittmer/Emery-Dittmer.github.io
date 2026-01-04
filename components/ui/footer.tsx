@@ -18,16 +18,18 @@ export default function Footer() {
       articles: 'Articles',
       visualizations: 'Visualizations',
       coolStuff: 'Cool Stuff',
+      fxRates: 'FX Rates',
     },
     fr: {
-      skills: 'Compétences',
-      creative: 'Créatif',
-      extracurriculars: 'Activités extrascolaires',
+      skills: 'Competences',
+      creative: 'Creatif',
+      extracurriculars: 'Activites extrascolaires',
       certifications: 'Certifications',
-      skillsLink: 'Compétences',
+      skillsLink: 'Competences',
       articles: 'Articles',
       visualizations: 'Visualisations',
       coolStuff: 'Loisirs',
+      fxRates: 'Taux de change',
     },
   }
   const t = copy[locale]
@@ -88,6 +90,11 @@ export default function Footer() {
                   <li className="mb-1">
                     <Link href={`/CoolStuff/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
                       {t.coolStuff}
+                    </Link>
+                  </li>
+                  <li className="mb-1">
+                    <Link href={`/FXRates/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      {t.fxRates}
                     </Link>
                   </li>
 
