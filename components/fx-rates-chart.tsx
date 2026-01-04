@@ -193,7 +193,7 @@ export default function FxRatesChart({
 
   const copy = {
     en: {
-      title: 'FX Rates',
+      title: 'FX Rates CAD Based',
       subtitle: 'Live data from Google Sheets',
       loading: 'Loading data...',
       error: 'Unable to load data.',
@@ -216,7 +216,7 @@ export default function FxRatesChart({
       },
     },
     fr: {
-      title: 'Taux de change',
+      title: 'Taux de change CAD',
       subtitle: 'Donn\u00e9es en direct depuis Google Sheets',
       loading: 'Chargement des donn\u00e9es...',
       error: 'Impossible de charger les donn\u00e9es.',
@@ -447,7 +447,7 @@ export default function FxRatesChart({
               viewBox={`0 0 ${chart.width} ${chart.height}`}
               className="w-full h-auto"
               role="img"
-              aria-label="FX rates chart"
+              aria-label="FX rates chart Basis:CAD"
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setHoveredIndex(null)}
             >
