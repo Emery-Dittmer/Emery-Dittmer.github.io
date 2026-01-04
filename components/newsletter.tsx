@@ -1,4 +1,18 @@
-export default function Newsletter() {
+import { Locale } from '@/lib/i18n'
+
+export default function Newsletter({ locale = 'en' }: { locale?: Locale }) {
+  const copy = {
+    en: {
+      title: "Let's Meet!",
+      cta: 'Calendly Link',
+    },
+    fr: {
+      title: 'Rencontrons-nous !',
+      cta: 'Lien Calendly',
+    },
+  }
+  const t = copy[locale]
+
   return (
     <section>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -23,7 +37,7 @@ export default function Newsletter() {
 
             {/* CTA content */}
             <div className="mb-6 lg:mr-16 lg:mb-0 text-center lg:text-left lg:w-1/2">
-              <h3 className="h3 text-white mb-2">Let's Meet!</h3>
+              <h3 className="h3 text-white mb-2">{t.title}</h3>
               <p className="text-purple-200 text-lg"></p>
             </div>
 
@@ -31,7 +45,7 @@ export default function Newsletter() {
             <form className="w-full lg:w-1/2">
               <div className="flex flex-col sm:flex-row justify-center max-w-xs mx-auto sm:max-w-mg lg:max-w-none">
                 <a className="btn text-purple-700 bg-purple-100 hover:bg-white shadow px-20 py-3 text-lg font-bold" href="https://calendly.com/emery-dittmer/"> 
-                Calendly Link
+                {t.cta}
                 </a>
               </div>
               {/* Success message */}

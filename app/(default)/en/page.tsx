@@ -15,13 +15,14 @@ import Testimonials from '@/components/testimonials'
 import Certifications from '@/components/certifications'
 
 export default function Home() {
+  const locale = 'en'
   return (
     <>
-      <Hero />
-      <Features />
-      <Certifications />
-      <Testimonials />
-      <Newsletter />
+      <Hero locale={locale} />
+      <Features locale={locale} />
+      <Certifications locale={locale} />
+      <Testimonials locale={locale} />
+      <Newsletter locale={locale} />
     </>
   )
 }

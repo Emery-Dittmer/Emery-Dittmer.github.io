@@ -16,10 +16,11 @@ export const metadata = {
   import Visuals from '@/components/visuals'
   
   export default function Home() {
+    const locale = 'en'
     return (
       <>
-        <Visuals />
-        <Newsletter />
+        <Visuals locale={locale} />
+        <Newsletter locale={locale} />
       </>
     )
   }

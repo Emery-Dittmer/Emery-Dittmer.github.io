@@ -15,10 +15,11 @@ export const metadata = {
   import Certifications from '@/components/certifications'
   
   export default function Home() {
+    const locale = 'en'
     return (
       <>
-        <Cards />
-        <Newsletter />
+        <Cards locale={locale} />
+        <Newsletter locale={locale} />
       </>
     )
   }

@@ -3,9 +3,18 @@ import MobileMenuItems from './MobileMenuItems'; // Import the MobileMenuItems c
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { getLocaleFromPathname } from '@/lib/i18n'
 
 export default function MobileMenu() {
   const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false)
+  const pathname = usePathname() ?? '/'
+  const locale = getLocaleFromPathname(pathname)
+  const copy = {
+    en: { menu: 'Menu' },
+    fr: { menu: 'Menu' },
+  }
+  const t = copy[locale]
 
   const trigger = useRef<HTMLButtonElement>(null)
   const mobileNav = useRef<HTMLDivElement>(null)
@@ -41,7 +50,7 @@ export default function MobileMenu() {
         aria-expanded={mobileNavOpen}
         onClick={() => setMobileNavOpen(!mobileNavOpen)}
       >
-        <span className="sr-only">Menu</span>
+        <span className="sr-only">{t.menu}</span>
         <svg
           className="w-6 h-6 fill-current text-gray-300 hover:text-gray-200 transition duration-150 ease-in-out"
           viewBox="0 0 24 24"
@@ -61,7 +70,7 @@ export default function MobileMenu() {
         style={mobileNavOpen ? { maxHeight: mobileNav.current?.scrollHeight, opacity: 1 } : { maxHeight: 0, opacity: 0.8 }}
       >
         {/* Use the MobileMenuItems component */}
-        <MobileMenuItems closeMobileNav={() => setMobileNavOpen(false)} />
+        <MobileMenuItems closeMobileNav={() => setMobileNavOpen(false)} locale={locale} pathname={pathname} />
       </nav>
     </div>
   )

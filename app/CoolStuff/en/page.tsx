@@ -3,9 +3,10 @@ import Gallery from "@/components/gallery";
 import CoolStuff from '@/components/coolstuff';
 
 export default function Home() {
+  const locale = 'en'
   return (
     <div className="my-24 w-full">
-      <CoolStuff />
+      <CoolStuff locale={locale} />
       <h3 className="h2 text-center"> Books </h3>
       {/* <Gallery /> */}
       

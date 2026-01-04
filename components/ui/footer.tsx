@@ -1,7 +1,37 @@
+'use client'
+
 import React from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { getLocaleFromPathname } from '@/lib/i18n'
 
 export default function Footer() {
+  const pathname = usePathname() ?? '/'
+  const locale = getLocaleFromPathname(pathname)
+  const copy = {
+    en: {
+      skills: 'Skills',
+      creative: 'Creative',
+      extracurriculars: 'Extracurriculars',
+      certifications: 'Certifications',
+      skillsLink: 'Skills',
+      articles: 'Articles',
+      visualizations: 'Visualizations',
+      coolStuff: 'Cool Stuff',
+    },
+    fr: {
+      skills: 'Compétences',
+      creative: 'Créatif',
+      extracurriculars: 'Activités extrascolaires',
+      certifications: 'Certifications',
+      skillsLink: 'Compétences',
+      articles: 'Articles',
+      visualizations: 'Visualisations',
+      coolStuff: 'Loisirs',
+    },
+  }
+  const t = copy[locale]
+
   return (
     <footer>
       <div className="py-6 md:py-6">
@@ -18,26 +48,34 @@ export default function Footer() {
 
               {/* 2nd block */}
               <div className="text-sm">
-                <h6 className="text-gray-200 font-medium mb-1">Skills</h6>
+                <h6 className="text-gray-200 font-medium mb-1">{t.skills}</h6>
                 <ul>
                   <li className="mb-1">
-                    <Link href="/Certifications/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Certifications</Link>
+                    <Link href={`/Certifications/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      {t.certifications}
+                    </Link>
                   </li>
                   <li className="mb-1">
-                    <Link href="/Skills/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Skills</Link>
+                    <Link href={`/Skills/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      {t.skillsLink}
+                    </Link>
                   </li>
                 </ul>
               </div>
 
               {/* 3rd block */}
               <div className="text-sm">
-                <h6 className="text-gray-200 font-medium mb-1">Creative</h6>
+                <h6 className="text-gray-200 font-medium mb-1">{t.creative}</h6>
                 <ul>
                   <li className="mb-1">
-                    <Link href="/Articles/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Articles</Link>
+                    <Link href={`/Articles/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      {t.articles}
+                    </Link>
                   </li>
                   <li className="mb-1">
-                    <Link href="/Visualizations/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Visualizations</Link>
+                    <Link href={`/Visualizations/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      {t.visualizations}
+                    </Link>
                   </li>
 
                 </ul>
@@ -45,10 +83,12 @@ export default function Footer() {
 
               {/* 4th block */}
               <div className="text-sm">
-                <h6 className="text-gray-200 font-medium mb-1">Extracurriculars</h6>
+                <h6 className="text-gray-200 font-medium mb-1">{t.extracurriculars}</h6>
                 <ul>
                   <li className="mb-1">
-                    <Link href="/CoolStuff/en" className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">Cool Stuff</Link>
+                    <Link href={`/CoolStuff/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      {t.coolStuff}
+                    </Link>
                   </li>
 
                 </ul>

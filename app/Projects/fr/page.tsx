@@ -18,10 +18,7 @@ export default function Home() {
   const locale = 'fr'
   return (
     <>
-      <Hero locale={locale} />
-      <Features locale={locale} />
-      <Certifications locale={locale} />
-      <Testimonials locale={locale} />
+      <Cards locale={locale} />
       <Newsletter locale={locale} />
     </>
   )

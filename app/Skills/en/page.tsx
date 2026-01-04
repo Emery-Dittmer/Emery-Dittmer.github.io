@@ -19,13 +19,13 @@ export const metadata = {
 
   
   export default function Home() {
+    const locale = 'en'
     return (
       <>
-        <p>test</p>
-        <Skills />
-        <Companies />
-        <Feature_Full />
-        <Newsletter />
+        <Skills locale={locale} />
+        <Companies locale={locale} />
+        <Feature_Full locale={locale} />
+        <Newsletter locale={locale} />
       </>
     )
   }

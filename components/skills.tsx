@@ -20,17 +20,37 @@ import excel from "@/assets/logos/excel_logo.png";
 import alteryx from "@/assets/logos/Alteryx_Logo.png";
 import orange from "@/assets/logos/orange_logo.png";
 import esri from "@/assets/logos/Esri_Logo.png";
+import { Locale } from '@/lib/i18n';
 
-export default function Skills({ data }: { data?: Array<{ section: string; certification: Array<{ name: string; image: string; company: string; link: string }> }> }) {
+export default function Skills({
+  locale = 'en',
+  data,
+}: {
+  locale?: Locale;
+  data?: Array<{
+    section: string;
+    certification: Array<{
+      name: string;
+      image: string;
+      company: string;
+      link: string;
+    }>;
+  }>;
+}) {
+  const titleCopy = {
+    en: 'Skills',
+    fr: 'Compétences',
+  }
+  const title = titleCopy[locale]
   return (
     <>
     <div className="max-w-6xl mx-auto px-4 sm:px-6">
     <div className="py-12 md:py-20 border-t border-gray-800"></div></div>
-    <h3 className="h2 text-center"> Skills </h3>
+    <h3 className="h2 text-center">{title}</h3>
     <div className="flex items-center justify-center">
       <div className="text-center my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-auto md:grid-cols-1 xl:px-0">
         <div className="certifications max-w-sm mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 items-start md:max-w-2xl lg:max-w-none">
-          {certs.map((sectionData) => (
+          {certsByLocale[locale].map((sectionData) => (
             <div className="certifications-section" key={sectionData.section}>
               <h2 className="section-title">{sectionData.section}</h2>
               <div className="certifications-grid grid grid-cols-2 gap-auto">
@@ -48,7 +68,8 @@ export default function Skills({ data }: { data?: Array<{ section: string; certi
 }
 
 
-const certs = [
+const certsByLocale = {
+  en: [
   // Review and add if needed
   // {
   //     'section': 'Technical',
@@ -201,5 +222,149 @@ const certs = [
       ]
     },
     // Add more sections and certification data as needed
-  ];
+  ],
+  fr: [
+    {
+      'section': 'Outils de visualisation',
+      'certification': [
+        {
+          'name': 'Figma',
+          'image': figma,
+          'company': 'Conception web',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'Afinity Designer',
+          'image': afinity,
+          'company': 'Design graphique',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'Penpot',
+          'image': penpot,
+          'company': 'Conception web',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'Power BI',
+          'image': powerbi,
+          'company': 'Visualisation de données',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'Tableau',
+          'image': tableau,
+          'company': 'Visualisation de données',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'Looker Studio',
+          'image': looker,
+          'company': 'Visualisation de données',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+      ],
+    },
+    {
+      'section': 'Compétences en programmation',
+      'certification': [
+        {
+          'name': 'Python',
+          'image': python,
+          'company': 'Délivré par : Microsoft',
+          'link': 'Flexible Coding',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'VBA',
+          'image': vba,
+          'company': 'Automatisation avec Excel',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'R',
+          'image': r,
+          'company': 'Programmation flexible',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'SQL',
+          'image': sql,
+          'company': 'Requêtes de base de données',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+      ],
+    },
+    {
+      'section': 'Analyse d’affaires',
+      'certification': [
+        {
+          'name': 'Excel',
+          'image': excel,
+          'company': 'Tableur',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'Alteryx',
+          'image': alteryx,
+          'company': 'Outil low-code',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'Orange',
+          'image': orange,
+          'company': 'Outil low-code',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+        {
+          'name': 'ESRI',
+          'image': esri,
+          'company': 'Technologies géospatiales',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': '',
+          h: 50,
+          year: '',
+        },
+      ],
+    },
+  ],
+};
   

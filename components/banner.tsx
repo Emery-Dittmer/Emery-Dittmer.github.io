@@ -1,9 +1,28 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { getLocaleFromPathname } from '@/lib/i18n'
 
 export default function Banner() {
   const [bannerOpen, setBannerOpen] = useState<boolean>(true)
+  const pathname = usePathname() ?? '/'
+  const locale = getLocaleFromPathname(pathname)
+  const copy = {
+    en: {
+      github: 'Check out my GitHub',
+      linkedin: 'Check out my LinkedIn',
+      or: 'or',
+      close: 'Close',
+    },
+    fr: {
+      github: 'Découvrez mon GitHub',
+      linkedin: 'Découvrez mon LinkedIn',
+      or: 'ou',
+      close: 'Fermer',
+    },
+  }
+  const t = copy[locale]
 
   return (
     <>
@@ -17,15 +36,16 @@ export default function Banner() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Check out my Github<span className="hidden sm:inline"></span>
+                {t.github}
+                <span className="hidden sm:inline"></span>
               </a>{' '}
-              <span className="italic px-1.5">or</span>{' '}
+              <span className="italic px-1.5">{t.or}</span>{' '}
               <a className="font-medium hover:underline text-emerald-400" href="https://www.linkedin.com/in/emery-dittmer/" target="_blank" rel="noreferrer">
-                Check out my Linkedin
+                {t.linkedin}
               </a>
             </div>
             <button className="text-slate-500 hover:text-slate-400 pl-2 ml-3 border-l border-gray-700" onClick={() => setBannerOpen(false)}>
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t.close}</span>
               <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 16 16">
                 <path d="M12.72 3.293a1 1 0 00-1.415 0L8.012 6.586 4.72 3.293a1 1 0 00-1.414 1.414L6.598 8l-3.293 3.293a1 1 0 101.414 1.414l3.293-3.293 3.293 3.293a1 1 0 001.414-1.414L9.426 8l3.293-3.293a1 1 0 000-1.414z" />
               </svg>
