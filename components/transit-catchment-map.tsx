@@ -59,46 +59,67 @@ function destinationPoint(center: LngLat, distanceMeters: number, bearing: numbe
   return { lat: toDeg(lat2), lng: toDeg(lng2) }
 }
 
+function getSourceLayer(layer: MapLibreMap['style']['layers'][number]): string {
+  if ('source-layer' in layer && typeof layer['source-layer'] === 'string') {
+    return layer['source-layer'].toLowerCase()
+  }
+  return ''
+}
+
+function isTransitLayerLayer(layer: MapLibreMap['style']['layers'][number]) {
+  if (layer.type !== 'line') return false
+  const id = layer.id.toLowerCase()
+  const sourceLayer = getSourceLayer(layer)
+  const isRoadLayer =
+    id.includes('road') ||
+    id.includes('street') ||
+    id.includes('highway') ||
+    id.includes('motorway') ||
+    sourceLayer.includes('road') ||
+    sourceLayer.includes('street') ||
+    sourceLayer.includes('highway') ||
+    sourceLayer.includes('motorway')
+  const isTransitLayer =
+    id.includes('rail') ||
+    id.includes('railway') ||
+    id.includes('subway') ||
+    id.includes('metro') ||
+    id.includes('tram') ||
+    id.includes('light_rail') ||
+    id.includes('transit') ||
+    id.includes('tunnel_railway_transit') ||
+    id.includes('tunnel_rail') ||
+    sourceLayer.includes('rail') ||
+    sourceLayer.includes('railway') ||
+    sourceLayer.includes('subway') ||
+    sourceLayer.includes('metro') ||
+    sourceLayer.includes('tram') ||
+    sourceLayer.includes('light_rail') ||
+    (sourceLayer.includes('transportation') && id.includes('rail'))
+
+  return isTransitLayer && !isRoadLayer
+}
+
 function emphasizeTransitLayers(map: MapLibreMap) {
   const style = map.getStyle()
   if (!style || !style.layers) return
 
   style.layers.forEach((layer) => {
-    if (layer.type !== 'line') return
-    const id = layer.id.toLowerCase()
-    const sourceLayer = typeof layer['source-layer'] === 'string' ? layer['source-layer'].toLowerCase() : ''
-    const isRoadLayer =
-      id.includes('road') ||
-      id.includes('street') ||
-      id.includes('highway') ||
-      id.includes('motorway') ||
-      sourceLayer.includes('road') ||
-      sourceLayer.includes('street') ||
-      sourceLayer.includes('highway') ||
-      sourceLayer.includes('motorway')
-    const isTransitLayer =
-      id.includes('rail') ||
-      id.includes('railway') ||
-      id.includes('subway') ||
-      id.includes('metro') ||
-      id.includes('tram') ||
-      id.includes('light_rail') ||
-      id.includes('transit') ||
-      id.includes('tunnel_railway_transit') ||
-      id.includes('tunnel_rail') ||
-      sourceLayer.includes('rail') ||
-      sourceLayer.includes('railway') ||
-      sourceLayer.includes('subway') ||
-      sourceLayer.includes('metro') ||
-      sourceLayer.includes('tram') ||
-      sourceLayer.includes('light_rail') ||
-      (sourceLayer.includes('transportation') && id.includes('rail'))
-
-    if (!isTransitLayer || isRoadLayer) return
+    if (!isTransitLayerLayer(layer)) return
 
     map.setPaintProperty(layer.id, 'line-color', '#f97316')
     map.setPaintProperty(layer.id, 'line-width', 2.6)
     map.setPaintProperty(layer.id, 'line-opacity', 0.9)
+  })
+}
+
+function bringTransitLayersToFront(map: MapLibreMap) {
+  const style = map.getStyle()
+  if (!style || !style.layers) return
+
+  style.layers.forEach((layer) => {
+    if (!isTransitLayerLayer(layer)) return
+    map.moveLayer(layer.id)
   })
 }
 
@@ -108,7 +129,7 @@ function showRoadLayers(map: MapLibreMap) {
 
   style.layers.forEach((layer) => {
     const id = layer.id.toLowerCase()
-    const sourceLayer = typeof layer['source-layer'] === 'string' ? layer['source-layer'].toLowerCase() : ''
+    const sourceLayer = getSourceLayer(layer)
     const isRoadLayer =
       id.includes('road') ||
       id.includes('street') ||
@@ -154,8 +175,16 @@ function buildStopsQuery(center: LngLat, radiusMeters: number) {
 (
   node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["highway"="bus_stop"];
   node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["public_transport"="station"]["station"="subway"];
+  node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["public_transport"="station"];
+  node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["public_transport"="stop_position"]["railway"~"station|subway|light_rail|tram_stop|halt"];
   node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["railway"="station"];
+  node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["railway"="subway"];
+  node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["railway"="light_rail"];
+  node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["railway"="tram_stop"];
+  node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["railway"="halt"];
   node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["railway"="subway_entrance"];
+  node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["station"="subway"];
+  node(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["subway"="yes"];
 );
 out body;
 `
@@ -167,8 +196,15 @@ function toStopFeature(element: any): GeoJSON.Feature<GeoJSON.Point, StopFeature
   const isBus = tags.highway === 'bus_stop'
   const isMetro =
     tags.station === 'subway' ||
+    tags.subway === 'yes' ||
     tags.railway === 'subway_entrance' ||
-    (tags.railway === 'station' && tags.subway !== 'no')
+    tags.railway === 'station' ||
+    tags.railway === 'subway' ||
+    tags.railway === 'light_rail' ||
+    tags.railway === 'tram_stop' ||
+    tags.railway === 'halt' ||
+    tags.public_transport === 'station' ||
+    (tags.public_transport === 'stop_position' && Boolean(tags.railway || tags.subway === 'yes'))
 
   if (!isBus && !isMetro) return null
 
@@ -330,6 +366,7 @@ export default function TransitCatchmentMap({
       map.on('load', () => {
         emphasizeTransitLayers(map)
         showRoadLayers(map)
+        bringTransitLayersToFront(map)
         setMapReady(true)
       })
     }
