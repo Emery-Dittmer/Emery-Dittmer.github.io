@@ -19,6 +19,7 @@ export default function Footer() {
       visualizations: 'Visualizations',
       coolStuff: 'Cool Stuff',
       fxRates: 'FX Rates',
+      transitReach: 'Transit Catchment',
     },
     fr: {
       skills: 'Competences',
@@ -30,6 +31,7 @@ export default function Footer() {
       visualizations: 'Visualisations',
       coolStuff: 'Loisirs',
       fxRates: 'Taux de change',
+      transitReach: 'Rayon transport',
     },
   }
   const t = copy[locale]
@@ -95,6 +97,11 @@ export default function Footer() {
                   <li className="mb-1">
                     <Link href={`/FXRates/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
                       {t.fxRates}
+                    </Link>
+                  </li>
+                  <li className="mb-1">
+                    <Link href={`/TransitReach/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      {t.transitReach}
                     </Link>
                   </li>
 
