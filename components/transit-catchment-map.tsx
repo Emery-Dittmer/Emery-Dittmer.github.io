@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { GeoJSONSource, Map as MapLibreMap, Marker } from 'maplibre-gl'
+import type { GeoJSONSource, LayerSpecification, Map as MapLibreMap, Marker } from 'maplibre-gl'
 
 type LngLat = {
   lng: number
@@ -59,14 +59,14 @@ function destinationPoint(center: LngLat, distanceMeters: number, bearing: numbe
   return { lat: toDeg(lat2), lng: toDeg(lng2) }
 }
 
-function getSourceLayer(layer: MapLibreMap['style']['layers'][number]): string {
+function getSourceLayer(layer: LayerSpecification): string {
   if ('source-layer' in layer && typeof layer['source-layer'] === 'string') {
     return layer['source-layer'].toLowerCase()
   }
   return ''
 }
 
-function isTransitLayerLayer(layer: MapLibreMap['style']['layers'][number]) {
+function isTransitLayerLayer(layer: LayerSpecification) {
   if (layer.type !== 'line') return false
   const id = layer.id.toLowerCase()
   const sourceLayer = getSourceLayer(layer)
