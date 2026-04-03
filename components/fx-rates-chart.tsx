@@ -2,19 +2,89 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-type FxPoint = {
-  x: string
-  c: number
-  d: number
-  af: number
-}
-
-type FxSeries = 'c' | 'd' | 'af'
-type FxGranularity = 'daily' | 'weekly' | 'monthly'
-type FxRange = 'all' | 'last12' | 'ytd' | 'last30'
-
 const SHEET_CSV_URL =
   'https://docs.google.com/spreadsheets/d/1nRwUi7dj7CawaSAjiHQ4Rp3KkPecmds9wlvZz5hyenU/export?format=csv'
+
+// Currencies that should appear first in the + dropdown (in this order)
+const PRIORITY_CURRENCIES = ['USD', 'EUR', 'CHF', 'CAD', 'GBP']
+
+// A regex to identify currency-like column headers (2–4 uppercase letters)
+const CURRENCY_CODE_RE = /^[A-Z]{2,4}$/
+
+// Fixed colours for well-known currencies; extras get colours from the palette below
+const CURRENCY_COLORS: Record<string, string> = {
+  USD: '#a855f7',
+  EUR: '#22c55e',
+  CHF: '#f97316',
+  CAD: '#3b82f6',
+  GBP: '#ec4899',
+}
+
+const EXTRA_COLORS = [
+  '#06b6d4', '#f59e0b', '#84cc16', '#6366f1', '#14b8a6',
+  '#f43f5e', '#8b5cf6', '#0ea5e9', '#d97706', '#10b981',
+]
+
+function getCurrencyColor(code: string, allCurrencies: string[]): string {
+  if (CURRENCY_COLORS[code]) return CURRENCY_COLORS[code]
+  const extraIndex = allCurrencies
+    .filter((c) => !CURRENCY_COLORS[c])
+    .indexOf(code)
+  return EXTRA_COLORS[extraIndex % EXTRA_COLORS.length]
+}
+
+const CURRENCY_FLAGS: Record<string, string> = {
+  USD: '🇺🇸',
+  EUR: '🇪🇺',
+  CHF: '🇨🇭',
+  CAD: '🇨🇦',
+  GBP: '🇬🇧',
+  JPY: '🇯🇵',
+  AUD: '🇦🇺',
+  NZD: '🇳🇿',
+  SEK: '🇸🇪',
+  NOK: '🇳🇴',
+  DKK: '🇩🇰',
+  CNY: '🇨🇳',
+  HKD: '🇭🇰',
+  SGD: '🇸🇬',
+  MXN: '🇲🇽',
+  BRL: '🇧🇷',
+  INR: '🇮🇳',
+  KRW: '🇰🇷',
+  ZAR: '🇿🇦',
+  TRY: '🇹🇷',
+  RUB: '🇷🇺',
+  PLN: '🇵🇱',
+  CZK: '🇨🇿',
+  HUF: '🇭🇺',
+  ILS: '🇮🇱',
+  AED: '🇦🇪',
+  SAR: '🇸🇦',
+  THB: '🇹🇭',
+  MYR: '🇲🇾',
+  IDR: '🇮🇩',
+  PHP: '🇵🇭',
+  VND: '🇻🇳',
+  CLP: '🇨🇱',
+  COP: '🇨🇴',
+  ARS: '🇦🇷',
+  PEN: '🇵🇪',
+  RON: '🇷🇴',
+  HRK: '🇭🇷',
+  BGN: '🇧🇬',
+  ISK: '🇮🇸',
+}
+
+const BASE_OPTIONS = ['CAD', 'USD', 'EUR', 'CHF', 'GBP']
+
+type RawPoint = {
+  x: string
+  rates: Record<string, number>
+}
+
+type FxGranularity = 'daily' | 'weekly' | 'monthly'
+type FxRange = 'all' | 'last12' | 'ytd' | 'last30' | 'custom'
 
 function parseCsv(text: string): string[][] {
   const rows: string[][] = []
@@ -64,28 +134,13 @@ function parseCsv(text: string): string[][] {
   return rows
 }
 
-function buildPath(points: FxPoint[], series: FxSeries, width: number, height: number, padding: number, minY: number, maxY: number) {
-  const usableWidth = width - padding * 2
-  const usableHeight = height - padding * 2
-  const count = points.length
-
-  return points
-    .map((point, index) => {
-      const x = padding + (index / Math.max(1, count - 1)) * usableWidth
-      const value = point[series]
-      const y = padding + (1 - (value - minY) / Math.max(1e-6, maxY - minY)) * usableHeight
-      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`
-    })
-    .join(' ')
-}
-
 function parseDate(value: string): Date | null {
   const direct = new Date(value)
   if (!Number.isNaN(direct.getTime())) return direct
 
-  const parts = value.split(/[\/\-]/).map((part) => part.trim())
+  const parts = value.split(/[\/\-]/).map((p) => p.trim())
   if (parts.length === 3) {
-    const [a, b, c] = parts.map((part) => Number(part))
+    const [a, b, c] = parts.map(Number)
     if (!Number.isNaN(a) && !Number.isNaN(b) && !Number.isNaN(c)) {
       const mmFirst = new Date(c, a - 1, b)
       if (!Number.isNaN(mmFirst.getTime())) return mmFirst
@@ -106,10 +161,10 @@ function getWeekKey(date: Date): string {
   return `${temp.getUTCFullYear()}-W${String(weekNumber).padStart(2, '0')}`
 }
 
-function aggregate(points: FxPoint[], granularity: FxGranularity): FxPoint[] {
+function aggregate(points: RawPoint[], granularity: FxGranularity): RawPoint[] {
   if (granularity === 'daily') return points
 
-  const buckets = new Map<string, { count: number; sumC: number; sumD: number; sumAf: number; label: string }>()
+  const buckets = new Map<string, { count: number; sums: Record<string, number>; label: string }>()
 
   points.forEach((point) => {
     const parsed = parseDate(point.x)
@@ -127,23 +182,28 @@ function aggregate(points: FxPoint[], granularity: FxGranularity): FxPoint[] {
       label = key
     }
 
-    const entry = buckets.get(key) ?? { count: 0, sumC: 0, sumD: 0, sumAf: 0, label }
+    const entry = buckets.get(key) ?? { count: 0, sums: {}, label }
     entry.count += 1
-    entry.sumC += point.c
-    entry.sumD += point.d
-    entry.sumAf += point.af
+    for (const [code, rate] of Object.entries(point.rates)) {
+      entry.sums[code] = (entry.sums[code] ?? 0) + rate
+    }
     buckets.set(key, entry)
   })
 
   return Array.from(buckets.values()).map((entry) => ({
     x: entry.label,
-    c: entry.sumC / entry.count,
-    d: entry.sumD / entry.count,
-    af: entry.sumAf / entry.count,
+    rates: Object.fromEntries(
+      Object.entries(entry.sums).map(([code, sum]) => [code, sum / entry.count])
+    ),
   }))
 }
 
-function filterByRange(points: FxPoint[], range: FxRange): FxPoint[] {
+function filterByRange(
+  points: RawPoint[],
+  range: FxRange,
+  customStart?: Date | null,
+  customEnd?: Date | null
+): RawPoint[] {
   if (range === 'all') return points
 
   const dated = points
@@ -151,9 +211,16 @@ function filterByRange(points: FxPoint[], range: FxRange): FxPoint[] {
       const parsed = parseDate(point.x)
       return parsed ? { point, date: parsed } : null
     })
-    .filter((entry): entry is { point: FxPoint; date: Date } => Boolean(entry))
+    .filter((entry): entry is { point: RawPoint; date: Date } => Boolean(entry))
 
   if (!dated.length) return points
+
+  if (range === 'custom') {
+    if (!customStart || !customEnd) return points
+    const s = customStart < customEnd ? customStart : customEnd
+    const e = customStart < customEnd ? customEnd : customStart
+    return dated.filter((entry) => entry.date >= s && entry.date <= e).map((entry) => entry.point)
+  }
 
   const maxDate = dated.reduce(
     (latest, entry) => (entry.date > latest ? entry.date : latest),
@@ -175,12 +242,55 @@ function filterByRange(points: FxPoint[], range: FxRange): FxPoint[] {
     .map((entry) => entry.point)
 }
 
+// Remove per-currency values that are more than 3× the previous valid value (200% above).
+// The bad value is deleted from the rates record so the chart skips it cleanly.
+function cleanSpikes(points: RawPoint[]): RawPoint[] {
+  const lastValid: Record<string, number> = {}
+  return points.map((point) => {
+    const rates = { ...point.rates }
+    for (const code of Object.keys(rates)) {
+      const val = rates[code]
+      const prev = lastValid[code]
+      if (prev !== undefined && val > prev * 3) {
+        delete rates[code]
+      } else {
+        lastValid[code] = val
+      }
+    }
+    return { ...point, rates }
+  })
+}
+
+function buildPath(
+  points: RawPoint[],
+  currency: string,
+  width: number,
+  height: number,
+  padding: number,
+  minY: number,
+  maxY: number
+): string {
+  const usableWidth = width - padding * 2
+  const usableHeight = height - padding * 2
+  const count = points.length
+
+  return points
+    .map((point, index) => {
+      const x = padding + (index / Math.max(1, count - 1)) * usableWidth
+      const value = point.rates[currency] ?? 0
+      const y = padding + (1 - (value - minY) / Math.max(1e-6, maxY - minY)) * usableHeight
+      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`
+    })
+    .join(' ')
+}
+
 export default function FxRatesChart({
   locale = 'en',
 }: {
   locale?: 'en' | 'fr'
 }) {
-  const [rawData, setRawData] = useState<FxPoint[]>([])
+  const [rawData, setRawData] = useState<RawPoint[]>([])
+  const [allCurrencies, setAllCurrencies] = useState<string[]>(['USD', 'EUR', 'CHF'])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
@@ -188,15 +298,32 @@ export default function FxRatesChart({
   const svgRef = useRef<SVGSVGElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const rafRef = useRef<number | null>(null)
+  const addMenuRef = useRef<HTMLDivElement>(null)
   const [granularity, setGranularity] = useState<FxGranularity>('daily')
   const [range, setRange] = useState<FxRange>('all')
+  const [baseCurrency, setBaseCurrency] = useState('CAD')
+  const [activeCurrencies, setActiveCurrencies] = useState(['USD', 'EUR', 'CHF'])
+  const [showAddMenu, setShowAddMenu] = useState(false)
+  const [customStart, setCustomStart] = useState<Date | null>(null)
+  const [customEnd, setCustomEnd] = useState<Date | null>(null)
+  const [showCalendar, setShowCalendar] = useState(false)
+  const [calendarStep, setCalendarStep] = useState<'start' | 'end'>('start')
+  const [calendarHover, setCalendarHover] = useState<Date | null>(null)
+  const [calViewYear, setCalViewYear] = useState(new Date().getFullYear())
+  const [calViewMonth, setCalViewMonth] = useState(new Date().getMonth())
+  const calendarRef = useRef<HTMLDivElement>(null)
+  const baseDropdownRef = useRef<HTMLDivElement>(null)
+  const [showBaseDropdown, setShowBaseDropdown] = useState(false)
+  const [baseSearch, setBaseSearch] = useState('')
 
   const copy = {
     en: {
-      title: 'FX Rates CAD Based',
+      title: 'FX Rates',
       subtitle: 'Live data from Google Sheets',
       loading: 'Loading data...',
       error: 'Unable to load data.',
+      baseCurrency: 'Base currency',
+      addCurrency: 'Add currency',
       granularity: {
         daily: 'Daily',
         weekly: 'Weekly',
@@ -208,18 +335,16 @@ export default function FxRatesChart({
         last12: 'Last 12 months',
         ytd: 'YTD',
         last30: 'Last 30 days',
-      },
-      legend: {
-        c: 'USD',
-        d: 'EUR',
-        af: 'CHF',
+        custom: 'Custom',
       },
     },
     fr: {
-      title: 'Taux de change CAD',
-      subtitle: 'Donn\u00e9es en direct depuis Google Sheets',
-      loading: 'Chargement des donn\u00e9es...',
-      error: 'Impossible de charger les donn\u00e9es.',
+      title: 'Taux de change',
+      subtitle: 'Données en direct depuis Google Sheets',
+      loading: 'Chargement des données...',
+      error: 'Impossible de charger les données.',
+      baseCurrency: 'Devise de base',
+      addCurrency: 'Ajouter une devise',
       granularity: {
         daily: 'Quotidien',
         weekly: 'Hebdomadaire',
@@ -227,15 +352,11 @@ export default function FxRatesChart({
         average: 'Moyenne',
       },
       range: {
-        all: 'Toutes les donnees',
+        all: 'Toutes les données',
         last12: '12 derniers mois',
-        ytd: "Depuis le debut de l'annee",
+        ytd: "Depuis le début de l'année",
         last30: '30 derniers jours',
-      },
-      legend: {
-        c: 'Colonne C',
-        d: 'Colonne D',
-        af: 'Colonne AF',
+        custom: 'Personnalisé',
       },
     },
   }
@@ -249,47 +370,80 @@ export default function FxRatesChart({
         setLoading(true)
         setError(null)
         const response = await fetch(SHEET_CSV_URL, { cache: 'no-store' })
-        if (!response.ok) {
-          throw new Error('fetch_failed')
-        }
+        if (!response.ok) throw new Error('fetch_failed')
         const text = await response.text()
         const rows = parseCsv(text)
+        if (!rows.length) return
 
-        const points: FxPoint[] = []
+        // Detect currency columns from the header row (col 0 = date, skip CAD = base anchor)
+        const header = rows[0]
+        const currencyCols: { code: string; colIndex: number }[] = []
+        header.forEach((cell, i) => {
+          if (i === 0) return
+          const code = cell.trim().toUpperCase()
+          if (CURRENCY_CODE_RE.test(code) && code !== 'CAD') {
+            currencyCols.push({ code, colIndex: i })
+          }
+        })
 
+        // Sort: priority currencies first (in order), then remaining alphabetically
+        const detected = currencyCols.map((c) => c.code)
+        const sorted = [
+          ...PRIORITY_CURRENCIES.filter((c) => detected.includes(c) && c !== 'CAD'),
+          ...detected.filter((c) => !PRIORITY_CURRENCIES.includes(c)).sort(),
+        ]
+        // CAD is always available to chart (it equals 1 when base=CAD, or derived otherwise)
+        const allCodes = ['CAD', ...sorted]
+
+        const points: RawPoint[] = []
         for (let i = 1; i < rows.length; i += 1) {
           const row = rows[i]
-          if (!row || row.length < 32) continue
-          const x = (row[0]?.trim() ?? '')
-          const c = Number(row[2])
-          const d = Number(row[3])
-          const af = Number(row[31])
-          if (!x || Number.isNaN(c) || Number.isNaN(d) || Number.isNaN(af)) {
-            continue
+          if (!row || row.length < 2) continue
+          const x = row[0]?.trim() ?? ''
+          if (!x) continue
+
+          // CAD rate vs itself is always 1 — used as anchor for cross-currency conversion
+          const rates: Record<string, number> = { CAD: 1 }
+          for (const { code, colIndex } of currencyCols) {
+            if (colIndex >= row.length) continue
+            const val = Number(row[colIndex])
+            if (!Number.isNaN(val) && val > 0) rates[code] = val
           }
-          points.push({ x, c, d, af })
+
+          points.push({ x, rates })
         }
 
         if (isMounted) {
-          setRawData(points)
+          setAllCurrencies(allCodes)
+          setRawData(cleanSpikes(points))
         }
-      } catch (err) {
-        if (isMounted) {
-          setError('load_failed')
-        }
+      } catch {
+        if (isMounted) setError('load_failed')
       } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
+        if (isMounted) setLoading(false)
       }
     }
 
     load()
-
-    return () => {
-      isMounted = false
-    }
+    return () => { isMounted = false }
   }, [])
+
+  // When base currency changes, adjust active currencies:
+  // - remove the new base (would be a flat 1.0 line)
+  // - add CAD if switching away from CAD and it's not already shown
+  // - remove CAD if switching back to CAD base
+  useEffect(() => {
+    setActiveCurrencies((prev) => {
+      const withoutNewBase = prev.filter((c) => c !== baseCurrency)
+      if (baseCurrency === 'CAD') {
+        return withoutNewBase.filter((c) => c !== 'CAD')
+      }
+      if (!withoutNewBase.includes('CAD')) {
+        return ['CAD', ...withoutNewBase]
+      }
+      return withoutNewBase
+    })
+  }, [baseCurrency])
 
   useEffect(() => {
     setHoveredIndex(null)
@@ -297,35 +451,99 @@ export default function FxRatesChart({
 
   useEffect(() => {
     return () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current)
-      }
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
     }
   }, [])
 
-  const filteredData = useMemo(() => filterByRange(rawData, range), [rawData, range])
-  const data = useMemo(() => aggregate(filteredData, granularity), [filteredData, granularity])
+  // Close add menu when clicking outside
+  useEffect(() => {
+    if (!showAddMenu) return
+    const handler = (e: MouseEvent) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
+        setShowAddMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showAddMenu])
+
+  // Close base dropdown when clicking outside
+  useEffect(() => {
+    if (!showBaseDropdown) return
+    const handler = (e: MouseEvent) => {
+      if (baseDropdownRef.current && !baseDropdownRef.current.contains(e.target as Node)) {
+        setShowBaseDropdown(false)
+        setBaseSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showBaseDropdown])
+
+  // Close calendar when clicking outside
+  useEffect(() => {
+    if (!showCalendar) return
+    const handler = (e: MouseEvent) => {
+      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
+        setShowCalendar(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showCalendar])
+
+  const filteredData = useMemo(
+    () => filterByRange(rawData, range, customStart, customEnd),
+    [rawData, range, customStart, customEnd]
+  )
+  const aggregatedData = useMemo(() => aggregate(filteredData, granularity), [filteredData, granularity])
+
+  // Convert all rates relative to the selected base currency.
+  // Raw data is CAD-based: rates[X] = units of X per 1 CAD.
+  // For a new base B: newRate[X] = rawRate[X] / rawRate[B]
+  // This works for CAD too since rawRate[CAD] = 1.
+  const displayData = useMemo(() => {
+    if (baseCurrency === 'CAD') return aggregatedData
+    return aggregatedData.map((point) => {
+      const baseRate = point.rates[baseCurrency] ?? 1
+      const newRates: Record<string, number> = {}
+      for (const [code, rate] of Object.entries(point.rates)) {
+        newRates[code] = rate / baseRate
+      }
+      return { x: point.x, rates: newRates }
+    })
+  }, [aggregatedData, baseCurrency])
+
+  const availableToAdd = allCurrencies.filter(
+    (c) => c !== baseCurrency && !activeCurrencies.includes(c)
+  )
 
   const chart = useMemo(() => {
-    if (!data.length) return null
+    if (!displayData.length || !activeCurrencies.length) return null
 
     const width = 900
     const height = 360
     const padding = 48
-    const values = data.flatMap((point) => [point.c, point.d, point.af])
+
+    const values = displayData
+      .flatMap((point) => activeCurrencies.map((code) => point.rates[code] ?? 0))
+      .filter((v) => v > 0)
+
+    if (!values.length) return null
+
     const minY = Math.min(...values)
     const maxY = Math.max(...values)
+
     const ticks = 4
     const tickLabels = Array.from({ length: ticks }).map((_, index) => {
       const ratio = index / (ticks - 1)
-      const dataIndex = Math.round(ratio * (data.length - 1))
-      return data[dataIndex]?.x ?? ''
+      const dataIndex = Math.round(ratio * (displayData.length - 1))
+      return displayData[dataIndex]?.x ?? ''
     })
 
     const yTicks = Array.from({ length: 5 }).map((_, index) => {
       const ratio = index / 4
-      const value = maxY - ratio * (maxY - minY)
-      return value
+      return maxY - ratio * (maxY - minY)
     })
 
     return {
@@ -336,20 +554,91 @@ export default function FxRatesChart({
       maxY,
       tickLabels,
       yTicks,
-      names: {
-        c: t.legend.c,
-        d: t.legend.d,
-        af: t.legend.af,
-      },
-      paths: {
-        c: buildPath(data, 'c', width, height, padding, minY, maxY),
-        d: buildPath(data, 'd', width, height, padding, minY, maxY),
-        af: buildPath(data, 'af', width, height, padding, minY, maxY),
-      },
+      paths: Object.fromEntries(
+        activeCurrencies.map((code) => [
+          code,
+          buildPath(displayData, code, width, height, padding, minY, maxY),
+        ])
+      ),
     }
-  }, [data, t.legend.af, t.legend.c, t.legend.d])
+  }, [displayData, activeCurrencies])
 
-  const formatValue = (value: number) => value.toFixed(3)
+  const ANALYZER_CURRENCIES = ['USD', 'EUR', 'CHF', 'GBP', 'CAD', 'JPY', 'BRL']
+
+  const trendAnalysis = useMemo(() => {
+    if (displayData.length < 2) return null
+
+    const rows = ANALYZER_CURRENCIES
+      .filter((code) => code !== baseCurrency)
+      .map((code) => {
+        const vals = displayData
+          .map((p, i) => ({ i, v: p.rates[code] }))
+          .filter((d): d is { i: number; v: number } => d.v != null && d.v > 0)
+
+        if (vals.length < 2) return null
+
+        const n = vals.length
+        const first = vals[0].v
+        const last = vals[n - 1].v
+        const pctChange = ((last - first) / first) * 100
+
+        // Linear regression slope
+        const sumX = vals.reduce((s, d) => s + d.i, 0)
+        const sumY = vals.reduce((s, d) => s + d.v, 0)
+        const sumXY = vals.reduce((s, d) => s + d.i * d.v, 0)
+        const sumX2 = vals.reduce((s, d) => s + d.i * d.i, 0)
+        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX)
+
+        // Daily log returns
+        const returns: number[] = []
+        for (let k = 1; k < vals.length; k++) {
+          returns.push(Math.log(vals[k].v / vals[k - 1].v))
+        }
+        const meanR = returns.reduce((s, r) => s + r, 0) / returns.length
+        const variance = returns.reduce((s, r) => s + (r - meanR) ** 2, 0) / returns.length
+        const volatility = Math.sqrt(variance) * 100  // as %
+
+        // Max drawdown (peak-to-trough on raw values)
+        let peak = vals[0].v
+        let maxDD = 0
+        for (const d of vals) {
+          if (d.v > peak) peak = d.v
+          const dd = (peak - d.v) / peak
+          if (dd > maxDD) maxDD = dd
+        }
+
+        // Trend consistency: % of periods moving in the same direction as the net change
+        const netUp = pctChange > 0
+        const consistent = returns.filter((r) => netUp ? r > 0 : r < 0).length
+        const consistency = (consistent / returns.length) * 100
+
+        const abs = Math.abs(pctChange)
+        const magnitude: 'strong' | 'moderate' | 'weak' =
+          abs >= 5 ? 'strong' : abs >= 1.5 ? 'moderate' : 'weak'
+
+        // Directional score: +1 = base strengthened vs this pair, -1 = weakened
+        // Weighted by consistency so noisy signals count less
+        const dirScore = (pctChange > 0 ? 1 : pctChange < 0 ? -1 : 0) * (consistency / 100)
+
+        return { code, pctChange, slope, volatility, maxDrawdown: maxDD * 100, consistency, magnitude, dirScore }
+      })
+      .filter(Boolean) as {
+        code: string; pctChange: number; slope: number
+        volatility: number; maxDrawdown: number; consistency: number
+        magnitude: 'strong' | 'moderate' | 'weak'; dirScore: number
+      }[]
+
+    if (!rows.length) return null
+
+    // Overall strength score: average directional score across all pairs, scaled to -100…+100
+    const overallScore = (rows.reduce((s, r) => s + r.dirScore, 0) / rows.length) * 100
+    const bullish = rows.filter((r) => r.pctChange > 0).length
+    const bearish = rows.filter((r) => r.pctChange < 0).length
+
+    return { rows, overallScore, bullish, bearish }
+  }, [displayData, baseCurrency])
+
+  const formatValue = (value: number) => value.toFixed(4)
 
   const handleMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
     if (!chart || !chartRef.current || !svgRef.current) return
@@ -370,19 +659,15 @@ export default function FxRatesChart({
     }
 
     const xRatio = Math.min(1, Math.max(0, (xPx - plotLeft) / (plotRight - plotLeft)))
-    const index = Math.round(xRatio * (data.length - 1))
+    const index = Math.round(xRatio * (displayData.length - 1))
     setHoveredIndex(index)
 
-    const x = xPx
-    const y = yPx
     const maxLeft = rect.width - 180
-    const left = Math.min(x, maxLeft)
-    const top = Math.max(y, 12)
+    const left = Math.min(xPx, maxLeft)
+    const top = Math.max(yPx, 12)
 
     if (tooltipRef.current) {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current)
-      }
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
       rafRef.current = requestAnimationFrame(() => {
         if (!tooltipRef.current) return
         tooltipRef.current.style.transform = `translate3d(${left}px, ${top}px, 0)`
@@ -396,6 +681,92 @@ export default function FxRatesChart({
         <div className="text-center mb-10">
           <h1 className="h2 mb-2">{t.title}</h1>
           <p className="text-lg text-gray-400">{t.subtitle}</p>
+
+          {/* Base currency selector */}
+          <div className="mt-5 flex flex-col items-center gap-2">
+            <span className="text-xs uppercase tracking-widest text-gray-500">{t.baseCurrency}</span>
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              {/* Quick-pick pills */}
+              <div className="inline-flex rounded-full bg-gray-800 p-1 text-xs font-semibold uppercase tracking-wide text-gray-300">
+                {BASE_OPTIONS.map((code) => (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => { setBaseCurrency(code); setShowBaseDropdown(false); setBaseSearch('') }}
+                    className={`px-4 py-2 rounded-full transition ${
+                      baseCurrency === code ? 'bg-purple-600 text-white' : 'hover:text-white'
+                    }`}
+                  >
+                    {code}
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom base dropdown */}
+              <div className="relative" ref={baseDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowBaseDropdown((v) => !v)}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wide transition ${
+                    !BASE_OPTIONS.includes(baseCurrency)
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:text-white'
+                  }`}
+                >
+                  {!BASE_OPTIONS.includes(baseCurrency) ? (
+                    <>
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full overflow-hidden" style={{ fontSize: '1rem', lineHeight: 1 }}>
+                        {CURRENCY_FLAGS[baseCurrency] ?? '🏳️'}
+                      </span>
+                      {baseCurrency}
+                    </>
+                  ) : (
+                    <>Custom ▾</>
+                  )}
+                </button>
+
+                {showBaseDropdown && (
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-30 w-52 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl overflow-hidden">
+                    <div className="p-2 border-b border-slate-700">
+                      <input
+                        autoFocus
+                        type="text"
+                        placeholder="Search currency…"
+                        value={baseSearch}
+                        onChange={(e) => setBaseSearch(e.target.value.toUpperCase())}
+                        className="w-full bg-slate-800 text-slate-100 text-xs rounded-lg px-3 py-2 outline-none placeholder-slate-500 border border-slate-600 focus:border-purple-500 transition"
+                      />
+                    </div>
+                    <div className="max-h-52 overflow-y-auto py-1">
+                      {allCurrencies
+                        .filter((c) => c !== baseCurrency && c.includes(baseSearch))
+                        .map((code) => {
+                          const color = getCurrencyColor(code, allCurrencies)
+                          return (
+                            <button
+                              key={code}
+                              type="button"
+                              onClick={() => {
+                                setBaseCurrency(code)
+                                setShowBaseDropdown(false)
+                                setBaseSearch('')
+                              }}
+                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-slate-700 transition"
+                            >
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.1rem', lineHeight: 1 }}>
+                                {CURRENCY_FLAGS[code] ?? '🏳️'}
+                              </span>
+                              <span style={{ color }} className="font-semibold">{code}</span>
+                            </button>
+                          )
+                        })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="mt-4 flex flex-col items-center justify-center gap-3">
             <div className="inline-flex rounded-full bg-gray-800 p-1 text-xs font-semibold uppercase tracking-wide text-gray-300">
               {(['all', 'last12', 'ytd', 'last30'] as FxRange[]).map((option) => (
@@ -410,6 +781,131 @@ export default function FxRatesChart({
                   {t.range[option]}
                 </button>
               ))}
+              {/* Custom date range button */}
+              <div className="relative" ref={calendarRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRange('custom')
+                    setShowCalendar((v) => !v)
+                  }}
+                  className={`px-4 py-2 rounded-full transition ${
+                    range === 'custom' ? 'bg-purple-600 text-white' : 'hover:text-white'
+                  }`}
+                >
+                  {range === 'custom' && customStart && customEnd
+                    ? `${customStart.toLocaleDateString()} – ${customEnd.toLocaleDateString()}`
+                    : t.range.custom}
+                </button>
+
+                {showCalendar && (() => {
+                  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
+                  const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa']
+                  const firstDay = new Date(calViewYear, calViewMonth, 1).getDay()
+                  const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate()
+
+                  const prevMonth = () => {
+                    if (calViewMonth === 0) { setCalViewMonth(11); setCalViewYear(y => y - 1) }
+                    else setCalViewMonth(m => m - 1)
+                  }
+                  const nextMonth = () => {
+                    if (calViewMonth === 11) { setCalViewMonth(0); setCalViewYear(y => y + 1) }
+                    else setCalViewMonth(m => m + 1)
+                  }
+
+                  const handleDay = (day: number) => {
+                    const d = new Date(calViewYear, calViewMonth, day)
+                    if (calendarStep === 'start') {
+                      setCustomStart(d)
+                      setCustomEnd(null)
+                      setCalendarStep('end')
+                    } else {
+                      setCustomEnd(d)
+                      setCalendarStep('start')
+                      setShowCalendar(false)
+                    }
+                  }
+
+                  const inRange = (day: number) => {
+                    const d = new Date(calViewYear, calViewMonth, day)
+                    const end = calendarStep === 'end' ? (calendarHover ?? customEnd) : customEnd
+                    if (!customStart || !end) return false
+                    const s = customStart < end ? customStart : end
+                    const e = customStart < end ? end : customStart
+                    return d > s && d < e
+                  }
+
+                  const isSelected = (day: number) => {
+                    const d = new Date(calViewYear, calViewMonth, day)
+                    return (customStart && d.toDateString() === customStart.toDateString()) ||
+                           (customEnd && d.toDateString() === customEnd.toDateString()) || false
+                  }
+
+                  return (
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-30 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-4 w-72 select-none">
+                      <div className="text-xs text-slate-400 text-center mb-3 font-medium">
+                        {calendarStep === 'start' ? 'Select start date' : 'Select end date'}
+                      </div>
+
+                      {/* Month navigation */}
+                      <div className="flex items-center justify-between mb-3">
+                        <button type="button" onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">‹</button>
+                        <span className="text-sm font-semibold text-white">{MONTHS[calViewMonth]} {calViewYear}</span>
+                        <button type="button" onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">›</button>
+                      </div>
+
+                      {/* Day headers */}
+                      <div className="grid grid-cols-7 mb-1">
+                        {DAYS.map(d => (
+                          <div key={d} className="text-center text-xs text-slate-500 font-medium py-1">{d}</div>
+                        ))}
+                      </div>
+
+                      {/* Day grid */}
+                      <div className="grid grid-cols-7">
+                        {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} />)}
+                        {Array.from({ length: daysInMonth }).map((_, i) => {
+                          const day = i + 1
+                          const sel = isSelected(day)
+                          const inR = inRange(day)
+                          return (
+                            <button
+                              key={day}
+                              type="button"
+                              onClick={() => handleDay(day)}
+                              onMouseEnter={() => calendarStep === 'end' && setCalendarHover(new Date(calViewYear, calViewMonth, day))}
+                              onMouseLeave={() => setCalendarHover(null)}
+                              className={`h-8 w-full text-xs rounded-full transition font-medium
+                                ${sel ? 'bg-purple-600 text-white' : ''}
+                                ${inR && !sel ? 'bg-purple-900/50 text-purple-200' : ''}
+                                ${!sel && !inR ? 'text-slate-300 hover:bg-slate-700' : ''}
+                              `}
+                            >
+                              {day}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="mt-3 flex justify-between items-center border-t border-slate-700 pt-3">
+                        <button
+                          type="button"
+                          onClick={() => { setCustomStart(null); setCustomEnd(null); setCalendarStep('start'); setRange('all'); setShowCalendar(false) }}
+                          className="text-xs text-slate-400 hover:text-white transition"
+                        >
+                          Clear
+                        </button>
+                        {customStart && customEnd && (
+                          <span className="text-xs text-slate-400">
+                            {customStart.toLocaleDateString()} – {customEnd.toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })()}
+              </div>
             </div>
             <div className="inline-flex rounded-full bg-gray-800 p-1 text-xs font-semibold uppercase tracking-wide text-gray-300">
               {(['daily', 'weekly', 'monthly'] as FxGranularity[]).map((option) => (
@@ -427,44 +923,96 @@ export default function FxRatesChart({
             </div>
           </div>
           {granularity !== 'daily' && (
-            <div className="mt-2 text-xs text-gray-500">
-              {t.granularity.average}
-            </div>
+            <div className="mt-2 text-xs text-gray-500">{t.granularity.average}</div>
           )}
         </div>
 
-        {loading && (
-          <div className="text-center text-gray-400">{t.loading}</div>
-        )}
-        {!loading && error && (
-          <div className="text-center text-red-300">{t.error}</div>
-        )}
+        {loading && <div className="text-center text-gray-400">{t.loading}</div>}
+        {!loading && error && <div className="text-center text-red-300">{t.error}</div>}
 
         {!loading && !error && chart && (
           <div className="relative w-full overflow-x-auto" ref={chartRef}>
+            {/* Currency bubbles + add button */}
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {activeCurrencies.map((code) => {
+                const color = getCurrencyColor(code, allCurrencies)
+                return (
+                  <span
+                    key={code}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                    style={{
+                      backgroundColor: `${color}22`,
+                      color,
+                      border: `1px solid ${color}55`,
+                    }}
+                  >
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.35rem', lineHeight: 1 }}>{CURRENCY_FLAGS[code] ?? '🏳️'}</span>
+                    {code}
+                    {activeCurrencies.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveCurrencies((prev) => prev.filter((c) => c !== code))}
+                        className="ml-0.5 leading-none opacity-50 hover:opacity-100 transition"
+                        aria-label={`Remove ${code}`}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </span>
+                )
+              })}
+
+              {availableToAdd.length > 0 && (
+                <div className="relative" ref={addMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddMenu((prev) => !prev)}
+                    className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-500 hover:text-white transition text-base font-bold leading-none"
+                    aria-label={t.addCurrency}
+                  >
+                    +
+                  </button>
+                  {showAddMenu && (
+                    <div className="absolute left-0 top-full mt-2 z-20 rounded-lg bg-slate-800 border border-slate-700 shadow-xl py-1 min-w-[110px]">
+                      {availableToAdd.map((code) => {
+                        const color = getCurrencyColor(code, allCurrencies)
+                        return (
+                          <button
+                            key={code}
+                            type="button"
+                            onClick={() => {
+                              setActiveCurrencies((prev) => [...prev, code])
+                              setShowAddMenu(false)
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left hover:bg-slate-700 transition"
+                          >
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.35rem', lineHeight: 1 }}>{CURRENCY_FLAGS[code] ?? '🏳️'}</span>
+                            <span style={{ color }} className="font-semibold">
+                              {code}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <svg
               ref={svgRef}
               viewBox={`0 0 ${chart.width} ${chart.height}`}
               className="w-full h-auto"
               role="img"
-              aria-label="FX rates chart Basis:CAD"
+              aria-label={`FX rates chart Basis:${baseCurrency}`}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setHoveredIndex(null)}
             >
-              <rect
-                x="0"
-                y="0"
-                width={chart.width}
-                height={chart.height}
-                rx="16"
-                fill="#0f172a"
-              />
+              <rect x="0" y="0" width={chart.width} height={chart.height} rx="16" fill="#0f172a" />
 
               <g stroke="#1f2937" strokeWidth="1">
                 {Array.from({ length: 5 }).map((_, index) => {
-                  const y =
-                    chart.padding +
-                    (index / 4) * (chart.height - chart.padding * 2)
+                  const y = chart.padding + (index / 4) * (chart.height - chart.padding * 2)
                   return (
                     <line
                       key={`grid-${index}`}
@@ -479,45 +1027,29 @@ export default function FxRatesChart({
 
               <g fill="#94a3b8" fontSize="12">
                 {chart.yTicks.map((value, index) => {
-                  const y =
-                    chart.padding +
-                    (index / 4) * (chart.height - chart.padding * 2)
+                  const y = chart.padding + (index / 4) * (chart.height - chart.padding * 2)
                   return (
-                    <text
-                      key={`y-tick-${index}`}
-                      x={chart.padding - 8}
-                      y={y + 4}
-                      textAnchor="end"
-                    >
+                    <text key={`y-tick-${index}`} x={chart.padding - 8} y={y + 4} textAnchor="end">
                       {value.toFixed(3)}
                     </text>
                   )
                 })}
               </g>
 
-              <path
-                d={chart.paths.c}
-                fill="none"
-                stroke="#a855f7"
-                strokeWidth="2.5"
-              />
-              <path
-                d={chart.paths.d}
-                fill="none"
-                stroke="#22c55e"
-                strokeWidth="2.5"
-              />
-              <path
-                d={chart.paths.af}
-                fill="none"
-                stroke="#f97316"
-                strokeWidth="2.5"
-              />
+              {activeCurrencies.map((code) => (
+                <path
+                  key={`path-${code}`}
+                  d={chart.paths[code]}
+                  fill="none"
+                  stroke={getCurrencyColor(code, allCurrencies)}
+                  strokeWidth="2.5"
+                />
+              ))}
 
               {hoveredIndex !== null && (
                 <line
-                  x1={chart.padding + (hoveredIndex / Math.max(1, data.length - 1)) * (chart.width - chart.padding * 2)}
-                  x2={chart.padding + (hoveredIndex / Math.max(1, data.length - 1)) * (chart.width - chart.padding * 2)}
+                  x1={chart.padding + (hoveredIndex / Math.max(1, displayData.length - 1)) * (chart.width - chart.padding * 2)}
+                  x2={chart.padding + (hoveredIndex / Math.max(1, displayData.length - 1)) * (chart.width - chart.padding * 2)}
                   y1={chart.padding}
                   y2={chart.height - chart.padding}
                   stroke="#64748b"
@@ -525,25 +1057,25 @@ export default function FxRatesChart({
                 />
               )}
 
-              {hoveredIndex !== null && data[hoveredIndex] && (
+              {hoveredIndex !== null && displayData[hoveredIndex] && (
                 <g>
-                  {(['c', 'd', 'af'] as FxSeries[]).map((series) => {
+                  {activeCurrencies.map((code) => {
                     const x =
                       chart.padding +
-                      (hoveredIndex / Math.max(1, data.length - 1)) *
+                      (hoveredIndex / Math.max(1, displayData.length - 1)) *
                         (chart.width - chart.padding * 2)
-                    const value = data[hoveredIndex][series]
+                    const value = displayData[hoveredIndex].rates[code] ?? 0
                     const y =
                       chart.padding +
                       (1 - (value - chart.minY) / Math.max(1e-6, chart.maxY - chart.minY)) *
                         (chart.height - chart.padding * 2)
                     return (
                       <circle
-                        key={`dot-${series}`}
+                        key={`dot-${code}`}
                         cx={x}
                         cy={y}
                         r="4"
-                        fill="#ffffff"
+                        fill={getCurrencyColor(code, allCurrencies)}
                         stroke="#0f172a"
                         strokeWidth="1.5"
                       />
@@ -567,42 +1099,134 @@ export default function FxRatesChart({
               </g>
             </svg>
 
-            {hoveredIndex !== null && data[hoveredIndex] && (
+            {hoveredIndex !== null && displayData[hoveredIndex] && (
               <div
                 ref={tooltipRef}
                 className="pointer-events-none absolute left-0 top-0 z-10 rounded-md bg-slate-900/95 px-3 py-2 text-xs text-slate-100 shadow-lg"
               >
-                <div className="font-semibold text-slate-200">
-                  {data[hoveredIndex].x}
+                <div className="font-semibold text-slate-200 mb-1">
+                  {displayData[hoveredIndex].x}
                 </div>
-                <div className="mt-1 flex flex-col gap-0.5">
-                  <span className="text-purple-300">
-                    {chart.names.c}: {formatValue(data[hoveredIndex].c)}
-                  </span>
-                  <span className="text-green-300">
-                    {chart.names.d}: {formatValue(data[hoveredIndex].d)}
-                  </span>
-                  <span className="text-orange-300">
-                    {chart.names.af}: {formatValue(data[hoveredIndex].af)}
-                  </span>
+                {activeCurrencies.map((code) => (
+                  <div key={code} style={{ color: getCurrencyColor(code, allCurrencies) }}>
+                    {code}/{baseCurrency}: {formatValue(displayData[hoveredIndex].rates[code] ?? 0)}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Trend analyzer */}
+            {trendAnalysis && (
+              <div className="mt-6 rounded-xl bg-slate-900 border border-slate-700 p-5">
+
+                {/* Header + overall score */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                  <div>
+                    <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                      {baseCurrency} Currency Strength Analyzer
+                    </div>
+                    <div className="text-xs text-slate-600 mt-0.5">
+                      {displayData[0]?.x} — {displayData[displayData.length - 1]?.x}
+                    </div>
+                  </div>
+
+                  {/* Overall score gauge */}
+                  {(() => {
+                    const s = trendAnalysis.overallScore
+                    const neutral = Math.abs(s) < 5
+                    const strong = Math.abs(s) >= 60
+                    const color = neutral ? '#64748b' : s > 0 ? '#22c55e' : '#ef4444'
+                    const label = neutral ? 'Neutral' : strong
+                      ? (s > 0 ? 'Strongly Bullish' : 'Strongly Bearish')
+                      : (s > 0 ? 'Mildly Bullish' : 'Mildly Bearish')
+                    const barW = Math.abs(s)
+                    return (
+                      <div className="flex flex-col items-end gap-1 min-w-[180px]">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xl font-bold" style={{ color }}>
+                            {s > 0 ? '+' : ''}{s.toFixed(1)}
+                          </span>
+                          <span className="text-xs font-semibold" style={{ color }}>{label}</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
+                          {s <= 0 && (
+                            <div className="ml-auto h-full rounded-full transition-all" style={{ width: `${barW}%`, backgroundColor: color }} />
+                          )}
+                          {s > 0 && (
+                            <div className="h-full rounded-full transition-all" style={{ width: `${barW}%`, backgroundColor: color }} />
+                          )}
+                        </div>
+                        <div className="flex justify-between w-full text-xs text-slate-600">
+                          <span>Bearish</span><span>{trendAnalysis.bullish}↑ {trendAnalysis.bearish}↓</span><span>Bullish</span>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+
+                {/* Per-currency cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                  {trendAnalysis.rows.map(({ code, pctChange, volatility, maxDrawdown, consistency, magnitude }) => {
+                    const up = pctChange > 0
+                    const neutral = Math.abs(pctChange) < 0.05
+                    const color = neutral ? '#64748b' : up ? '#22c55e' : '#ef4444'
+                    const bgColor = neutral ? '#1e293b' : up ? '#052e16' : '#1f0a0a'
+                    const arrow = neutral ? '→' : up ? '▲' : '▼'
+                    const magnitudeLabel = { strong: 'Strong', moderate: 'Moderate', weak: 'Slight' }[magnitude]
+                    const label = neutral ? 'Stable' : `${magnitudeLabel} ${up ? 'rise' : 'fall'}`
+
+                    return (
+                      <div
+                        key={code}
+                        className="flex flex-col gap-2 rounded-lg px-3 py-3"
+                        style={{ backgroundColor: bgColor, border: `1px solid ${color}33` }}
+                      >
+                        {/* Currency label */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.1rem', lineHeight: 1 }}>
+                            {CURRENCY_FLAGS[code] ?? '🏳️'}
+                          </span>
+                          <span className="text-xs font-bold text-slate-200">{code}</span>
+                        </div>
+
+                        {/* % change */}
+                        <div className="flex items-baseline gap-1">
+                          <span style={{ color }} className="text-sm font-bold leading-none">{arrow}</span>
+                          <span style={{ color }} className="text-xs font-semibold">
+                            {pctChange > 0 ? '+' : ''}{pctChange.toFixed(2)}%
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-slate-400 leading-tight">{label}</div>
+
+                        {/* Stats */}
+                        <div className="mt-1 flex flex-col gap-0.5 border-t border-slate-700 pt-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-slate-500">Volatility</span>
+                            <span className="text-slate-300">{volatility.toFixed(2)}%</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-slate-500">Max DD</span>
+                            <span className="text-red-400">-{maxDrawdown.toFixed(2)}%</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-slate-500">Consistency</span>
+                            <span className="text-slate-300">{consistency.toFixed(0)}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-600 border-t border-slate-800 pt-3">
+                  <span>▲/▼ = {baseCurrency} gained/lost vs that currency over the period</span>
+                  <span>Volatility = std dev of daily log returns</span>
+                  <span>Max DD = largest peak-to-trough drop · Consistency = % of days moving with the trend</span>
                 </div>
               </div>
             )}
 
-            <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-400">
-              <span className="inline-flex items-center gap-2">
-                <span className="inline-block w-3 h-3 rounded-full bg-purple-500" />
-                {t.legend.c}
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <span className="inline-block w-3 h-3 rounded-full bg-green-500" />
-                {t.legend.d}
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <span className="inline-block w-3 h-3 rounded-full bg-orange-500" />
-                {t.legend.af}
-              </span>
-            </div>
           </div>
         )}
       </div>
