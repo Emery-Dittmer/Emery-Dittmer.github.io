@@ -261,6 +261,17 @@ function cleanSpikes(points: RawPoint[]): RawPoint[] {
   })
 }
 
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+function formatDateLabel(x: string): string {
+  const d = parseDate(x)
+  if (!d) return x
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mmm = MONTHS_SHORT[d.getMonth()]
+  const yy = String(d.getFullYear()).slice(2)
+  return `${dd}-${mmm}-${yy}`
+}
+
 function buildPath(
   points: RawPoint[],
   currency: string,
@@ -289,6 +300,7 @@ export default function FxRatesChart({
 }: {
   locale?: 'en' | 'fr'
 }) {
+  const [containerWidth, setContainerWidth] = useState(900)
   const [rawData, setRawData] = useState<RawPoint[]>([])
   const [allCurrencies, setAllCurrencies] = useState<string[]>(['USD', 'EUR', 'CHF'])
   const [error, setError] = useState<string | null>(null)
@@ -320,6 +332,8 @@ export default function FxRatesChart({
   const [analyzerEditSlot, setAnalyzerEditSlot] = useState<string | null>(null)
   const [analyzerSearch, setAnalyzerSearch] = useState('')
   const analyzerEditRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const [analyzerOpen, setAnalyzerOpen] = useState(true)
+  const [calculatorOpen, setCalculatorOpen] = useState(true)
   const [calcSource, setCalcSource] = useState<string | null>(null)
   const [calcInput, setCalcInput] = useState('1')
 
@@ -462,6 +476,17 @@ export default function FxRatesChart({
     }
   }, [])
 
+  // Track container width to drive responsive chart height
+  useEffect(() => {
+    if (!chartRef.current) return
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width
+      if (w) setContainerWidth(w)
+    })
+    ro.observe(chartRef.current)
+    return () => ro.disconnect()
+  }, [])
+
   // Close add menu when clicking outside
   useEffect(() => {
     if (!showAddMenu) return
@@ -544,8 +569,12 @@ export default function FxRatesChart({
     if (!displayData.length || !activeCurrencies.length) return null
 
     const width = 900
-    const height = 360
-    const padding = 48
+    const isMobile = containerWidth < 640
+    // Taller viewBox on mobile so the chart fills more vertical space
+    const height = isMobile ? 560 : 360
+    // Larger font + padding on mobile so axis labels are readable
+    const fontSize = isMobile ? 22 : 20
+    const padding = isMobile ? 72 : 64
 
     const values = displayData
       .flatMap((point) => activeCurrencies.map((code) => point.rates[code] ?? 0))
@@ -560,7 +589,7 @@ export default function FxRatesChart({
     const tickLabels = Array.from({ length: ticks }).map((_, index) => {
       const ratio = index / (ticks - 1)
       const dataIndex = Math.round(ratio * (displayData.length - 1))
-      return displayData[dataIndex]?.x ?? ''
+      return formatDateLabel(displayData[dataIndex]?.x ?? '')
     })
 
     const yTicks = Array.from({ length: 5 }).map((_, index) => {
@@ -572,6 +601,7 @@ export default function FxRatesChart({
       width,
       height,
       padding,
+      fontSize,
       minY,
       maxY,
       tickLabels,
@@ -717,22 +747,24 @@ export default function FxRatesChart({
 
           {/* Base currency selector */}
           <div className="mt-5 flex flex-col items-center gap-2">
-            <span className="text-xs uppercase tracking-widest text-gray-500">{t.baseCurrency}</span>
-            <div className="flex items-center gap-2 flex-wrap justify-center">
-              {/* Quick-pick pills */}
-              <div className="inline-flex rounded-full bg-gray-800 p-1 text-xs font-semibold uppercase tracking-wide text-gray-300">
-                {BASE_OPTIONS.map((code) => (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => { setBaseCurrency(code); setShowBaseDropdown(false); setBaseSearch('') }}
-                    className={`px-4 py-2 rounded-full transition ${
-                      baseCurrency === code ? 'bg-purple-600 text-white' : 'hover:text-white'
-                    }`}
-                  >
-                    {code}
-                  </button>
-                ))}
+            <span className="text-sm sm:text-xs uppercase tracking-widest text-gray-500">{t.baseCurrency}</span>
+            <div className="flex items-center gap-2 flex-wrap justify-center w-full">
+              {/* Quick-pick pills — scrollable on mobile */}
+              <div className="max-w-full overflow-x-auto pb-1">
+                <div className="inline-flex rounded-full bg-gray-800 p-1 text-sm sm:text-xs font-semibold uppercase tracking-wide text-gray-300">
+                  {BASE_OPTIONS.map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => { setBaseCurrency(code); setShowBaseDropdown(false); setBaseSearch('') }}
+                      className={`px-4 py-2 rounded-full transition ${
+                        baseCurrency === code ? 'bg-purple-600 text-white' : 'hover:text-white'
+                      }`}
+                    >
+                      {code}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Custom base dropdown */}
@@ -801,158 +833,176 @@ export default function FxRatesChart({
           </div>
 
           <div className="mt-4 flex flex-col items-center justify-center gap-3">
-            <div className="inline-flex rounded-full bg-gray-800 p-1 text-xs font-semibold uppercase tracking-wide text-gray-300">
-              {(['all', 'last12', 'ytd', 'last30'] as FxRange[]).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setRange(option)}
-                  className={`px-4 py-2 rounded-full transition ${
-                    range === option ? 'bg-purple-600 text-white' : 'hover:text-white'
-                  }`}
-                >
-                  {t.range[option]}
-                </button>
-              ))}
-              {/* Custom date range button */}
-              <div className="relative" ref={calendarRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRange('custom')
-                    setShowCalendar((v) => !v)
-                  }}
-                  className={`px-4 py-2 rounded-full transition ${
-                    range === 'custom' ? 'bg-purple-600 text-white' : 'hover:text-white'
-                  }`}
-                >
-                  {range === 'custom' && customStart && customEnd
-                    ? `${customStart.toLocaleDateString()} – ${customEnd.toLocaleDateString()}`
-                    : t.range.custom}
-                </button>
-
-                {showCalendar && (() => {
-                  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
-                  const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa']
-                  const firstDay = new Date(calViewYear, calViewMonth, 1).getDay()
-                  const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate()
-
-                  const prevMonth = () => {
-                    if (calViewMonth === 0) { setCalViewMonth(11); setCalViewYear(y => y - 1) }
-                    else setCalViewMonth(m => m - 1)
-                  }
-                  const nextMonth = () => {
-                    if (calViewMonth === 11) { setCalViewMonth(0); setCalViewYear(y => y + 1) }
-                    else setCalViewMonth(m => m + 1)
-                  }
-
-                  const handleDay = (day: number) => {
-                    const d = new Date(calViewYear, calViewMonth, day)
-                    if (calendarStep === 'start') {
-                      setCustomStart(d)
-                      setCustomEnd(null)
-                      setCalendarStep('end')
-                    } else {
-                      setCustomEnd(d)
-                      setCalendarStep('start')
-                      setShowCalendar(false)
-                    }
-                  }
-
-                  const inRange = (day: number) => {
-                    const d = new Date(calViewYear, calViewMonth, day)
-                    const end = calendarStep === 'end' ? (calendarHover ?? customEnd) : customEnd
-                    if (!customStart || !end) return false
-                    const s = customStart < end ? customStart : end
-                    const e = customStart < end ? end : customStart
-                    return d > s && d < e
-                  }
-
-                  const isSelected = (day: number) => {
-                    const d = new Date(calViewYear, calViewMonth, day)
-                    return (customStart && d.toDateString() === customStart.toDateString()) ||
-                           (customEnd && d.toDateString() === customEnd.toDateString()) || false
-                  }
-
-                  return (
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-30 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-4 w-72 select-none">
-                      <div className="text-xs text-slate-400 text-center mb-3 font-medium">
-                        {calendarStep === 'start' ? 'Select start date' : 'Select end date'}
-                      </div>
-
-                      {/* Month navigation */}
-                      <div className="flex items-center justify-between mb-3">
-                        <button type="button" onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">‹</button>
-                        <span className="text-sm font-semibold text-white">{MONTHS[calViewMonth]} {calViewYear}</span>
-                        <button type="button" onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">›</button>
-                      </div>
-
-                      {/* Day headers */}
-                      <div className="grid grid-cols-7 mb-1">
-                        {DAYS.map(d => (
-                          <div key={d} className="text-center text-xs text-slate-500 font-medium py-1">{d}</div>
-                        ))}
-                      </div>
-
-                      {/* Day grid */}
-                      <div className="grid grid-cols-7">
-                        {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} />)}
-                        {Array.from({ length: daysInMonth }).map((_, i) => {
-                          const day = i + 1
-                          const sel = isSelected(day)
-                          const inR = inRange(day)
-                          return (
-                            <button
-                              key={day}
-                              type="button"
-                              onClick={() => handleDay(day)}
-                              onMouseEnter={() => calendarStep === 'end' && setCalendarHover(new Date(calViewYear, calViewMonth, day))}
-                              onMouseLeave={() => setCalendarHover(null)}
-                              className={`h-8 w-full text-xs rounded-full transition font-medium
-                                ${sel ? 'bg-purple-600 text-white' : ''}
-                                ${inR && !sel ? 'bg-purple-900/50 text-purple-200' : ''}
-                                ${!sel && !inR ? 'text-slate-300 hover:bg-slate-700' : ''}
-                              `}
-                            >
-                              {day}
-                            </button>
-                          )
-                        })}
-                      </div>
-
-                      {/* Footer */}
-                      <div className="mt-3 flex justify-between items-center border-t border-slate-700 pt-3">
-                        <button
-                          type="button"
-                          onClick={() => { setCustomStart(null); setCustomEnd(null); setCalendarStep('start'); setRange('all'); setShowCalendar(false) }}
-                          className="text-xs text-slate-400 hover:text-white transition"
-                        >
-                          Clear
-                        </button>
-                        {customStart && customEnd && (
-                          <span className="text-xs text-slate-400">
-                            {customStart.toLocaleDateString()} – {customEnd.toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })()}
+            {/* Range pills — scrollable on mobile */}
+            <div className="max-w-full overflow-x-auto pb-1">
+              <div className="inline-flex rounded-full bg-gray-800 p-1 text-sm sm:text-xs font-semibold uppercase tracking-wide text-gray-300 whitespace-nowrap">
+                {(['all', 'last12', 'ytd', 'last30'] as FxRange[]).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setRange(option)}
+                    className={`px-4 py-2 rounded-full transition ${
+                      range === option ? 'bg-purple-600 text-white' : 'hover:text-white'
+                    }`}
+                  >
+                    {t.range[option]}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="inline-flex rounded-full bg-gray-800 p-1 text-xs font-semibold uppercase tracking-wide text-gray-300">
-              {(['daily', 'weekly', 'monthly'] as FxGranularity[]).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setGranularity(option)}
-                  className={`px-4 py-2 rounded-full transition ${
-                    granularity === option ? 'bg-purple-600 text-white' : 'hover:text-white'
-                  }`}
-                >
-                  {t.granularity[option]}
-                </button>
-              ))}
+
+            {/* Custom date range — separate from preset pills */}
+            <div className="relative" ref={calendarRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setRange('custom')
+                  setShowCalendar((v) => !v)
+                }}
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm sm:text-xs font-semibold uppercase tracking-wide transition border ${
+                  range === 'custom'
+                    ? 'bg-purple-600 border-purple-500 text-white'
+                    : 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white hover:border-gray-500'
+                }`}
+              >
+                <span>📅</span>
+                {range === 'custom' && customStart && customEnd
+                  ? `${customStart.toLocaleDateString('en', { month: 'short', day: 'numeric' })} – ${customEnd.toLocaleDateString('en', { month: 'short', day: 'numeric' })}`
+                  : t.range.custom}
+              </button>
+
+              {showCalendar && (() => {
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
+                const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa']
+                const firstDay = new Date(calViewYear, calViewMonth, 1).getDay()
+                const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate()
+
+                const prevMonth = () => {
+                  if (calViewMonth === 0) { setCalViewMonth(11); setCalViewYear(y => y - 1) }
+                  else setCalViewMonth(m => m - 1)
+                }
+                const nextMonth = () => {
+                  if (calViewMonth === 11) { setCalViewMonth(0); setCalViewYear(y => y + 1) }
+                  else setCalViewMonth(m => m + 1)
+                }
+
+                const handleDay = (day: number) => {
+                  const d = new Date(calViewYear, calViewMonth, day)
+                  if (d > today) return
+                  if (calendarStep === 'start') {
+                    setCustomStart(d)
+                    setCustomEnd(null)
+                    setCalendarStep('end')
+                  } else {
+                    setCustomEnd(d)
+                    setCalendarStep('start')
+                    setShowCalendar(false)
+                  }
+                }
+
+                const inRange = (day: number) => {
+                  const d = new Date(calViewYear, calViewMonth, day)
+                  const end = calendarStep === 'end' ? (calendarHover ?? customEnd) : customEnd
+                  if (!customStart || !end) return false
+                  const s = customStart < end ? customStart : end
+                  const e = customStart < end ? end : customStart
+                  return d > s && d < e
+                }
+
+                const isSelected = (day: number) => {
+                  const d = new Date(calViewYear, calViewMonth, day)
+                  return (customStart && d.toDateString() === customStart.toDateString()) ||
+                         (customEnd && d.toDateString() === customEnd.toDateString()) || false
+                }
+
+                return (
+                  <div className="fixed sm:absolute left-1/2 -translate-x-1/2 top-1/2 sm:top-full -translate-y-1/2 sm:translate-y-0 sm:mt-2 z-50 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-4 w-[min(18rem,90vw)] select-none">
+                    <div className="text-xs text-slate-400 text-center mb-3 font-medium">
+                      {calendarStep === 'start' ? 'Select start date' : 'Select end date'}
+                    </div>
+
+                    {/* Month navigation */}
+                    <div className="flex items-center justify-between mb-3">
+                      <button type="button" onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">‹</button>
+                      <span className="text-sm font-semibold text-white">{MONTHS[calViewMonth]} {calViewYear}</span>
+                      <button type="button" onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">›</button>
+                    </div>
+
+                    {/* Day headers */}
+                    <div className="grid grid-cols-7 mb-1">
+                      {DAYS.map(d => (
+                        <div key={d} className="text-center text-xs text-slate-500 font-medium py-1">{d}</div>
+                      ))}
+                    </div>
+
+                    {/* Day grid */}
+                    <div className="grid grid-cols-7">
+                      {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} />)}
+                      {Array.from({ length: daysInMonth }).map((_, i) => {
+                        const day = i + 1
+                        const d = new Date(calViewYear, calViewMonth, day)
+                        const future = d > today
+                        const sel = isSelected(day)
+                        const inR = inRange(day)
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            disabled={future}
+                            onClick={() => handleDay(day)}
+                            onMouseEnter={() => !future && calendarStep === 'end' && setCalendarHover(new Date(calViewYear, calViewMonth, day))}
+                            onMouseLeave={() => setCalendarHover(null)}
+                            className={`h-8 w-full text-xs rounded-full transition font-medium
+                              ${future ? 'text-slate-700 cursor-not-allowed' : ''}
+                              ${!future && sel ? 'bg-purple-600 text-white' : ''}
+                              ${!future && inR && !sel ? 'bg-purple-900/50 text-purple-200' : ''}
+                              ${!future && !sel && !inR ? 'text-slate-300 hover:bg-slate-700' : ''}
+                            `}
+                          >
+                            {day}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="mt-3 flex justify-between items-center border-t border-slate-700 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => { setCustomStart(null); setCustomEnd(null); setCalendarStep('start'); setRange('all'); setShowCalendar(false) }}
+                        className="text-xs text-slate-400 hover:text-white transition"
+                      >
+                        Clear
+                      </button>
+                      {customStart && customEnd && (
+                        <span className="text-xs text-slate-400">
+                          {customStart.toLocaleDateString()} – {customEnd.toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* Granularity pills — scrollable on mobile */}
+            <div className="max-w-full overflow-x-auto pb-1">
+              <div className="inline-flex rounded-full bg-gray-800 p-1 text-sm sm:text-xs font-semibold uppercase tracking-wide text-gray-300 whitespace-nowrap">
+                {(['daily', 'weekly', 'monthly'] as FxGranularity[]).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setGranularity(option)}
+                    className={`px-4 py-2 rounded-full transition ${
+                      granularity === option ? 'bg-purple-600 text-white' : 'hover:text-white'
+                    }`}
+                  >
+                    {t.granularity[option]}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           {granularity !== 'daily' && (
@@ -972,7 +1022,7 @@ export default function FxRatesChart({
                 return (
                   <span
                     key={code}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm sm:text-xs font-semibold"
                     style={{
                       backgroundColor: `${color}22`,
                       color,
@@ -1071,7 +1121,7 @@ export default function FxRatesChart({
                 })}
               </g>
 
-              <g fill="#94a3b8" fontSize="12">
+              <g fill="#94a3b8" fontSize={chart.fontSize}>
                 {chart.yTicks.map((value, index) => {
                   const y = chart.padding + (index / 4) * (chart.height - chart.padding * 2)
                   return (
@@ -1130,7 +1180,7 @@ export default function FxRatesChart({
                 </g>
               )}
 
-              <g fill="#94a3b8" fontSize="12">
+              <g fill="#94a3b8" fontSize={chart.fontSize}>
                 {chart.tickLabels.map((label, index) => {
                   const x =
                     chart.padding +
@@ -1151,7 +1201,7 @@ export default function FxRatesChart({
                 className="pointer-events-none absolute left-0 top-0 z-10 rounded-md bg-slate-900/95 px-3 py-2 text-xs text-slate-100 shadow-lg"
               >
                 <div className="font-semibold text-slate-200 mb-1">
-                  {displayData[hoveredIndex].x}
+                  {formatDateLabel(displayData[hoveredIndex].x)}
                 </div>
                 {activeCurrencies.map((code) => (
                   <div key={code} style={{ color: getCurrencyColor(code, allCurrencies) }}>
@@ -1163,18 +1213,30 @@ export default function FxRatesChart({
 
             {/* Trend analyzer */}
             {trendAnalysis && (
-              <div className="mt-6 rounded-xl bg-slate-900 border border-slate-700 p-5">
+              <div className="mt-6 rounded-xl bg-slate-900 border border-slate-700">
 
-                {/* Header + overall score */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                {/* Collapsible header */}
+                <button
+                  type="button"
+                  onClick={() => setAnalyzerOpen((v) => !v)}
+                  className="w-full flex items-center justify-between px-5 py-4 text-left"
+                >
                   <div>
-                    <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                    <div className="text-sm sm:text-xs uppercase tracking-widest text-slate-500 font-semibold">
                       {baseCurrency} Currency Strength Analyzer
                     </div>
                     <div className="text-xs text-slate-600 mt-0.5">
-                      {displayData[0]?.x} — {displayData[displayData.length - 1]?.x}
+                      {formatDateLabel(displayData[0]?.x ?? '')} — {formatDateLabel(displayData[displayData.length - 1]?.x ?? '')}
                     </div>
                   </div>
+                  <span className="text-slate-500 text-sm ml-4">{analyzerOpen ? '▲' : '▼'}</span>
+                </button>
+
+                {analyzerOpen && (
+                <div className="px-5 pb-5">
+                {/* Header + overall score */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                  <div />
 
                   {/* Overall score gauge */}
                   {(() => {
@@ -1211,13 +1273,12 @@ export default function FxRatesChart({
                 </div>
 
                 {/* Per-currency cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                   {trendAnalysis.rows.map(({ code, pctChange, volatility, maxDrawdown, consistency, magnitude }) => {
                     const up = pctChange > 0
                     const neutral = Math.abs(pctChange) < 0.05
                     const color = neutral ? '#64748b' : up ? '#22c55e' : '#ef4444'
                     const bgColor = neutral ? '#1e293b' : up ? '#052e16' : '#1f0a0a'
-                    const arrow = neutral ? '→' : up ? '▲' : '▼'
                     const magnitudeLabel = { strong: 'Strong', moderate: 'Moderate', weak: 'Slight' }[magnitude]
                     const label = neutral ? 'Stable' : `${magnitudeLabel} ${up ? 'rise' : 'fall'}`
                     const isEditing = analyzerEditSlot === code
@@ -1293,7 +1354,6 @@ export default function FxRatesChart({
 
                         {/* % change */}
                         <div className="flex items-baseline gap-1">
-                          <span style={{ color }} className="text-sm font-bold leading-none">{arrow}</span>
                           <span style={{ color }} className="text-xs font-semibold">
                             {pctChange > 0 ? '+' : ''}{pctChange.toFixed(2)}%
                           </span>
@@ -1303,15 +1363,15 @@ export default function FxRatesChart({
 
                         {/* Stats */}
                         <div className="mt-1 flex flex-col gap-0.5 border-t border-slate-700 pt-2">
-                          <div className="flex justify-between text-xs">
+                          <div className="flex justify-between text-sm sm:text-xs">
                             <span className="text-slate-500">Volatility</span>
                             <span className="text-slate-300">{volatility.toFixed(2)}%</span>
                           </div>
-                          <div className="flex justify-between text-xs">
+                          <div className="flex justify-between text-sm sm:text-xs">
                             <span className="text-slate-500">Max DD</span>
                             <span className="text-red-400">-{maxDrawdown.toFixed(2)}%</span>
                           </div>
-                          <div className="flex justify-between text-xs">
+                          <div className="flex justify-between text-sm sm:text-xs">
                             <span className="text-slate-500">Consistency</span>
                             <span className="text-slate-300">{consistency.toFixed(0)}%</span>
                           </div>
@@ -1322,20 +1382,31 @@ export default function FxRatesChart({
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-600 border-t border-slate-800 pt-3">
-                  <span>▲/▼ = {baseCurrency} gained/lost vs that currency over the period</span>
+                  <span>+/− = {baseCurrency} gained/lost vs that currency over the period</span>
                   <span>Volatility = std dev of daily log returns</span>
                   <span>Max DD = largest peak-to-trough drop · Consistency = % of days moving with the trend</span>
                 </div>
+                </div>
+                )}
               </div>
             )}
 
             {/* Currency Calculator */}
             {calcCurrencies.length > 0 && Object.keys(calcRates).length > 0 && (
-              <div className="mt-6 rounded-xl bg-slate-900 border border-slate-700 p-5">
-                <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
-                  Currency Calculator
-                </div>
+              <div className="mt-6 rounded-xl bg-slate-900 border border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setCalculatorOpen((v) => !v)}
+                  className="w-full flex items-center justify-between px-5 py-4 text-left"
+                >
+                  <div className="text-sm sm:text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                    Currency Calculator
+                  </div>
+                  <span className="text-slate-500 text-sm ml-4">{calculatorOpen ? '▲' : '▼'}</span>
+                </button>
 
+                {calculatorOpen && (
+                <div className="px-5 pb-5">
                 <div className="flex flex-col gap-2">
                   {calcCurrencies.map((code) => {
                     const color = code === baseCurrency ? '#94a3b8' : getCurrencyColor(code, allCurrencies)
@@ -1389,11 +1460,11 @@ export default function FxRatesChart({
                               setCalcInput(computed)
                             }
                           }}
-                          className="flex-1 bg-slate-800 text-slate-100 text-sm font-mono rounded-lg px-3 py-2 outline-none border border-slate-700 focus:border-purple-500 transition text-right"
+                          className="flex-1 bg-slate-800 text-slate-100 text-sm font-mono rounded-lg px-3 py-2 outline-none border border-slate-700 focus:border-purple-500 transition text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
 
-                        {/* Rate hint */}
-                        <div className="w-32 text-right flex-shrink-0">
+                        {/* Rate hint — hidden on mobile */}
+                        <div className="hidden sm:block w-32 text-right flex-shrink-0">
                           <span className="text-xs text-slate-600 font-mono">
                             1 {baseCurrency} = {(calcRates[code] ?? 0).toFixed(4)} {code}
                           </span>
@@ -1412,6 +1483,8 @@ export default function FxRatesChart({
                     Reset
                   </button>
                 </div>
+                </div>
+                )}
               </div>
             )}
 
