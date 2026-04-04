@@ -304,6 +304,7 @@ export default function FxRatesChart({
   const [baseCurrency, setBaseCurrency] = useState('CAD')
   const [activeCurrencies, setActiveCurrencies] = useState(['USD', 'EUR', 'CHF'])
   const [showAddMenu, setShowAddMenu] = useState(false)
+  const [addSearch, setAddSearch] = useState('')
   const [customStart, setCustomStart] = useState<Date | null>(null)
   const [customEnd, setCustomEnd] = useState<Date | null>(null)
   const [showCalendar, setShowCalendar] = useState(false)
@@ -315,6 +316,12 @@ export default function FxRatesChart({
   const baseDropdownRef = useRef<HTMLDivElement>(null)
   const [showBaseDropdown, setShowBaseDropdown] = useState(false)
   const [baseSearch, setBaseSearch] = useState('')
+  const [analyzerCurrencies, setAnalyzerCurrencies] = useState(['USD', 'EUR', 'CHF', 'GBP', 'CAD', 'JPY', 'BRL'])
+  const [analyzerEditSlot, setAnalyzerEditSlot] = useState<string | null>(null)
+  const [analyzerSearch, setAnalyzerSearch] = useState('')
+  const analyzerEditRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const [calcSource, setCalcSource] = useState<string | null>(null)
+  const [calcInput, setCalcInput] = useState('1')
 
   const copy = {
     en: {
@@ -461,6 +468,7 @@ export default function FxRatesChart({
     const handler = (e: MouseEvent) => {
       if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
         setShowAddMenu(false)
+        setAddSearch('')
       }
     }
     document.addEventListener('mousedown', handler)
@@ -479,6 +487,20 @@ export default function FxRatesChart({
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [showBaseDropdown])
+
+  // Close analyzer slot dropdown when clicking outside
+  useEffect(() => {
+    if (!analyzerEditSlot) return
+    const handler = (e: MouseEvent) => {
+      const ref = analyzerEditRefs.current[analyzerEditSlot]
+      if (ref && !ref.contains(e.target as Node)) {
+        setAnalyzerEditSlot(null)
+        setAnalyzerSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [analyzerEditSlot])
 
   // Close calendar when clicking outside
   useEffect(() => {
@@ -563,12 +585,10 @@ export default function FxRatesChart({
     }
   }, [displayData, activeCurrencies])
 
-  const ANALYZER_CURRENCIES = ['USD', 'EUR', 'CHF', 'GBP', 'CAD', 'JPY', 'BRL']
-
   const trendAnalysis = useMemo(() => {
     if (displayData.length < 2) return null
 
-    const rows = ANALYZER_CURRENCIES
+    const rows = analyzerCurrencies
       .filter((code) => code !== baseCurrency)
       .map((code) => {
         const vals = displayData
@@ -636,7 +656,20 @@ export default function FxRatesChart({
     const bearish = rows.filter((r) => r.pctChange < 0).length
 
     return { rows, overallScore, bullish, bearish }
+  }, [displayData, baseCurrency, analyzerCurrencies])
+
+  // Latest rates for the calculator: baseCurrency is always 1, others from last displayData point
+  const calcRates = useMemo(() => {
+    if (!displayData.length) return {} as Record<string, number>
+    const last = displayData[displayData.length - 1]
+    return { [baseCurrency]: 1, ...last.rates } as Record<string, number>
   }, [displayData, baseCurrency])
+
+  // Currencies shown in the calculator: base + active currencies (deduped)
+  const calcCurrencies = useMemo(
+    () => [baseCurrency, ...activeCurrencies.filter((c) => c !== baseCurrency)],
+    [baseCurrency, activeCurrencies]
+  )
 
   const formatValue = (value: number) => value.toFixed(4)
 
@@ -973,26 +1006,39 @@ export default function FxRatesChart({
                     +
                   </button>
                   {showAddMenu && (
-                    <div className="absolute left-0 top-full mt-2 z-20 rounded-lg bg-slate-800 border border-slate-700 shadow-xl py-1 min-w-[110px]">
-                      {availableToAdd.map((code) => {
-                        const color = getCurrencyColor(code, allCurrencies)
-                        return (
-                          <button
-                            key={code}
-                            type="button"
-                            onClick={() => {
-                              setActiveCurrencies((prev) => [...prev, code])
-                              setShowAddMenu(false)
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left hover:bg-slate-700 transition"
-                          >
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.35rem', lineHeight: 1 }}>{CURRENCY_FLAGS[code] ?? '🏳️'}</span>
-                            <span style={{ color }} className="font-semibold">
-                              {code}
-                            </span>
-                          </button>
-                        )
-                      })}
+                    <div className="absolute left-0 top-full mt-2 z-20 rounded-lg bg-slate-800 border border-slate-700 shadow-xl w-36 overflow-hidden">
+                      <div className="p-2 border-b border-slate-700">
+                        <input
+                          autoFocus
+                          type="text"
+                          placeholder="Search…"
+                          value={addSearch}
+                          onChange={(e) => setAddSearch(e.target.value.toUpperCase())}
+                          className="w-full bg-slate-700 text-slate-100 text-xs rounded-md px-2 py-1.5 outline-none placeholder-slate-500 border border-slate-600 focus:border-purple-500 transition"
+                        />
+                      </div>
+                      <div className="max-h-40 overflow-y-auto py-1">
+                        {availableToAdd
+                          .filter((code) => code.includes(addSearch))
+                          .map((code) => {
+                            const color = getCurrencyColor(code, allCurrencies)
+                            return (
+                              <button
+                                key={code}
+                                type="button"
+                                onClick={() => {
+                                  setActiveCurrencies((prev) => [...prev, code])
+                                  setShowAddMenu(false)
+                                  setAddSearch('')
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left hover:bg-slate-700 transition"
+                              >
+                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.1rem', lineHeight: 1 }}>{CURRENCY_FLAGS[code] ?? '🏳️'}</span>
+                                <span style={{ color }} className="font-semibold">{code}</span>
+                              </button>
+                            )
+                          })}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1174,6 +1220,9 @@ export default function FxRatesChart({
                     const arrow = neutral ? '→' : up ? '▲' : '▼'
                     const magnitudeLabel = { strong: 'Strong', moderate: 'Moderate', weak: 'Slight' }[magnitude]
                     const label = neutral ? 'Stable' : `${magnitudeLabel} ${up ? 'rise' : 'fall'}`
+                    const isEditing = analyzerEditSlot === code
+                    const replacements = allCurrencies
+                      .filter((c) => c !== baseCurrency && !analyzerCurrencies.includes(c) && c.includes(analyzerSearch))
 
                     return (
                       <div
@@ -1181,12 +1230,65 @@ export default function FxRatesChart({
                         className="flex flex-col gap-2 rounded-lg px-3 py-3"
                         style={{ backgroundColor: bgColor, border: `1px solid ${color}33` }}
                       >
-                        {/* Currency label */}
-                        <div className="flex items-center gap-1.5">
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.1rem', lineHeight: 1 }}>
-                            {CURRENCY_FLAGS[code] ?? '🏳️'}
-                          </span>
-                          <span className="text-xs font-bold text-slate-200">{code}</span>
+                        {/* Currency label — click to swap */}
+                        <div
+                          className="relative"
+                          ref={(el) => { analyzerEditRefs.current[code] = el }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAnalyzerEditSlot(isEditing ? null : code)
+                              setAnalyzerSearch('')
+                            }}
+                            className="flex items-center gap-1.5 w-full group"
+                            title="Click to replace this currency"
+                          >
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.1rem', lineHeight: 1 }}>
+                              {CURRENCY_FLAGS[code] ?? '🏳️'}
+                            </span>
+                            <span className="text-xs font-bold text-slate-200">{code}</span>
+                            <span className="ml-auto text-slate-500 group-hover:text-slate-300 text-xs transition">▾</span>
+                          </button>
+
+                          {isEditing && (
+                            <div className="absolute left-0 top-full mt-1 z-30 w-36 rounded-lg bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden">
+                              <div className="p-2 border-b border-slate-700">
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  placeholder="Search…"
+                                  value={analyzerSearch}
+                                  onChange={(e) => setAnalyzerSearch(e.target.value.toUpperCase())}
+                                  className="w-full bg-slate-700 text-slate-100 text-xs rounded-md px-2 py-1.5 outline-none placeholder-slate-500 border border-slate-600 focus:border-purple-500 transition"
+                                />
+                              </div>
+                              <div className="max-h-40 overflow-y-auto py-1">
+                                {replacements.length === 0 ? (
+                                  <div className="px-3 py-2 text-xs text-slate-500">No currencies available</div>
+                                ) : replacements.map((c) => {
+                                  const cColor = getCurrencyColor(c, allCurrencies)
+                                  return (
+                                    <button
+                                      key={c}
+                                      type="button"
+                                      onClick={() => {
+                                        setAnalyzerCurrencies((prev) => prev.map((x) => x === code ? c : x))
+                                        setAnalyzerEditSlot(null)
+                                        setAnalyzerSearch('')
+                                      }}
+                                      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-slate-700 transition"
+                                    >
+                                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1rem', lineHeight: 1 }}>
+                                        {CURRENCY_FLAGS[c] ?? '🏳️'}
+                                      </span>
+                                      <span style={{ color: cColor }} className="font-semibold">{c}</span>
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* % change */}
@@ -1223,6 +1325,92 @@ export default function FxRatesChart({
                   <span>▲/▼ = {baseCurrency} gained/lost vs that currency over the period</span>
                   <span>Volatility = std dev of daily log returns</span>
                   <span>Max DD = largest peak-to-trough drop · Consistency = % of days moving with the trend</span>
+                </div>
+              </div>
+            )}
+
+            {/* Currency Calculator */}
+            {calcCurrencies.length > 0 && Object.keys(calcRates).length > 0 && (
+              <div className="mt-6 rounded-xl bg-slate-900 border border-slate-700 p-5">
+                <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
+                  Currency Calculator
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {calcCurrencies.map((code) => {
+                    const color = code === baseCurrency ? '#94a3b8' : getCurrencyColor(code, allCurrencies)
+                    const sourceRate = calcRates[calcSource ?? baseCurrency] ?? 1
+                    const targetRate = calcRates[code] ?? 1
+                    const parsed = parseFloat(calcInput)
+                    const computed = !isNaN(parsed) && sourceRate > 0
+                      ? (parsed * (targetRate / sourceRate)).toFixed(4)
+                      : ''
+                    const isSource = calcSource === code
+
+                    return (
+                      <div
+                        key={code}
+                        className="flex items-center gap-3 rounded-lg px-4 py-3 transition"
+                        style={{
+                          backgroundColor: isSource ? '#1e1b4b' : '#0f172a',
+                          border: `1px solid ${isSource ? '#6d28d9' : '#1e293b'}`,
+                        }}
+                      >
+                        {/* Flag + code */}
+                        <div className="flex items-center gap-2 w-20 flex-shrink-0">
+                          <span
+                            className="inline-flex items-center justify-center w-7 h-7 rounded-full overflow-hidden flex-shrink-0"
+                            style={{ fontSize: '1.3rem', lineHeight: 1 }}
+                          >
+                            {CURRENCY_FLAGS[code] ?? '🏳️'}
+                          </span>
+                          <span className="text-xs font-bold" style={{ color }}>
+                            {code}
+                          </span>
+                          {code === baseCurrency && (
+                            <span className="text-xs text-slate-600">(base)</span>
+                          )}
+                        </div>
+
+                        {/* Input */}
+                        <input
+                          type="number"
+                          min="0"
+                          step="any"
+                          value={isSource ? calcInput : computed}
+                          placeholder="0"
+                          onChange={(e) => {
+                            setCalcSource(code)
+                            setCalcInput(e.target.value)
+                          }}
+                          onFocus={() => {
+                            if (!isSource) {
+                              setCalcSource(code)
+                              setCalcInput(computed)
+                            }
+                          }}
+                          className="flex-1 bg-slate-800 text-slate-100 text-sm font-mono rounded-lg px-3 py-2 outline-none border border-slate-700 focus:border-purple-500 transition text-right"
+                        />
+
+                        {/* Rate hint */}
+                        <div className="w-32 text-right flex-shrink-0">
+                          <span className="text-xs text-slate-600 font-mono">
+                            1 {baseCurrency} = {(calcRates[code] ?? 0).toFixed(4)} {code}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => { setCalcSource(null); setCalcInput('1') }}
+                    className="text-xs text-slate-600 hover:text-slate-400 transition"
+                  >
+                    Reset
+                  </button>
                 </div>
               </div>
             )}
