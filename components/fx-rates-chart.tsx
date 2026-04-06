@@ -301,6 +301,7 @@ export default function FxRatesChart({
   locale?: 'en' | 'fr'
 }) {
   const [containerWidth, setContainerWidth] = useState(900)
+  const [clipWidth, setClipWidth] = useState(0)
   const [rawData, setRawData] = useState<RawPoint[]>([])
   const [allCurrencies, setAllCurrencies] = useState<string[]>(['USD', 'EUR', 'CHF'])
   const [error, setError] = useState<string | null>(null)
@@ -310,6 +311,8 @@ export default function FxRatesChart({
   const svgRef = useRef<SVGSVGElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const rafRef = useRef<number | null>(null)
+  const animRafRef = useRef<number | null>(null)
+  const animStartRef = useRef<number | null>(null)
   const addMenuRef = useRef<HTMLDivElement>(null)
   const [granularity, setGranularity] = useState<FxGranularity>('daily')
   const [range, setRange] = useState<FxRange>('all')
@@ -450,19 +453,19 @@ export default function FxRatesChart({
   }, [])
 
   // When base currency changes, adjust active currencies:
-  // - remove the new base (would be a flat 1.0 line)
+  // - keep the new base if it was already active (it will render as a flat 1.0 line)
+  // - special case: when CAD is the base, ensure CAD is active so it shows as a flat 1.0 line
   // - add CAD if switching away from CAD and it's not already shown
-  // - remove CAD if switching back to CAD base
   useEffect(() => {
     setActiveCurrencies((prev) => {
-      const withoutNewBase = prev.filter((c) => c !== baseCurrency)
       if (baseCurrency === 'CAD') {
-        return withoutNewBase.filter((c) => c !== 'CAD')
+        if (!prev.includes('CAD')) return ['CAD', ...prev]
+        return prev
       }
-      if (!withoutNewBase.includes('CAD')) {
-        return ['CAD', ...withoutNewBase]
+      if (!prev.includes('CAD')) {
+        return ['CAD', ...prev]
       }
-      return withoutNewBase
+      return prev
     })
   }, [baseCurrency])
 
@@ -561,8 +564,28 @@ export default function FxRatesChart({
     })
   }, [aggregatedData, baseCurrency])
 
+  useEffect(() => {
+    const totalWidth = 900
+    const duration = 700
+    if (animRafRef.current !== null) cancelAnimationFrame(animRafRef.current)
+    animStartRef.current = null
+    setClipWidth(0)
+    const step = (timestamp: number) => {
+      if (animStartRef.current === null) animStartRef.current = timestamp
+      const elapsed = timestamp - animStartRef.current
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setClipWidth(eased * totalWidth)
+      if (progress < 1) animRafRef.current = requestAnimationFrame(step)
+    }
+    animRafRef.current = requestAnimationFrame(step)
+    return () => {
+      if (animRafRef.current !== null) cancelAnimationFrame(animRafRef.current)
+    }
+  }, [displayData, baseCurrency])
+
   const availableToAdd = allCurrencies.filter(
-    (c) => c !== baseCurrency && !activeCurrencies.includes(c)
+    (c) => !activeCurrencies.includes(c) && (c !== baseCurrency || baseCurrency === 'CAD')
   )
 
   const chart = useMemo(() => {
@@ -573,8 +596,8 @@ export default function FxRatesChart({
     // Taller viewBox on mobile so the chart fills more vertical space
     const height = isMobile ? 560 : 360
     // Larger font + padding on mobile so axis labels are readable
-    const fontSize = isMobile ? 22 : 20
-    const padding = isMobile ? 72 : 64
+    const fontSize = isMobile ? 22 : 12
+    const padding = isMobile ? 72 : 52
 
     const values = displayData
       .flatMap((point) => activeCurrencies.map((code) => point.rates[code] ?? 0))
@@ -1106,6 +1129,12 @@ export default function FxRatesChart({
             >
               <rect x="0" y="0" width={chart.width} height={chart.height} rx="16" fill="#0f172a" />
 
+              <defs>
+                <clipPath id="chart-reveal">
+                  <rect x="0" y="0" height={chart.height} width={clipWidth} />
+                </clipPath>
+              </defs>
+
               <g stroke="#1f2937" strokeWidth="1">
                 {Array.from({ length: 5 }).map((_, index) => {
                   const y = chart.padding + (index / 4) * (chart.height - chart.padding * 2)
@@ -1132,15 +1161,17 @@ export default function FxRatesChart({
                 })}
               </g>
 
-              {activeCurrencies.map((code) => (
-                <path
-                  key={`path-${code}`}
-                  d={chart.paths[code]}
-                  fill="none"
-                  stroke={getCurrencyColor(code, allCurrencies)}
-                  strokeWidth="2.5"
-                />
-              ))}
+              <g clipPath="url(#chart-reveal)">
+                {activeCurrencies.map((code) => (
+                  <path
+                    key={`path-${code}`}
+                    d={chart.paths[code]}
+                    fill="none"
+                    stroke={getCurrencyColor(code, allCurrencies)}
+                    strokeWidth="2.5"
+                  />
+                ))}
+              </g>
 
               {hoveredIndex !== null && (
                 <line

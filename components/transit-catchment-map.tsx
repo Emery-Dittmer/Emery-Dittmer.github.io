@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { GeoJSONSource, LayerSpecification, Map as MapLibreMap, Marker } from 'maplibre-gl'
+import type { GeoJSONSource, LayerSpecification, Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 
 type LngLat = {
   lng: number
@@ -20,6 +20,7 @@ const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
 const CATCHMENT_SOURCE_ID = 'catchment-area'
 const STOPS_SOURCE_ID = 'transit-stops'
+const METRO_CLUSTER_RADIUS_METERS = 150
 
 const round = (value: number, digits = 4) =>
   Number(value.toFixed(digits))
@@ -234,6 +235,57 @@ const distanceMeters = (a: LngLat, b: LngLat) => {
   return 2 * radius * Math.asin(Math.min(1, Math.sqrt(h)))
 }
 
+type StopItem = {
+  id: string
+  name: string
+  mode: string
+  lat: number
+  lng: number
+  entrances?: number
+}
+
+function clusterMetroStops(stops: StopItem[]): StopItem[] {
+  const metros = stops.filter((s) => s.mode === 'metro')
+  const others = stops.filter((s) => s.mode !== 'metro')
+
+  const parent = metros.map((_, i) => i)
+
+  const find = (i: number): number => {
+    if (parent[i] !== i) parent[i] = find(parent[i])
+    return parent[i]
+  }
+
+  for (let i = 0; i < metros.length; i++) {
+    for (let j = i + 1; j < metros.length; j++) {
+      if (
+        distanceMeters(
+          { lat: metros[i].lat, lng: metros[i].lng },
+          { lat: metros[j].lat, lng: metros[j].lng }
+        ) <= METRO_CLUSTER_RADIUS_METERS
+      ) {
+        parent[find(i)] = find(j)
+      }
+    }
+  }
+
+  const groups = new Map<number, StopItem[]>()
+  metros.forEach((stop, i) => {
+    const root = find(i)
+    if (!groups.has(root)) groups.set(root, [])
+    groups.get(root)!.push(stop)
+  })
+
+  const clustered = Array.from(groups.values()).map((group) => {
+    if (group.length === 1) return group[0]
+    const lat = group.reduce((sum, s) => sum + s.lat, 0) / group.length
+    const lng = group.reduce((sum, s) => sum + s.lng, 0) / group.length
+    const named = group.find((s) => s.name !== 'Metro stop') ?? group[0]
+    return { ...named, lat, lng, entrances: group.length }
+  })
+
+  return [...others, ...clustered]
+}
+
 export default function TransitCatchmentMap({
   locale = 'en',
 }: {
@@ -255,6 +307,10 @@ export default function TransitCatchmentMap({
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const markerRef = useRef<Marker | null>(null)
+  const popupRef = useRef<Popup | null>(null)
+  const maplibreglRef = useRef<typeof import('maplibre-gl') | null>(null)
+  const selectedRef = useRef<LngLat>(selected)
+  selectedRef.current = selected
 
   const copy = {
     en: {
@@ -344,6 +400,7 @@ export default function TransitCatchmentMap({
       if (!mapContainerRef.current || mapRef.current) return
       const maplibregl = await import('maplibre-gl')
       if (cancelled) return
+      maplibreglRef.current = maplibregl
 
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
@@ -440,6 +497,44 @@ export default function TransitCatchmentMap({
           'circle-stroke-width': 1,
         },
       })
+
+      const showPopup = (e: any) => {
+        const feature = e.features?.[0]
+        if (!feature || !maplibreglRef.current) return
+        const { name, mode } = feature.properties as { name: string; mode: string }
+        const [lng, lat] = feature.geometry.coordinates as [number, number]
+        const dist = distanceMeters(selectedRef.current, { lat, lng })
+        const distLabel = dist < 1000 ? `${Math.round(dist)} m` : `${(dist / 1000).toFixed(2)} km`
+        const color = mode === 'metro' ? '#22c55e' : '#38bdf8'
+        const html = `
+          <div style="font-family:sans-serif;font-size:13px;line-height:1.5;padding:2px 4px">
+            <div style="font-weight:600;margin-bottom:2px">${name}</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color}"></span>
+              <span style="text-transform:capitalize;color:#94a3b8">${mode}</span>
+            </div>
+            <div style="color:#94a3b8;margin-top:2px">${distLabel} away</div>
+          </div>`
+        if (popupRef.current) popupRef.current.remove()
+        popupRef.current = new maplibreglRef.current.Popup({ closeButton: false, offset: 10 })
+          .setLngLat([lng, lat])
+          .setHTML(html)
+          .addTo(map)
+        map.getCanvas().style.cursor = 'pointer'
+      }
+
+      const hidePopup = () => {
+        if (popupRef.current) {
+          popupRef.current.remove()
+          popupRef.current = null
+        }
+        map.getCanvas().style.cursor = ''
+      }
+
+      map.on('mouseenter', 'stops-bus', showPopup)
+      map.on('mouseenter', 'stops-metro', showPopup)
+      map.on('mouseleave', 'stops-bus', hidePopup)
+      map.on('mouseleave', 'stops-metro', hidePopup)
     }
 
   }, [mapReady, radiusMeters, selected])
@@ -469,6 +564,7 @@ export default function TransitCatchmentMap({
   useEffect(() => {
     if (!mapReady) return
     let isCurrent = true
+    setStopsData(null)
     setStopsStatus('loading')
 
     const timeout = setTimeout(async () => {
@@ -512,10 +608,10 @@ export default function TransitCatchmentMap({
   }, [mapReady, radiusMeters, selected])
 
   useEffect(() => {
-    if (!mapReady || !mapRef.current || !stopsData) return
+    if (!mapReady || !mapRef.current) return
     const source = mapRef.current.getSource(STOPS_SOURCE_ID) as GeoJSONSource | undefined
     if (source) {
-      source.setData(stopsData)
+      source.setData(stopsData ?? { type: 'FeatureCollection', features: [] })
     }
   }, [mapReady, stopsData])
 
@@ -563,7 +659,7 @@ export default function TransitCatchmentMap({
   const stopsList = useMemo(() => {
     if (!stopsData) return []
     const seen = new Set<string>()
-    const raw = stopsData.features
+    const deduped = stopsData.features
       .map((feature: any) => ({
         id: feature?.properties?.id ?? `${feature?.geometry?.coordinates?.[1]}-${feature?.geometry?.coordinates?.[0]}`,
         name: feature?.properties?.name ?? 'Stop',
@@ -577,6 +673,8 @@ export default function TransitCatchmentMap({
         seen.add(key)
         return true
       })
+
+    const raw = clusterMetroStops(deduped)
 
     const query = filterQuery.trim().toLowerCase()
     const filtered = raw.filter((stop) => {
@@ -898,7 +996,14 @@ export default function TransitCatchmentMap({
                   )}
                   {stopsList.map((stop) => (
                     <tr key={stop.id} className="border-t border-slate-800 text-gray-300">
-                      <td className="px-3 py-2">{stop.name}</td>
+                      <td className="px-3 py-2">
+                        {stop.name}
+                        {stop.entrances && stop.entrances > 1 && (
+                          <span className="ml-2 rounded-full bg-slate-800 px-1.5 py-0.5 text-[10px] text-gray-400">
+                            {stop.entrances} entrances
+                          </span>
+                        )}
+                      </td>
                       <td className="px-3 py-2 capitalize">{stop.mode}</td>
                       <td className="px-3 py-2">{round(stop.lat, 4)}</td>
                       <td className="px-3 py-2">{round(stop.lng, 4)}</td>
