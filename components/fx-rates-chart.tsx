@@ -762,8 +762,8 @@ export default function FxRatesChart({
   }
 
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6">
-      <div className="py-12 md:py-20 border-t border-gray-800">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-20">
+      <div className="py-10 md:py-14 border-t border-gray-800">
         <div className="text-center mb-10">
           <h1 className="h2 mb-2">{t.title}</h1>
           <p className="text-lg text-gray-400">{t.subtitle}</p>

@@ -21,6 +21,44 @@ const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
 const CATCHMENT_SOURCE_ID = 'catchment-area'
 const STOPS_SOURCE_ID = 'transit-stops'
 const METRO_CLUSTER_RADIUS_METERS = 150
+const CITY_FETCH_RADIUS_METERS = 10000
+const CACHE_KEY = 'transit_stops_cache'
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000
+
+type StopsCache = {
+  center: LngLat
+  radius: number
+  features: GeoJSON.Feature[]
+  timestamp: number
+}
+
+function readStopsCache(): StopsCache | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const cache = JSON.parse(raw) as StopsCache
+    if (Date.now() - cache.timestamp > CACHE_TTL_MS) {
+      localStorage.removeItem(CACHE_KEY)
+      return null
+    }
+    return cache
+  } catch {
+    return null
+  }
+}
+
+function writeStopsCache(cache: StopsCache) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache))
+  } catch {
+    // localStorage unavailable or full — silently skip
+  }
+}
+
+function isCoveredByCache(cache: StopsCache, point: LngLat): boolean {
+  // Leave a 500 m buffer so the walking radius never reaches beyond the cached area
+  return distanceMeters(cache.center, point) + 500 <= cache.radius
+}
 
 const round = (value: number, digits = 4) =>
   Number(value.toFixed(digits))
@@ -564,6 +602,25 @@ export default function TransitCatchmentMap({
   useEffect(() => {
     if (!mapReady) return
     let isCurrent = true
+
+    const applyFeatures = (allFeatures: GeoJSON.Feature[]) => {
+      const features = allFeatures.filter((f: any) => {
+        const [lng, lat] = f.geometry.coordinates as [number, number]
+        return distanceMeters(selected, { lat, lng }) <= radiusMeters
+      })
+      if (isCurrent) {
+        setStopsData({ type: 'FeatureCollection', features })
+        setStopsStatus('idle')
+      }
+    }
+
+    // Serve from cache when the selected point is covered
+    const cache = readStopsCache()
+    if (cache && isCoveredByCache(cache, selected)) {
+      applyFeatures(cache.features)
+      return () => { isCurrent = false }
+    }
+
     setStopsData(null)
     setStopsStatus('loading')
 
@@ -571,33 +628,28 @@ export default function TransitCatchmentMap({
       try {
         const response = await fetch(OVERPASS_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-          body: buildStopsQuery(selected, radiusMeters),
+          headers: { 'Content-Type': 'text/plain' },
+          body: buildStopsQuery(selected, CITY_FETCH_RADIUS_METERS),
           cache: 'no-store',
         })
 
-        if (!response.ok) {
-          throw new Error('overpass_failed')
-        }
+        if (!response.ok) throw new Error('overpass_failed')
 
         const data = await response.json()
-        const features = (data.elements ?? [])
+        const allFeatures = (data.elements ?? [])
           .map(toStopFeature)
-          .filter((feature: GeoJSON.Feature | null): feature is GeoJSON.Feature<GeoJSON.Point, StopFeatureProps> => Boolean(feature))
+          .filter((f: GeoJSON.Feature | null): f is GeoJSON.Feature<GeoJSON.Point, StopFeatureProps> => Boolean(f))
 
-        if (isCurrent) {
-          setStopsData({
-            type: 'FeatureCollection',
-            features,
-          })
-          setStopsStatus('idle')
-        }
-      } catch (error) {
-        if (isCurrent) {
-          setStopsStatus('error')
-        }
+        writeStopsCache({
+          center: selected,
+          radius: CITY_FETCH_RADIUS_METERS,
+          features: allFeatures,
+          timestamp: Date.now(),
+        })
+
+        applyFeatures(allFeatures)
+      } catch {
+        if (isCurrent) setStopsStatus('error')
       }
     }, 350)
 
@@ -723,17 +775,35 @@ export default function TransitCatchmentMap({
   }
 
   return (
-    <section className="w-full">
-      <div className="py-12 md:py-20 border-t border-gray-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center mb-10">
+    <section className="w-full pt-20">
+      <div className="py-10 md:py-14 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center mb-8">
           <h1 className="h2 mb-3">{t.title}</h1>
           <p className="text-lg text-gray-400">{t.subtitle}</p>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.2fr_2fr] gap-6 items-start">
+        {/* Map — full width, prominent */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-6">
+          <div className="relative">
+            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-purple-500/20 via-slate-900/0 to-cyan-500/20 blur-2xl" />
+            <div className="relative h-[60vh] min-h-[420px] rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
+              <div ref={mapContainerRef} className="h-full w-full" />
+              {!mapReady && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-950/80 text-sm text-gray-200">
+                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-purple-400 border-t-transparent" aria-hidden="true" />
+                  <span role="status" aria-live="polite">{t.mapLoading}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Controls — below the map */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-lg">
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div>
+            <form onSubmit={handleSearch} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Search */}
+              <div className="sm:col-span-2 lg:col-span-1">
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   {t.searchLabel}
                 </label>
@@ -760,6 +830,7 @@ export default function TransitCatchmentMap({
                 )}
               </div>
 
+              {/* Walking time */}
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   {t.walkingLabel}: {walkingMinutes} min
@@ -794,41 +865,48 @@ export default function TransitCatchmentMap({
                 <p className="mt-2 text-xs text-gray-500">{t.walkingNote}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
-                <div className="rounded-lg bg-slate-950/80 border border-slate-800 p-3">
-                  <div className="text-xs uppercase tracking-wide text-gray-500">{t.radiusLabel}</div>
-                  <div className="mt-1 text-lg font-semibold">
-                    {(radiusMeters / 1000).toFixed(2)} km
+              {/* Stats */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 text-sm text-gray-300">
+                  <div className="rounded-lg bg-slate-950/80 border border-slate-800 p-3">
+                    <div className="text-xs uppercase tracking-wide text-gray-500">{t.radiusLabel}</div>
+                    <div className="mt-1 text-lg font-semibold">
+                      {(radiusMeters / 1000).toFixed(2)} km
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-slate-950/80 border border-slate-800 p-3">
+                    <div className="text-xs uppercase tracking-wide text-gray-500">{t.resultsLabel}</div>
+                    <div className="mt-1 text-lg font-semibold">
+                      {counts.bus + counts.metro}
+                    </div>
                   </div>
                 </div>
-                <div className="rounded-lg bg-slate-950/80 border border-slate-800 p-3">
-                  <div className="text-xs uppercase tracking-wide text-gray-500">{t.resultsLabel}</div>
-                  <div className="mt-1 text-lg font-semibold">
-                    {counts.bus + counts.metro}
+                <div className="space-y-1.5 text-sm text-gray-300">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rounded-full bg-sky-400" />
+                      {t.busLabel}
+                    </span>
+                    <span className="font-semibold">{counts.bus}</span>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rounded-full bg-green-400" />
+                      {t.metroLabel}
+                    </span>
+                    <span className="font-semibold">{counts.metro}</span>
+                  </div>
+                  <div className="text-xs text-gray-500">{t.dataNote}</div>
                 </div>
+                {stopsStatus === 'loading' && (
+                  <div className="text-xs text-purple-200">{t.loadingStops}</div>
+                )}
+                {stopsStatus === 'error' && (
+                  <div className="text-xs text-red-300">{t.errorStops}</div>
+                )}
               </div>
 
-              <div className="space-y-2 text-sm text-gray-300">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="inline-block h-2 w-2 rounded-full bg-sky-400" />
-                    {t.busLabel}
-                  </span>
-                  <span className="font-semibold">{counts.bus}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="inline-block h-2 w-2 rounded-full bg-green-400" />
-                    {t.metroLabel}
-                  </span>
-                  <span className="font-semibold">{counts.metro}</span>
-                </div>
-                <div className="text-xs text-gray-500">
-                  {t.dataNote}
-                </div>
-              </div>
-
+              {/* Coordinate adjuster */}
               <div className="space-y-3 text-xs text-gray-400">
                 <div className="text-gray-500">
                   {round(selected.lat, 4)}, {round(selected.lng, 4)}
@@ -890,31 +968,11 @@ export default function TransitCatchmentMap({
                   </div>
                 </div>
               </div>
-
-              {stopsStatus === 'loading' && (
-                <div className="text-xs text-purple-200">{t.loadingStops}</div>
-              )}
-              {stopsStatus === 'error' && (
-                <div className="text-xs text-red-300">{t.errorStops}</div>
-              )}
             </form>
-          </div>
-
-          <div className="relative">
-            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-purple-500/20 via-slate-900/0 to-cyan-500/20 blur-2xl" />
-            <div className="relative h-[520px] rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
-              <div ref={mapContainerRef} className="h-full w-full" />
-              {!mapReady && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-950/80 text-sm text-gray-200">
-                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-purple-400 border-t-transparent" aria-hidden="true" />
-                  <span role="status" aria-live="polite">{t.mapLoading}</span>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
-        <div className="mt-8 w-full px-4 sm:px-6">
+        <div className="mt-6 max-w-6xl mx-auto px-4 sm:px-6">
           <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-gray-300">
               <span>{t.resultsLabel}</span>
