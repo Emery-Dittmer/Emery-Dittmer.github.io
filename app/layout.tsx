@@ -4,6 +4,7 @@ import { Inter, Architects_Daughter } from 'next/font/google'
 
 import Header from '@/components/ui/header'
 import Banner from '@/components/banner'
+import ChatbotWidget from '@/components/chatbot-widget'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -35,6 +36,7 @@ export default function RootLayout({
           <Header />
           {children}
           <Banner />
+          <ChatbotWidget />
         </div>
       </body>
     </html>
