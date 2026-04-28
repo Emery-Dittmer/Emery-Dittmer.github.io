@@ -1,15 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Props {
   title: string
   children: React.ReactNode
   defaultOpen?: boolean
+  listenEvent?: string
 }
 
-export default function CollapsibleSection({ title, children, defaultOpen = false }: Props) {
+export default function CollapsibleSection({ title, children, defaultOpen = false, listenEvent }: Props) {
   const [open, setOpen] = useState(defaultOpen)
+
+  useEffect(() => {
+    if (!listenEvent) return
+    const handler = () => setOpen(true)
+    window.addEventListener(listenEvent, handler)
+    return () => window.removeEventListener(listenEvent, handler)
+  }, [listenEvent])
 
   return (
     <div className="border border-gray-800 rounded-xl overflow-hidden">

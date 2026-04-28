@@ -21,6 +21,7 @@ import esri from "@/assets/logos/Esri_Logo.png";
 import { Locale } from '@/lib/i18n';
 import SwimLaneVisualisation from './SwimLaneVisualisation';
 import NetworkDiagram from './NetworkDiagram';
+import SkillsMarketComparison from './SkillsMarketComparison';
 import CollapsibleSkillSection from './CollapsibleSkillSection';
 import CollapsibleSection from './CollapsibleSection';
 import ExperienceSection from './ExperienceSection';
@@ -41,6 +42,7 @@ export default function Skills({
   }
   const sectionTitles = {
     network:    { en: 'Skills × Roles Network',  fr: 'Réseau Compétences × Rôles' },
+    market:     { en: 'Where I Shine vs the Market', fr: 'Où je me démarque du marché' },
     swimlane:   { en: 'Skills Overview',          fr: 'Vue d\'ensemble des compétences' },
     experience: { en: 'Work Experience',          fr: 'Expérience professionnelle' },
     tools:      { en: 'Tools & Certifications',   fr: 'Outils & Certifications' },
@@ -65,6 +67,11 @@ export default function Skills({
 
       {/* ── All collapsible sections ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-12 pb-24 space-y-4">
+
+        {/* Market comparison */}
+        <CollapsibleSection title={sectionTitles.market[locale]} defaultOpen>
+          <SkillsMarketComparison />
+        </CollapsibleSection>
 
         {/* Skills Network Diagram */}
         <CollapsibleSection title={sectionTitles.network[locale]} defaultOpen>
@@ -100,7 +107,7 @@ export default function Skills({
         </CollapsibleSection>
 
         {/* Skill Details */}
-        <CollapsibleSection title={sectionTitles.details[locale]}>
+        <CollapsibleSection title={sectionTitles.details[locale]} listenEvent="navigate-to-skill">
           {skillsConfig.lanes.flatMap(lane =>
             lane.skills.map(skill => (
               <CollapsibleSkillSection

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import ContributionGraph from './ContributionGraph'
 import { SkillContribution } from '@/lib/skillsConfig'
 
@@ -16,10 +16,26 @@ export default function CollapsibleSkillSection({
   id, skillName, laneTitle, laneColor, contributions,
 }: Props) {
   const [open, setOpen] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ id: string }>).detail
+      if (detail?.id !== id) return
+      setOpen(true)
+      // Wait a frame for the section to render before scrolling
+      requestAnimationFrame(() => {
+        sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+    window.addEventListener('navigate-to-skill', handler)
+    return () => window.removeEventListener('navigate-to-skill', handler)
+  }, [id])
 
   return (
     <section
       id={id}
+      ref={sectionRef}
       className="border border-gray-800 rounded-xl overflow-hidden"
       style={{ scrollMarginTop: '100px' }}
     >
