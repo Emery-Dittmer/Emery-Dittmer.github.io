@@ -7,7 +7,6 @@ import pwcLogo    from '@/assets/companies/pwc_logo.png'
 import mcgillLogo from '@/assets/companies/McGill_University.png'
 
 type View     = 'timeline' | 'industry'
-type Track    = 'above' | 'below' | 'below2'
 type Industry = 'Technology' | 'Consulting' | 'Financial Services' | 'Education'
 
 interface Role {
@@ -17,7 +16,6 @@ interface Role {
   end:      [number, number] | null
   industry: Industry
   color:    string
-  track:    Track
   logo?:    StaticImageData
   bullets:  string[]
 }
@@ -29,7 +27,7 @@ const roles: Role[] = [
     company: 'RBC',
     role: 'Strategic Planning Analyst',
     start: [2020, 2], end: [2021, 1],
-    industry: 'Financial Services', color: '#2563eb', track: 'above',
+    industry: 'Financial Services', color: '#2563eb',
     logo: rbcLogo,
     bullets: [
       'Consolidated KPIs & executive reporting across modernized platforms',
@@ -41,7 +39,7 @@ const roles: Role[] = [
     company: 'PwC',
     role: 'Experienced Associate — Automation & Analytics',
     start: [2021, 1], end: [2023, 6],
-    industry: 'Consulting', color: '#dc2626', track: 'below',
+    industry: 'Consulting', color: '#dc2626',
     logo: pwcLogo,
     bullets: [
       'Delivery lead across 30+ digital transformation projects',
@@ -53,7 +51,7 @@ const roles: Role[] = [
     company: 'Compass Data',
     role: 'Data Science Analytics Manager',
     start: [2023, 8], end: null,
-    industry: 'Technology', color: '#059669', track: 'above',
+    industry: 'Technology', color: '#059669',
     bullets: [
       'Orchestrated intake & delivery of analytics and ML initiatives',
       'Built scalable data pipelines on Dataiku & Snowflake with MLOps',
@@ -63,8 +61,8 @@ const roles: Role[] = [
   {
     company: 'McGill University',
     role: 'Capstone Coach',
-    start: [2023, 6], end: [2024, 4],  // Jul 2023 – May 2024
-    industry: 'Education', color: '#9f1239', track: 'below',
+    start: [2023, 6], end: [2024, 4],
+    industry: 'Education', color: '#9f1239',
     logo: mcgillLogo,
     bullets: [
       'Mentored data science teams on end-to-end capstone projects',
@@ -75,7 +73,7 @@ const roles: Role[] = [
     company: 'Coveo',
     role: 'BI Analyst & Data Scientist',
     start: [2023, 10], end: [2024, 7],
-    industry: 'Technology', color: '#ea580c', track: 'below2',
+    industry: 'Technology', color: '#ea580c',
     bullets: [
       'KPI dashboards supporting $2M ARR growth',
       'A/B testing & uplift modelling — 5× improved monetization efficiency',
@@ -93,20 +91,52 @@ const industryMeta: Record<Industry, { color: string }> = {
 const industryOrder: Industry[] = ['Technology', 'Consulting', 'Financial Services', 'Education']
 
 // ── SVG layout ────────────────────────────────────────────────────────────────
-const SVG_W   = 1000
-const SVG_H   = 410
-const PAD_L   = 80
-const PAD_R   = 70
-const USABLE  = SVG_W - PAD_L - PAD_R   // 850 px
-const AXIS_Y  = 195
-const T0_YEAR = 2020
-const T_MONTHS = 78                      // Jan 2020 → Jun 2026
-const PX      = USABLE / T_MONTHS        // px per month
-
-const TRACK_Y: Record<Track, number> = { above: 118, below: 272, below2: 338 }
+const SVG_W    = 1000
+const PAD_L    = 80
+const PAD_R    = 70
+const USABLE   = SVG_W - PAD_L - PAD_R   // 850 px
+const AXIS_Y   = 195
+const T0_YEAR  = 2020
+const T_MONTHS = 78                       // Jan 2020 → Jun 2026
+const PX       = USABLE / T_MONTHS        // px per month
 
 function toX([year, month]: [number, number]): number {
   return PAD_L + ((year - T0_YEAR) * 12 + month) * PX
+}
+
+function toMonths([year, month]: [number, number]): number {
+  return year * 12 + month
+}
+
+// y position for a given track index.
+// Track 0 is above the axis; tracks 1+ are stacked below.
+function trackToY(idx: number): number {
+  if (idx === 0) return AXIS_Y - 77
+  return AXIS_Y + 77 + (idx - 1) * 80
+}
+
+// Greedy interval scheduling with strict inequality so that roles whose
+// end date equals another's start date are placed on separate lines.
+function computeTrackAssignments(rs: Role[]): Map<string, number> {
+  const sorted = [...rs].sort((a, b) => toMonths(a.start) - toMonths(b.start))
+  const trackEnds: number[] = []
+  const map = new Map<string, number>()
+
+  sorted.forEach(role => {
+    const startM = toMonths(role.start)
+    const endM   = toMonths(role.end ?? NOW)
+
+    // Strict less-than: a touching end/start pair goes to a new track
+    const existing = trackEnds.findIndex(end => end < startM)
+    const idx = existing === -1 ? trackEnds.length : existing
+
+    if (existing === -1) trackEnds.push(endM)
+    else trackEnds[idx] = endM
+
+    map.set(role.company, idx)
+  })
+
+  return map
 }
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -154,13 +184,16 @@ export default function ExperienceSection() {
 
 // ── Timeline view ─────────────────────────────────────────────────────────────
 function TimelineView() {
-  const nowX     = toX(NOW)
-  const yearTicks = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
-  const ARROW    = 8
+  const nowX        = toX(NOW)
+  const yearTicks   = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
+  const ARROW       = 8
+  const assignments = computeTrackAssignments(roles)
+  const maxTrack    = Math.max(...assignments.values())
+  const svgH        = Math.max(420, trackToY(maxTrack) + 80)
 
   return (
     <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="w-full min-w-[680px]" style={{ height: SVG_H }}>
+      <svg viewBox={`0 0 ${SVG_W} ${svgH}`} className="w-full min-w-[680px]" style={{ height: svgH }}>
 
         {/* Axis */}
         <line x1={PAD_L} y1={AXIS_Y} x2={SVG_W - PAD_R} y2={AXIS_Y}
@@ -186,16 +219,17 @@ function TimelineView() {
 
         {/* Roles */}
         {roles.map(role => {
+          const trackIdx = assignments.get(role.company)!
           const x1    = toX(role.start)
           const x2    = role.end ? toX(role.end) : nowX
-          const y     = TRACK_Y[role.track]
-          const above = role.track === 'above'
+          const y     = trackToY(trackIdx)
+          const above = trackIdx === 0
           const mid   = (x1 + x2) / 2
           const dur   = durMonths(role)
 
           return (
             <g key={role.company}>
-              {/* Connector from bar to axis */}
+              {/* Connector from bar start to axis */}
               <line
                 x1={x1} y1={above ? y : AXIS_Y}
                 x2={x1} y2={above ? AXIS_Y : y}
@@ -221,6 +255,23 @@ function TimelineView() {
               {!role.end && (
                 <line x1={nowX} y1={y} x2={nowX + 20} y2={y}
                   stroke={role.color} strokeWidth={2} strokeDasharray="4 4" opacity={0.4} />
+              )}
+
+              {/* Company logo badge at the start of the bar */}
+              {role.logo && (
+                <g>
+                  <rect
+                    x={x1 - 12} y={y - 12}
+                    width={24} height={24} rx={5}
+                    fill="white" opacity={0.95}
+                  />
+                  <image
+                    href={role.logo.src}
+                    x={x1 - 9} y={y - 9}
+                    width={18} height={18}
+                    preserveAspectRatio="xMidYMid meet"
+                  />
+                </g>
               )}
 
               {/* Company label */}
