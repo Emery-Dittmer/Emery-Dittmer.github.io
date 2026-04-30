@@ -215,7 +215,7 @@ function TimelineView({ roles }: { roles: Role[] }) {
   const yearTicks   = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
   const ARROW       = 10
   const assignments = computeTrackAssignments(roles)
-  const maxTrack    = roles.length ? Math.max(...assignments.values()) : 0
+  const maxTrack    = roles.length ? Math.max(...Array.from(assignments.values())) : 0
   const svgH        = Math.max(460, trackToY(maxTrack) + 115)
 
   return (
