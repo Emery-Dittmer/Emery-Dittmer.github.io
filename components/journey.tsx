@@ -237,7 +237,7 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
       <svg
         className="absolute pointer-events-none select-none opacity-[0.07]"
         style={{ left: '-30px', bottom: '8%', width: '240px', height: '220px' }}
-        viewBox="0 0 240 220"
+        viewBox="0 0 230 220"
         fill="none"
         aria-hidden="true"
       >
