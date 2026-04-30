@@ -5,7 +5,8 @@
       "Bash(npm install *)",
       "Bash(npm run *)",
       "Bash(mkdir -p \"c:/Users/raymo/Documents/Website/Other website/open-react-template-master/open-react-template-master/app/Projects/en/[slug]\")",
-      "Bash(mkdir -p \"c:/Users/raymo/Documents/Website/Other website/open-react-template-master/open-react-template-master/app/Projects/fr/[slug]\")"
+      "Bash(mkdir -p \"c:/Users/raymo/Documents/Website/Other website/open-react-template-master/open-react-template-master/app/Projects/fr/[slug]\")",
+      "Bash(git check-ignore *)"
     ]
   }
 }
