@@ -12,8 +12,8 @@ type MarketSkill = {
   fullName: string
   laneTitle: string
   laneColor: string
-  emery: number   // 0–100: proficiency × job-usage frequency
-  market: number  // 0–100: 2025 job-market demand estimate
+  emery: number   // 1-5: proficiency × job-usage frequency
+  market: number  // 1-5: 2025 job-market demand estimate
   note: string
 }
 
@@ -123,7 +123,7 @@ function wrapText(text: string, maxChars = 16): string[] {
   return lines
 }
 
-const Q_THRESHOLD = 70
+const Q_THRESHOLD = 3
 
 function quadrant(s: MarketSkill): Quadrant {
   if (s.emery >= Q_THRESHOLD && s.market >= Q_THRESHOLD) return 'shine'
@@ -163,8 +163,8 @@ const PB = 42   // bottom (x-axis labels)
 const plotW = VW - PL - PR
 const plotH = VH - PT - PB
 
-const px = (v: number) => PL + (v / 100) * plotW
-const py = (v: number) => (VH - PB) - (v / 100) * plotH
+const px = (v: number) => PL + (v / 5.5) * plotW
+const py = (v: number) => (VH - PB) - (v / 5.5) * plotH
 
 const QX = px(Q_THRESHOLD)
 const QY = py(Q_THRESHOLD)
@@ -183,7 +183,7 @@ const BAR_H   = 13
 const BAR_GAP = 6
 const BAR_PAD = (GROUP_H - BAR_H * 2 - BAR_GAP) / 2  // vertical centering
 
-const cxPos = (v: number) => CPL + (v / 100) * cPlotW
+const cxPos = (v: number) => CPL + (v / 5) * cPlotW
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -199,7 +199,7 @@ export default function SkillsMarketComparison() {
     <svg viewBox={`0 0 ${CW} ${CH}`} className="w-full block">
 
       {/* Vertical grid lines + x-axis ticks */}
-      {[0, 25, 50, 75, 100].map(v => (
+      {[1, 2, 3, 4, 5].map(v => (
         <g key={v}>
           <line
             x1={cxPos(v)} y1={CPT}
@@ -267,7 +267,7 @@ export default function SkillsMarketComparison() {
             {/* "Emery's Skill" bar */}
             <rect
               x={CPL} y={youY}
-              width={(skill.emery / 100) * cPlotW} height={BAR_H} rx={2}
+              width={(skill.emery / 5) * cPlotW} height={BAR_H} rx={2}
               fill={skill.laneColor} opacity={isHov ? 1 : 0.85}
             />
             {showBarLabels && i === 0 && (
@@ -278,7 +278,7 @@ export default function SkillsMarketComparison() {
             {/* "Market" bar */}
             <rect
               x={CPL} y={mktY}
-              width={(skill.market / 100) * cPlotW} height={BAR_H} rx={2}
+              width={(skill.market / 5) * cPlotW} height={BAR_H} rx={2}
               fill="#4b5563" opacity={isHov ? 0.9 : 0.65}
             />
             {showBarLabels && i === 0 && (
@@ -390,7 +390,7 @@ export default function SkillsMarketComparison() {
 
           <line x1={QX} y1={PT} x2={QX} y2={VH - PB} stroke="#374151" strokeWidth={1} strokeDasharray="4 4" />
           <line x1={PL} y1={QY} x2={VW - PR} y2={QY} stroke="#374151" strokeWidth={1} strokeDasharray="4 4" />
-          <line x1={px(0)} y1={py(0)} x2={px(100)} y2={py(100)} stroke="#1f2937" strokeWidth={1} strokeDasharray="3 5" />
+          <line x1={px(0)} y1={py(0)} x2={px(5)} y2={py(5)} stroke="#1f2937" strokeWidth={1} strokeDasharray="3 5" />
 
           {[25, 50, 75].map(v => (
             <g key={v}>
@@ -399,7 +399,7 @@ export default function SkillsMarketComparison() {
             </g>
           ))}
 
-          {[0, 25, 50, 75, 100].map(v => (
+          {[1, 2, 3, 4, 5].map(v => (
             <g key={v}>
               <text x={px(v)} y={VH - PB + 14} textAnchor="middle" fontSize={8} fill="#4b5563">{v}</text>
               <text x={PL - 6} y={py(v) + 3} textAnchor="end" fontSize={8} fill="#4b5563">{v}</text>
