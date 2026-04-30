@@ -212,7 +212,7 @@ export default function NetworkDiagram() {
   const [hiddenCompanies,  setHiddenCompanies]  = useState<Set<string>>(new Set())
   const [hiddenSkills,     setHiddenSkills]     = useState<Set<string>>(new Set())
   const [filterOpen,       setFilterOpen]       = useState(false)
-  const [filterSections,   setFilterSections]   = useState<Set<'jobs' | 'roles' | 'skills'>>(new Set(['jobs']))
+  const [filterSections,   setFilterSections]   = useState<Set<'jobs' | 'roles' | 'skills'>>(new Set<'jobs' | 'roles' | 'skills'>(['jobs']))
   const [paused,           setPaused]           = useState(false)
   const pausedRef           = useRef(false)
   const hiddenCompaniesRef  = useRef<Set<string>>(new Set())
