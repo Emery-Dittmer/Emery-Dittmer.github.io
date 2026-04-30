@@ -1,241 +1,307 @@
-import Card from "@/components/shared/card";
-import Balancer from "react-wrap-balancer";
-import { DEPLOY_URL } from "@/lib/constants";
-import { Github, Twitter } from "@/assets/icons";
-import WebVitals from "@/components/shared/web-vital";
-import ComponentGrid from "@/components/shared/component-grid";
-import Image from "next/image";
-import { nFormatter } from "@/lib/utils";
-import EmeryHeadshot from '@/assets/images/emery_dittmer alt.jpg';
-import movie from "@/assets/projects/movies.png";
-import network from "@/assets/projects/network.png";
+'use client'
 
-import windturbine from "@/assets/projects/windturbine.png";
-import fraud_risk from "@/assets/projects/fraudtool.png";
+import { useState, useMemo } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import Balancer from 'react-wrap-balancer'
+import { ArrowRight, ChevronDown, Check, X } from 'lucide-react'
+import { projectsConfig, ProjectType } from '@/lib/projectsConfig'
+import { skillsConfig, LaneId } from '@/lib/skillsConfig'
+import { Locale } from '@/lib/i18n'
 
-import accrual_forecast from "@/assets/projects/financialmodel.png";
-import reversal_finder from "@/assets/projects/journalentry.png";
+const laneOptions = skillsConfig.lanes.map((l) => ({ id: l.id as LaneId, title: l.title }))
+const allIndustries = Array.from(new Set(projectsConfig.map((p) => p.industry))).sort()
+const allYears = Array.from(new Set(projectsConfig.map((p) => p.year))).sort((a, b) => b - a)
 
-import workshop from "@/assets/projects/workshopicon.png";
-import inventory_drain from "@/assets/projects/supplyforecast.png";
+type SortKey = 'year-desc' | 'year-asc'
+type DropdownKey = 'type' | 'domain' | 'industry' | 'year' | 'sort' | null
 
-import Demand_supply from "@/assets/projects/demandinvtory.png";
-
-import { Locale } from "@/lib/i18n";
-
-export default function Cards({ locale = "en" }: { locale?: Locale }) {
-  const copy = {
-    en: {
-      title: "Some Past Examples",
-    },
-    fr: {
-      title: "Quelques exemples passés",
-    },
-  };
-  const t = copy[locale];
+// ── Dropdown shell ─────────────────────────────────────────────────────────
+function Dropdown({
+  label, active, open, onToggle, children,
+}: {
+  label: string; active: boolean; open: boolean; onToggle: () => void; children: React.ReactNode
+}) {
   return (
-    <>
-              {/* Section header */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-      <div className="py-12 md:py-20 border-t border-gray-800">
-        <h3 className="h2 text-center">{t.title}</h3>
-      <div className="flex items-center justify-center">
-        <div className="my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-2 gap-5 px-5 md:grid-cols-3 xl:px-0 ">
-          {featuresByLocale[locale].map(({ title, description, large,company,mediaSrc,linkUrl,linkText }) => (
-            <Card
-              key={title}
-              title={title}
-              description={description}
-              large={large}
-              company={company}
-              mediaSrc={mediaSrc}
-              linkUrl={linkUrl}
-              linkText={linkText}
-            />
-          ))}
+    <div className="relative">
+      <button
+        onClick={onToggle}
+        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition-colors ${
+          active
+            ? 'bg-purple-600/20 border-purple-500/60 text-purple-300'
+            : 'bg-gray-800/60 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+        }`}
+      >
+        {label}
+        <ChevronDown size={12} className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1.5 z-50 min-w-[190px] rounded-xl border border-gray-700 bg-gray-900 shadow-2xl shadow-black/50 p-1.5">
+          {children}
         </div>
-      </div>
-      </div>
-      </div>
-    </>
-  );
+      )}
+    </div>
+  )
 }
 
-const featuresByLocale = {
-  en: [
-    {
-      title: 'Wind Turbine Blade Recycling Facility',
-      company: 'Academic Project',
-      description: 'A team and I investigated the optimal location of wind turbine recycling facilities throughout Ontario. We aimed to minimize the fixed cost of facility construction with the variable cost of transportation. This methodology lays the groundwork for future research and Canada\'s leadership in the global green economy. ',
-      linkText: 'See the report here',
-      linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/turbine_recycling.pdf' ,
-      large: false,
-      mediaSrc: windturbine
-    },
-    {
-      title: 'Developed a Fraud Risk Detection Tool',
-      company: 'Professional Project',
-      description: 'I helped build a financial risk and fraud tool using financial data expertise and a custom excel VBA workbook. The code allowed companies to self-evaluate or externally evaluate their processes. A standardized report generated a risk score with dynamic highlights.*',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: fraud_risk
-    },
-    {
-      title: 'Large Government Department Financial Model' ,
-      company: 'Professional Project',
-      description: 'I helped develop a financial prediction tool to plan 50 years of capital asset replacements. A BI dashboard helped to display the accrual ceiling and budget requirements. The government department saved an estimated $500 million in redundant assets over the next 50 years.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: accrual_forecast
-    },
-    {
-      title: 'Network Analysis',
-      company: 'Academic Project',
-      description: 'A team and I investigated the network within the USPTO advice network. We uncovered that many recipriocal networks exist but that these networks do not have divisoona along race or gender lines.',
-      linkText: 'See the report here',
-      linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/Networkanalysis.pdf' ,
-      large: false,
-      mediaSrc: network
-    },
-    {
-      title: 'Movie theatre Revenue Forecasting',
-      company: 'Academic Project',
-      description: 'A team and I investigated the optimal pricing models for movie theatres post pandemic and various revenue strategies. The different strategies demonstrated increased marginal growth form a pure ticket revenue and concenssion persepectove',
-      linkText: 'See the report here',
-      linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/Revenue%20managment.pdf' ,
-      large: false,
-      mediaSrc: movie
-    },  
-    {
-      title: 'Journal Entry Reversal Finder' ,
-      company: 'Professional Project',
-      description:  'I developed an Alteryx workflow that detected journal entry reversals and produced a report. Audit procedures are complex but detecting and matching reversed journal entries saves teams time and money.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: reversal_finder
-    },
-    {
-      title: 'Advising Workshop Effectiveness Analytics ' ,
-      company: 'Professional Project',
-      description: 'I prepared a dashboard and report using data from advisor workshops. The dashboard segmented the number of people attending the workshops by location, subject, and other marketing factors. The insights allowed RBC to increase workshop value and effectiveness by changing to a geographic and demographic approach to the times and subjects offered.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: workshop
-    },
-    {
-      title:  'Supply Forecasting Tool' ,
-      company: 'Professional Project',
-      description: 'I developed a forecasting tool to track inventory and alert of critical supply shortages. I was responsible for critical substrate and rare earth coating materials.  The tool queried from several SQL databases of inventory, manufacturing usage, orders, and sales forecasting to keep track of critical supplies and upcoming shortages. The program would visualize the forecasted needs and send automated alerts for material needs when inventory is too low.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: inventory_drain
-    },
-    {
-      title: 'Demand and Inventory Balancing Model' ,
-      company: 'Professional Project',
-      description: 'Working on POS data and inventory availability, I built a model that minimized the inventory requirements for the predicted sales of products such as razors, toothbrushes, and coffee machines. I was able to reallocate inventory space to higher volatility and profit items. This increased annual revenue.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: Demand_supply
-    }
-  ],
-  fr: [
-    {
-      title: 'Installation de recyclage de pales d’éoliennes',
-      company: 'Projet académique',
-      description: 'Mon équipe et moi avons étudié l’emplacement optimal des installations de recyclage de pales d’éoliennes en Ontario. Nous cherchions à minimiser le coût fixe de construction tout en prenant en compte le coût variable de transport. Cette méthodologie pose les bases de recherches futures et du leadership du Canada dans l’économie verte mondiale.',
-      linkText: 'Voir le rapport',
-      linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/turbine_recycling.pdf' ,
-      large: false,
-      mediaSrc: windturbine
-    },
-    {
-      title: 'Développement d’un outil de détection du risque de fraude',
-      company: 'Projet professionnel',
-      description: 'J’ai aidé à concevoir un outil de risque financier et de fraude en m’appuyant sur mon expertise en données financières et sur un classeur Excel VBA personnalisé. Le code permettait aux entreprises d’évaluer leurs processus en interne ou en externe. Un rapport standardisé générait un score de risque avec des mises en évidence dynamiques.*',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: fraud_risk
-    },
-    {
-      title: 'Modèle financier pour un grand ministère' ,
-      company: 'Projet professionnel',
-      description: 'J’ai aidé à développer un outil de prévision financière pour planifier 50 ans de remplacements d’actifs. Un tableau de bord BI a permis d’afficher le plafond d’amortissement et les besoins budgétaires. Le ministère a économisé environ 500 millions de dollars en actifs redondants sur les 50 prochaines années.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: accrual_forecast
-    },
-    {
-      title: 'Analyse de réseau',
-      company: 'Projet académique',
-      description: 'Mon équipe et moi avons étudié le réseau de conseil de l’USPTO. Nous avons constaté l’existence de nombreux réseaux réciproques, sans divisions selon la race ou le genre.',
-      linkText: 'Voir le rapport',
-      linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/Networkanalysis.pdf' ,
-      large: false,
-      mediaSrc: network
-    },
-    {
-      title: 'Prévision des revenus de salles de cinéma',
-      company: 'Projet académique',
-      description: 'Mon équipe et moi avons étudié les modèles de tarification optimaux pour les salles de cinéma après la pandémie et diverses stratégies de revenus. Ces stratégies ont montré une croissance marginale des recettes de billetterie et des concessions.',
-      linkText: 'Voir le rapport',
-      linkUrl:'https://github.com/Emery-Dittmer/Emery-Dittmer.github.io/blob/main/assets/docs/Revenue%20managment.pdf' ,
-      large: false,
-      mediaSrc: movie
-    },  
-    {
-      title: 'Détection d’écritures d’extourne' ,
-      company: 'Projet professionnel',
-      description:  'J’ai développé un workflow Alteryx qui détectait les extournes d’écritures comptables et produisait un rapport. Les procédures d’audit sont complexes, mais détecter et rapprocher les extournes fait gagner du temps et de l’argent.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: reversal_finder
-    },
-    {
-      title: 'Analyses de l’efficacité d’ateliers de conseil' ,
-      company: 'Projet professionnel',
-      description: 'J’ai préparé un tableau de bord et un rapport à partir des données d’ateliers de conseillers. Le tableau de bord segmentait les participants par lieu, sujet et facteurs marketing. Les insights ont permis à RBC d’améliorer la valeur et l’efficacité des ateliers en adoptant une approche géographique et démographique pour les horaires et sujets proposés.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: workshop
-    },
-    {
-      title:  'Outil de prévision des approvisionnements' ,
-      company: 'Projet professionnel',
-      description: 'J’ai développé un outil de prévision pour suivre les stocks et alerter sur les pénuries critiques. J’étais responsable de matériaux de substrat critiques et de revêtements de terres rares. L’outil interrogeait plusieurs bases SQL (stock, fabrication, commandes et prévisions de ventes) pour anticiper les besoins. Il visualisait les besoins prévus et envoyait des alertes automatiques lorsque l’inventaire était trop bas.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: inventory_drain
-    },
-    {
-      title: 'Modèle d’équilibrage demande et stocks' ,
-      company: 'Projet professionnel',
-      description: 'À partir des données de vente POS et de la disponibilité des stocks, j’ai construit un modèle qui minimisait les besoins en stock pour les ventes prévues de produits (rasoirs, brosses à dents, machines à café). J’ai pu réallouer l’espace d’inventaire vers des articles plus volatils et à forte marge. Cela a augmenté les revenus annuels.*',
-      picture: '',
-      linkText: '',
-      linkUrl:'' ,
-      large: false,
-      mediaSrc: Demand_supply
-    }
-  ],
-};
+// ── Multi-select checkbox option ───────────────────────────────────────────
+function CheckOption({ checked, onClick, children }: { checked: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors ${
+        checked ? 'bg-purple-600/20 text-purple-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+      }`}
+    >
+      <span className={`flex-shrink-0 w-3.5 h-3.5 rounded border flex items-center justify-center ${
+        checked ? 'bg-purple-600 border-purple-500' : 'border-gray-600'
+      }`}>
+        {checked && <Check size={9} className="text-white" />}
+      </span>
+      <span>{children}</span>
+    </button>
+  )
+}
+
+// ── Single-select option (sort only) ──────────────────────────────────────
+function RadioOption({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors ${
+        selected ? 'bg-purple-600/20 text-purple-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+      }`}
+    >
+      <span>{children}</span>
+      {selected && <Check size={11} className="text-purple-400 shrink-0" />}
+    </button>
+  )
+}
+
+// ── Label helpers ──────────────────────────────────────────────────────────
+function multiLabel(prefix: string, items: (string | number)[], allLabel: string, maxShow = 1): string {
+  if (items.length === 0) return `${prefix}: ${allLabel}`
+  if (items.length <= maxShow) return `${prefix}: ${items.join(', ')}`
+  return `${prefix}: ${items.length} selected`
+}
+
+// ── Clear link inside a dropdown ───────────────────────────────────────────
+function ClearLink({ onClear, label }: { onClear: () => void; label: string }) {
+  return (
+    <>
+      <div className="my-1 border-t border-gray-800" />
+      <button onClick={onClear} className="w-full text-left px-3 py-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors">
+        {label}
+      </button>
+    </>
+  )
+}
+
+// ── Main component ─────────────────────────────────────────────────────────
+export default function Cards({ locale = 'en' }: { locale?: Locale }) {
+  const t = {
+    title:        locale === 'fr' ? 'Quelques exemples passés' : 'Some Past Examples',
+    viewDetails:  locale === 'fr' ? 'Voir les détails' : 'View Details',
+    sortBy:       locale === 'fr' ? 'Trier' : 'Sort',
+    all:          locale === 'fr' ? 'Tous' : 'All',
+    academic:     locale === 'fr' ? 'Académique' : 'Academic',
+    professional: locale === 'fr' ? 'Professionnel' : 'Professional',
+    type:         locale === 'fr' ? 'Type' : 'Type',
+    domain:       locale === 'fr' ? 'Domaine' : 'Domain',
+    industry:     locale === 'fr' ? 'Industrie' : 'Industry',
+    year:         locale === 'fr' ? 'Année' : 'Year',
+    newestFirst:  locale === 'fr' ? 'Plus récent' : 'Newest first',
+    oldestFirst:  locale === 'fr' ? 'Plus ancien' : 'Oldest first',
+    noResults:    locale === 'fr' ? 'Aucun projet ne correspond.' : 'No projects match the current filters.',
+    clearFilters: locale === 'fr' ? 'Réinitialiser' : 'Clear filters',
+    showing:      locale === 'fr' ? 'Résultats' : 'Showing',
+    of:           locale === 'fr' ? 'sur' : 'of',
+    projects:     locale === 'fr' ? 'projets' : 'projects',
+  }
+
+  // ── Filter state (all multi-select arrays) ─────────────────────────────
+  const [selectedTypes,      setSelectedTypes]      = useState<ProjectType[]>([])
+  const [selectedLanes,      setSelectedLanes]      = useState<LaneId[]>([])
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([])
+  const [selectedYears,      setSelectedYears]      = useState<number[]>([])
+  const [sort,               setSort]               = useState<SortKey>('year-desc')
+  const [openDropdown,       setOpenDropdown]       = useState<DropdownKey>(null)
+
+  const hasActiveFilters =
+    selectedTypes.length > 0 ||
+    selectedLanes.length > 0 ||
+    selectedIndustries.length > 0 ||
+    selectedYears.length > 0
+
+  function clearFilters() {
+    setSelectedTypes([])
+    setSelectedLanes([])
+    setSelectedIndustries([])
+    setSelectedYears([])
+    setOpenDropdown(null)
+  }
+
+  function toggle<T>(val: T, set: React.Dispatch<React.SetStateAction<T[]>>) {
+    set((prev) => prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val])
+  }
+
+  function toggleDropdown(key: DropdownKey) {
+    setOpenDropdown((prev) => (prev === key ? null : key))
+  }
+
+  // ── Dropdown trigger labels ─────────────────────────────────────────────
+  const typeLabel = multiLabel(
+    t.type,
+    selectedTypes.map((v) => v === 'academic' ? t.academic : t.professional),
+    t.all,
+  )
+  const domainLabel = multiLabel(
+    t.domain,
+    selectedLanes.map((id) => laneOptions.find((l) => l.id === id)?.title ?? id),
+    t.all,
+  )
+  const industryLabel = multiLabel(t.industry, selectedIndustries, t.all)
+  const yearLabel     = multiLabel(t.year,     selectedYears,      t.all)
+  const sortLabel     = `${t.sortBy}: ${sort === 'year-desc' ? t.newestFirst : t.oldestFirst}`
+
+  // ── Filtered + sorted list ──────────────────────────────────────────────
+  const visible = useMemo(() => {
+    let list = projectsConfig.filter((p) => {
+      if (selectedTypes.length      > 0 && !selectedTypes.includes(p.projectType))            return false
+      if (selectedIndustries.length > 0 && !selectedIndustries.includes(p.industry))          return false
+      if (selectedYears.length      > 0 && !selectedYears.includes(p.year))                   return false
+      if (selectedLanes.length      > 0 && !selectedLanes.some((l) => p.laneIds.includes(l))) return false
+      return true
+    })
+    return [...list].sort((a, b) => sort === 'year-desc' ? b.year - a.year : a.year - b.year)
+  }, [selectedTypes, selectedLanes, selectedIndustries, selectedYears, sort])
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="py-12 md:py-20 border-t border-gray-800">
+        <h3 className="h2 text-center">{t.title}</h3>
+
+        {/* Backdrop to close dropdowns */}
+        {openDropdown !== null && (
+          <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
+        )}
+
+        {/* ── Filter bar ──────────────────────────────────────────────────── */}
+        <div className="mt-8 flex flex-wrap items-center gap-2 relative z-50">
+
+          {/* Type */}
+          <Dropdown label={typeLabel} active={selectedTypes.length > 0} open={openDropdown === 'type'} onToggle={() => toggleDropdown('type')}>
+            <CheckOption checked={selectedTypes.includes('professional')} onClick={() => toggle<ProjectType>('professional', setSelectedTypes)}>{t.professional}</CheckOption>
+            <CheckOption checked={selectedTypes.includes('academic')}     onClick={() => toggle<ProjectType>('academic',     setSelectedTypes)}>{t.academic}</CheckOption>
+            {selectedTypes.length > 0 && <ClearLink onClear={() => setSelectedTypes([])} label={t.clearFilters} />}
+          </Dropdown>
+
+          {/* Domain */}
+          <Dropdown label={domainLabel} active={selectedLanes.length > 0} open={openDropdown === 'domain'} onToggle={() => toggleDropdown('domain')}>
+            {laneOptions.map((lane) => (
+              <CheckOption key={lane.id} checked={selectedLanes.includes(lane.id)} onClick={() => toggle<LaneId>(lane.id, setSelectedLanes)}>
+                {lane.title}
+              </CheckOption>
+            ))}
+            {selectedLanes.length > 0 && <ClearLink onClear={() => setSelectedLanes([])} label={t.clearFilters} />}
+          </Dropdown>
+
+          {/* Industry */}
+          <Dropdown label={industryLabel} active={selectedIndustries.length > 0} open={openDropdown === 'industry'} onToggle={() => toggleDropdown('industry')}>
+            {allIndustries.map((ind) => (
+              <CheckOption key={ind} checked={selectedIndustries.includes(ind)} onClick={() => toggle<string>(ind, setSelectedIndustries)}>
+                {ind}
+              </CheckOption>
+            ))}
+            {selectedIndustries.length > 0 && <ClearLink onClear={() => setSelectedIndustries([])} label={t.clearFilters} />}
+          </Dropdown>
+
+          {/* Year */}
+          <Dropdown label={yearLabel} active={selectedYears.length > 0} open={openDropdown === 'year'} onToggle={() => toggleDropdown('year')}>
+            {allYears.map((yr) => (
+              <CheckOption key={yr} checked={selectedYears.includes(yr)} onClick={() => toggle<number>(yr, setSelectedYears)}>
+                {yr}
+              </CheckOption>
+            ))}
+            {selectedYears.length > 0 && <ClearLink onClear={() => setSelectedYears([])} label={t.clearFilters} />}
+          </Dropdown>
+
+          {/* Divider */}
+          <div className="h-5 w-px bg-gray-700 mx-1 hidden sm:block" />
+
+          {/* Sort (single-select) */}
+          <Dropdown label={sortLabel} active={false} open={openDropdown === 'sort'} onToggle={() => toggleDropdown('sort')}>
+            <RadioOption selected={sort === 'year-desc'} onClick={() => { setSort('year-desc'); setOpenDropdown(null) }}>{t.newestFirst}</RadioOption>
+            <RadioOption selected={sort === 'year-asc'}  onClick={() => { setSort('year-asc');  setOpenDropdown(null) }}>{t.oldestFirst}</RadioOption>
+          </Dropdown>
+
+          {/* Count + clear all */}
+          <div className="ml-auto flex items-center gap-3">
+            <span className="text-xs text-gray-500">
+              {t.showing} {visible.length} {t.of} {projectsConfig.length} {t.projects}
+            </span>
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 transition-colors">
+                <X size={11} />
+                {t.clearFilters}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Project grid ──────────────────────────────────────────────────── */}
+        {visible.length === 0 ? (
+          <div className="mt-16 text-center text-gray-500">
+            <p className="mb-3">{t.noResults}</p>
+            <button onClick={clearFilters} className="text-sm text-purple-400 hover:text-purple-300 underline">{t.clearFilters}</button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center">
+            <div className="my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-2 gap-5 px-5 md:grid-cols-3 xl:px-0">
+              {visible.map((project) => (
+                <div key={project.id} className="relative col-span-1 h-auto overflow-hidden shadow-md flex flex-col">
+                  <div className="max-h-60 overflow-hidden flex justify-center items-center mt-4">
+                    <Image src={project.mediaSrc} alt={project.title[locale]} width={100} height={40} unoptimized />
+                  </div>
+                  <div className="mx-auto max-w-md text-center p-4 flex flex-col flex-1">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <span className="text-xs font-semibold text-purple-400">{project.year}</span>
+                      <span className="text-xs text-gray-600">·</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
+                        project.projectType === 'academic'
+                          ? 'border-blue-700/60 text-blue-400 bg-blue-900/20'
+                          : 'border-green-700/60 text-green-400 bg-green-900/20'
+                      }`}>
+                        {project.projectType === 'academic' ? t.academic : t.professional}
+                      </span>
+                      <span className="text-xs text-gray-600">·</span>
+                      <span className="text-xs text-gray-500">{project.industry}</span>
+                    </div>
+                    <h2 className="bg-gradient-to-br from-white to-stone-500 bg-clip-text font-display text-xl font-bold text-transparent md:text-3xl md:font-normal single-line-spacing">
+                      <Balancer>{project.title[locale]}</Balancer>
+                    </h2>
+                    <div className="prose-sm leading-normal text-gray-500 md:prose mt-3">
+                      <Balancer><p>{project.description[locale]}</p></Balancer>
+                    </div>
+                    <div className="mt-auto pt-4 flex flex-col items-center gap-2">
+                      {project.linkUrl && (
+                        <a href={project.linkUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-300 hover:text-blue-400 transition-colors">
+                          {project.linkText?.[locale]}
+                        </a>
+                      )}
+                      <Link href={`/Projects/${locale}/${project.id}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors">
+                        {t.viewDetails}
+                        <ArrowRight size={14} />
+                      </Link>
+                      <div className="text-xs text-gray-400">{project.company[locale]}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -23,7 +23,7 @@ const MAX_SPEED = 10
 const DECAY     = 0.4   // speed multiplied by DECAY^(dt seconds) each frame
 
 const PROF_NODE_R: Record<Proficiency, number> = {
-  strong: 5, weak: 4, beginning: 3, 'no-skill': 2.5,
+  1: 2.5, 2: 3, 3: 4, 4: 5, 5: 6.5,
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -379,8 +379,8 @@ export default function NetworkDiagram() {
           })
         } else if ('isCompany' in node) {
           const a      = Math.atan2(y - CY, x - CX)
-          const lx     = 23 * Math.cos(a)
-          const ly     = 23 * Math.sin(a)
+          const lx     = 32 * Math.cos(a)
+          const ly     = 32 * Math.sin(a)
           const anchor = txAnchor(a)
           const texts  = companyTextRefs.current.get(node.id) ?? []
           const n      = texts.length
@@ -425,7 +425,7 @@ export default function NetworkDiagram() {
           if ('isCompany' in node && hiddenCompaniesRef.current.has(node.id)) return
           const pos  = posRef.current.get(node.id)
           if (!pos) return
-          const hitR = node.isRole ? 16 : ('isCompany' in node ? 16 : 10)
+          const hitR = node.isRole ? 16 : ('isCompany' in node ? 22 : 10)
           const dx   = mouse.x - pos.x
           const dy   = mouse.y - pos.y
           const d    = Math.sqrt(dx * dx + dy * dy)
@@ -884,7 +884,7 @@ export default function NetworkDiagram() {
           {/* Clip path for company logos — objectBoundingBox makes it position-independent */}
           <defs>
             <clipPath id="company-logo-clip" clipPathUnits="objectBoundingBox">
-              <circle cx="0.5" cy="0.5" r="0.5" />
+              <circle cx="0.7" cy="0.7" r="1" />
             </clipPath>
           </defs>
 
@@ -969,7 +969,7 @@ export default function NetworkDiagram() {
                   <circle cx={0} cy={0} r={nr + 4} fill="none"
                     stroke={prof.color} strokeWidth={1.5} strokeOpacity={0.75} />
                 )}
-                <circle cx={0} cy={0} r={isHov ? nr + 2 : nr} fill={prof.color} opacity={dim ? 0.1 : 0.88} />
+                <circle cx={0} cy={0} r={isHov ? nr + 2 : nr} fill={prof.color} opacity={dim ? 0.05 : 0.88} />
                 {showLabel && (
                   <>
                     <rect
@@ -1018,7 +1018,7 @@ export default function NetworkDiagram() {
                 )}
                 <circle cx={0} cy={0} r={11}
                   fill={`${role.color}22`} stroke={role.color}
-                  strokeWidth={dim ? 1 : 2.2} opacity={dim ? 0.22 : 1}
+                  strokeWidth={dim ? 1 : 2.2} opacity={dim ? 0.06 : 1}
                 />
                 {lines.map((line, li) => (
                   <text
@@ -1033,7 +1033,7 @@ export default function NetworkDiagram() {
                     y={ly0 + (li - (lines.length - 1) / 2) * LH + 4}
                     textAnchor={txAnchor(role.angle)}
                     fontSize={11} fontWeight={600}
-                    fill={dim ? '#374151' : role.color}
+                    fill={dim ? '#1f2937' : role.color}
                     style={{ pointerEvents: 'none' }}
                   >
                     {line}
@@ -1063,33 +1063,33 @@ export default function NetworkDiagram() {
                 onPointerDown={e => handleNodePointerDown(company.id, e)}
               >
                 {isLocked && (
-                  <circle cx={0} cy={0} r={20} fill="none"
+                  <circle cx={0} cy={0} r={26} fill="none"
                     stroke={company.color} strokeWidth={1.5} strokeOpacity={0.65} />
                 )}
                 {isHov && !isLocked && (
-                  <circle cx={0} cy={0} r={18} fill="none"
+                  <circle cx={0} cy={0} r={24} fill="none"
                     stroke={company.color} strokeWidth={1} strokeOpacity={0.35} />
                 )}
                 {/* Node body */}
-                <circle cx={0} cy={0} r={12}
+                <circle cx={0} cy={0} r={18}
                   fill={companyLogoSrc[company.id] ? '#ffffff' : `${company.color}28`}
                   stroke={company.color}
-                  strokeWidth={dim ? 1 : 2} opacity={dim ? 0.2 : 1}
+                  strokeWidth={dim ? 1 : 2} opacity={dim ? 0.06 : 1}
                 />
                 {companyLogoSrc[company.id] ? (
                   <image
                     href={companyLogoSrc[company.id]!}
-                    x={-9} y={-9} width={18} height={18}
+                    x={-14} y={-14} width={28} height={28}
                     clipPath="url(#company-logo-clip)"
                     preserveAspectRatio="xMidYMid meet"
-                    opacity={dim ? 0.15 : 1}
+                    opacity={dim ? 0.05 : 1}
                     style={{ pointerEvents: 'none' }}
                   />
                 ) : (
                   <text
                     x={0} y={4.5}
                     textAnchor="middle" fontSize={10} fontWeight={800}
-                    fill={dim ? '#374151' : company.color}
+                    fill={dim ? '#1f2937' : company.color}
                     style={{ pointerEvents: 'none' }}
                   >
                     {company.name[0]}
@@ -1097,8 +1097,8 @@ export default function NetworkDiagram() {
                 )}
                 {lines.map((line, li) => {
                   const a0  = Math.atan2(company.y - CY, company.x - CX)
-                  const lx0 = 23 * Math.cos(a0)
-                  const ly0 = 23 * Math.sin(a0)
+                  const lx0 = 32 * Math.cos(a0)
+                  const ly0 = 32 * Math.sin(a0)
                   return (
                     <text
                       key={li}
@@ -1111,7 +1111,7 @@ export default function NetworkDiagram() {
                       x={lx0} y={ly0 + (li - (lines.length - 1) / 2) * LH + 4}
                       textAnchor={txAnchor(a0)}
                       fontSize={11} fontWeight={700}
-                      fill={dim ? '#374151' : company.color}
+                      fill={dim ? '#1f2937' : company.color}
                       style={{ pointerEvents: 'none' }}
                     >
                       {line}
@@ -1264,18 +1264,33 @@ export default function NetworkDiagram() {
       </div>
 
       {/* ── Legend ── */}
-      <div className="flex flex-wrap justify-center gap-x-5 gap-y-1.5 mt-2">
-        {(Object.entries(proficiencyMeta) as [Proficiency, { label: string; color: string }][]).map(
-          ([key, meta]) => (
-            <span key={key} className="flex items-center gap-1.5 text-[11px] text-gray-500">
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <circle cx="6" cy="6" r={PROF_NODE_R[key]} fill={meta.color} opacity={0.9} />
-              </svg>
-              {meta.label}
-            </span>
-          )
-        )}
-        <span className="text-[11px] text-gray-600">· drag · hover · click to lock</span>
+      <div className="flex flex-col items-center gap-2 mt-3">
+        {/* Skill node size = proficiency */}
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-1.5">
+          <span className="text-[11px] text-gray-600 font-semibold mr-1 self-center">Skill size:</span>
+          {([1, 2, 3, 4, 5] as Proficiency[]).map(level => {
+            const meta = proficiencyMeta[level]
+            return (
+              <span key={level} className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                <svg width="14" height="14" viewBox="0 0 14 14">
+                  <circle cx="7" cy="7" r={PROF_NODE_R[level]} fill={meta.color} opacity={0.9} />
+                </svg>
+                {meta.label}
+              </span>
+            )
+          })}
+        </div>
+        {/* Company node explanation */}
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 text-[11px] text-gray-500">
+            <svg width="22" height="22" viewBox="0 0 22 22">
+              <circle cx="11" cy="11" r="9" fill="#ffffff22" stroke="#9ca3af" strokeWidth="1.5" />
+              <text x="11" y="15" textAnchor="middle" fontSize="8" fontWeight="800" fill="#9ca3af">Co</text>
+            </svg>
+            Large node = employer / job
+          </span>
+          <span className="text-[11px] text-gray-600">· drag · hover · click to lock</span>
+        </div>
       </div>
     </div>
   )

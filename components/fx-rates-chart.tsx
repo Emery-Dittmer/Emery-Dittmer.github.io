@@ -77,6 +77,7 @@ const CURRENCY_FLAGS: Record<string, string> = {
 }
 
 const BASE_OPTIONS = ['CAD', 'USD', 'EUR', 'CHF', 'GBP']
+const DEFAULT_COMPARE = ['USD', 'CAD', 'EUR']
 
 type RawPoint = {
   x: string
@@ -316,8 +317,8 @@ export default function FxRatesChart({
   const addMenuRef = useRef<HTMLDivElement>(null)
   const [granularity, setGranularity] = useState<FxGranularity>('daily')
   const [range, setRange] = useState<FxRange>('all')
-  const [baseCurrency, setBaseCurrency] = useState('CAD')
-  const [activeCurrencies, setActiveCurrencies] = useState(['USD', 'EUR', 'CHF'])
+  const [baseCurrency, setBaseCurrency] = useState('GBP')
+  const [activeCurrencies, setActiveCurrencies] = useState(['USD', 'CAD', 'EUR'])
   const [showAddMenu, setShowAddMenu] = useState(false)
   const [addSearch, setAddSearch] = useState('')
   const [customStart, setCustomStart] = useState<Date | null>(null)
@@ -339,6 +340,10 @@ export default function FxRatesChart({
   const [calculatorOpen, setCalculatorOpen] = useState(true)
   const [calcSource, setCalcSource] = useState<string | null>(null)
   const [calcInput, setCalcInput] = useState('1')
+  const [showAddVsMenu, setShowAddVsMenu] = useState(false)
+  const [addVsSearch, setAddVsSearch] = useState('')
+  const addVsMenuRef = useRef<HTMLDivElement>(null)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const copy = {
     en: {
@@ -452,21 +457,9 @@ export default function FxRatesChart({
     return () => { isMounted = false }
   }, [])
 
-  // When base currency changes, adjust active currencies:
-  // - keep the new base if it was already active (it will render as a flat 1.0 line)
-  // - special case: when CAD is the base, ensure CAD is active so it shows as a flat 1.0 line
-  // - add CAD if switching away from CAD and it's not already shown
+  // When base currency changes, remove it from active currencies (would be flat 1.0 line)
   useEffect(() => {
-    setActiveCurrencies((prev) => {
-      if (baseCurrency === 'CAD') {
-        if (!prev.includes('CAD')) return ['CAD', ...prev]
-        return prev
-      }
-      if (!prev.includes('CAD')) {
-        return ['CAD', ...prev]
-      }
-      return prev
-    })
+    setActiveCurrencies((prev) => prev.filter((c) => c !== baseCurrency))
   }, [baseCurrency])
 
   useEffect(() => {
@@ -542,6 +535,19 @@ export default function FxRatesChart({
     return () => document.removeEventListener('mousedown', handler)
   }, [showCalendar])
 
+  // Close vs. add menu when clicking outside
+  useEffect(() => {
+    if (!showAddVsMenu) return
+    const handler = (e: MouseEvent) => {
+      if (addVsMenuRef.current && !addVsMenuRef.current.contains(e.target as Node)) {
+        setShowAddVsMenu(false)
+        setAddVsSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showAddVsMenu])
+
   const filteredData = useMemo(
     () => filterByRange(rawData, range, customStart, customEnd),
     [rawData, range, customStart, customEnd]
@@ -585,7 +591,7 @@ export default function FxRatesChart({
   }, [displayData, baseCurrency])
 
   const availableToAdd = allCurrencies.filter(
-    (c) => !activeCurrencies.includes(c) && (c !== baseCurrency || baseCurrency === 'CAD')
+    (c) => !activeCurrencies.includes(c) && c !== baseCurrency
   )
 
   const chart = useMemo(() => {
@@ -764,280 +770,20 @@ export default function FxRatesChart({
   return (
     <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-20">
       <div className="py-10 md:py-14 border-t border-gray-800">
-        <div className="text-center mb-10">
+        {/* Header */}
+        <div className="text-center mb-8">
           <h1 className="h2 mb-2">{t.title}</h1>
           <p className="text-lg text-gray-400">{t.subtitle}</p>
-
-          {/* Base currency selector */}
-          <div className="mt-5 flex flex-col items-center gap-2">
-            <span className="text-sm sm:text-xs uppercase tracking-widest text-gray-500">{t.baseCurrency}</span>
-            <div className="flex items-center gap-2 flex-wrap justify-center w-full">
-              {/* Quick-pick pills — scrollable on mobile */}
-              <div className="max-w-full overflow-x-auto pb-1">
-                <div className="inline-flex rounded-full bg-gray-800 p-1 text-sm sm:text-xs font-semibold uppercase tracking-wide text-gray-300">
-                  {BASE_OPTIONS.map((code) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => { setBaseCurrency(code); setShowBaseDropdown(false); setBaseSearch('') }}
-                      className={`px-4 py-2 rounded-full transition ${
-                        baseCurrency === code ? 'bg-purple-600 text-white' : 'hover:text-white'
-                      }`}
-                    >
-                      {code}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom base dropdown */}
-              <div className="relative" ref={baseDropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowBaseDropdown((v) => !v)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wide transition ${
-                    !BASE_OPTIONS.includes(baseCurrency)
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:text-white'
-                  }`}
-                >
-                  {!BASE_OPTIONS.includes(baseCurrency) ? (
-                    <>
-                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full overflow-hidden" style={{ fontSize: '1rem', lineHeight: 1 }}>
-                        {CURRENCY_FLAGS[baseCurrency] ?? '🏳️'}
-                      </span>
-                      {baseCurrency}
-                    </>
-                  ) : (
-                    <>Custom ▾</>
-                  )}
-                </button>
-
-                {showBaseDropdown && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-30 w-52 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl overflow-hidden">
-                    <div className="p-2 border-b border-slate-700">
-                      <input
-                        autoFocus
-                        type="text"
-                        placeholder="Search currency…"
-                        value={baseSearch}
-                        onChange={(e) => setBaseSearch(e.target.value.toUpperCase())}
-                        className="w-full bg-slate-800 text-slate-100 text-xs rounded-lg px-3 py-2 outline-none placeholder-slate-500 border border-slate-600 focus:border-purple-500 transition"
-                      />
-                    </div>
-                    <div className="max-h-52 overflow-y-auto py-1">
-                      {allCurrencies
-                        .filter((c) => c !== baseCurrency && c.includes(baseSearch))
-                        .map((code) => {
-                          const color = getCurrencyColor(code, allCurrencies)
-                          return (
-                            <button
-                              key={code}
-                              type="button"
-                              onClick={() => {
-                                setBaseCurrency(code)
-                                setShowBaseDropdown(false)
-                                setBaseSearch('')
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-slate-700 transition"
-                            >
-                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.1rem', lineHeight: 1 }}>
-                                {CURRENCY_FLAGS[code] ?? '🏳️'}
-                              </span>
-                              <span style={{ color }} className="font-semibold">{code}</span>
-                            </button>
-                          )
-                        })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-col items-center justify-center gap-3">
-            {/* Range pills — scrollable on mobile */}
-            <div className="max-w-full overflow-x-auto pb-1">
-              <div className="inline-flex rounded-full bg-gray-800 p-1 text-sm sm:text-xs font-semibold uppercase tracking-wide text-gray-300 whitespace-nowrap">
-                {(['all', 'last12', 'ytd', 'last30'] as FxRange[]).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setRange(option)}
-                    className={`px-4 py-2 rounded-full transition ${
-                      range === option ? 'bg-purple-600 text-white' : 'hover:text-white'
-                    }`}
-                  >
-                    {t.range[option]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom date range — separate from preset pills */}
-            <div className="relative" ref={calendarRef}>
-              <button
-                type="button"
-                onClick={() => {
-                  setRange('custom')
-                  setShowCalendar((v) => !v)
-                }}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm sm:text-xs font-semibold uppercase tracking-wide transition border ${
-                  range === 'custom'
-                    ? 'bg-purple-600 border-purple-500 text-white'
-                    : 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white hover:border-gray-500'
-                }`}
-              >
-                <span>📅</span>
-                {range === 'custom' && customStart && customEnd
-                  ? `${customStart.toLocaleDateString('en', { month: 'short', day: 'numeric' })} – ${customEnd.toLocaleDateString('en', { month: 'short', day: 'numeric' })}`
-                  : t.range.custom}
-              </button>
-
-              {showCalendar && (() => {
-                const today = new Date()
-                today.setHours(0, 0, 0, 0)
-                const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
-                const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa']
-                const firstDay = new Date(calViewYear, calViewMonth, 1).getDay()
-                const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate()
-
-                const prevMonth = () => {
-                  if (calViewMonth === 0) { setCalViewMonth(11); setCalViewYear(y => y - 1) }
-                  else setCalViewMonth(m => m - 1)
-                }
-                const nextMonth = () => {
-                  if (calViewMonth === 11) { setCalViewMonth(0); setCalViewYear(y => y + 1) }
-                  else setCalViewMonth(m => m + 1)
-                }
-
-                const handleDay = (day: number) => {
-                  const d = new Date(calViewYear, calViewMonth, day)
-                  if (d > today) return
-                  if (calendarStep === 'start') {
-                    setCustomStart(d)
-                    setCustomEnd(null)
-                    setCalendarStep('end')
-                  } else {
-                    setCustomEnd(d)
-                    setCalendarStep('start')
-                    setShowCalendar(false)
-                  }
-                }
-
-                const inRange = (day: number) => {
-                  const d = new Date(calViewYear, calViewMonth, day)
-                  const end = calendarStep === 'end' ? (calendarHover ?? customEnd) : customEnd
-                  if (!customStart || !end) return false
-                  const s = customStart < end ? customStart : end
-                  const e = customStart < end ? end : customStart
-                  return d > s && d < e
-                }
-
-                const isSelected = (day: number) => {
-                  const d = new Date(calViewYear, calViewMonth, day)
-                  return (customStart && d.toDateString() === customStart.toDateString()) ||
-                         (customEnd && d.toDateString() === customEnd.toDateString()) || false
-                }
-
-                return (
-                  <div className="fixed sm:absolute left-1/2 -translate-x-1/2 top-1/2 sm:top-full -translate-y-1/2 sm:translate-y-0 sm:mt-2 z-50 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-4 w-[min(18rem,90vw)] select-none">
-                    <div className="text-xs text-slate-400 text-center mb-3 font-medium">
-                      {calendarStep === 'start' ? 'Select start date' : 'Select end date'}
-                    </div>
-
-                    {/* Month navigation */}
-                    <div className="flex items-center justify-between mb-3">
-                      <button type="button" onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">‹</button>
-                      <span className="text-sm font-semibold text-white">{MONTHS[calViewMonth]} {calViewYear}</span>
-                      <button type="button" onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">›</button>
-                    </div>
-
-                    {/* Day headers */}
-                    <div className="grid grid-cols-7 mb-1">
-                      {DAYS.map(d => (
-                        <div key={d} className="text-center text-xs text-slate-500 font-medium py-1">{d}</div>
-                      ))}
-                    </div>
-
-                    {/* Day grid */}
-                    <div className="grid grid-cols-7">
-                      {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} />)}
-                      {Array.from({ length: daysInMonth }).map((_, i) => {
-                        const day = i + 1
-                        const d = new Date(calViewYear, calViewMonth, day)
-                        const future = d > today
-                        const sel = isSelected(day)
-                        const inR = inRange(day)
-                        return (
-                          <button
-                            key={day}
-                            type="button"
-                            disabled={future}
-                            onClick={() => handleDay(day)}
-                            onMouseEnter={() => !future && calendarStep === 'end' && setCalendarHover(new Date(calViewYear, calViewMonth, day))}
-                            onMouseLeave={() => setCalendarHover(null)}
-                            className={`h-8 w-full text-xs rounded-full transition font-medium
-                              ${future ? 'text-slate-700 cursor-not-allowed' : ''}
-                              ${!future && sel ? 'bg-purple-600 text-white' : ''}
-                              ${!future && inR && !sel ? 'bg-purple-900/50 text-purple-200' : ''}
-                              ${!future && !sel && !inR ? 'text-slate-300 hover:bg-slate-700' : ''}
-                            `}
-                          >
-                            {day}
-                          </button>
-                        )
-                      })}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="mt-3 flex justify-between items-center border-t border-slate-700 pt-3">
-                      <button
-                        type="button"
-                        onClick={() => { setCustomStart(null); setCustomEnd(null); setCalendarStep('start'); setRange('all'); setShowCalendar(false) }}
-                        className="text-xs text-slate-400 hover:text-white transition"
-                      >
-                        Clear
-                      </button>
-                      {customStart && customEnd && (
-                        <span className="text-xs text-slate-400">
-                          {customStart.toLocaleDateString()} – {customEnd.toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )
-              })()}
-            </div>
-
-            {/* Granularity pills — scrollable on mobile */}
-            <div className="max-w-full overflow-x-auto pb-1">
-              <div className="inline-flex rounded-full bg-gray-800 p-1 text-sm sm:text-xs font-semibold uppercase tracking-wide text-gray-300 whitespace-nowrap">
-                {(['daily', 'weekly', 'monthly'] as FxGranularity[]).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setGranularity(option)}
-                    className={`px-4 py-2 rounded-full transition ${
-                      granularity === option ? 'bg-purple-600 text-white' : 'hover:text-white'
-                    }`}
-                  >
-                    {t.granularity[option]}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          {granularity !== 'daily' && (
-            <div className="mt-2 text-xs text-gray-500">{t.granularity.average}</div>
-          )}
         </div>
 
         {loading && <div className="text-center text-gray-400">{t.loading}</div>}
         {!loading && error && <div className="text-center text-red-300">{t.error}</div>}
 
-        {!loading && !error && chart && (
-          <div className="relative w-full overflow-x-auto" ref={chartRef}>
+        {!loading && !error && displayData.length > 0 && (
+          <div className="flex gap-0 items-start">
+            {/* ── Chart area ── */}
+            <div className="flex-1 min-w-0">
+              <div className="relative w-full overflow-x-auto" ref={chartRef}>
             {/* Currency bubbles + add button */}
             <div className="mb-4 flex flex-wrap items-center gap-2">
               {activeCurrencies.map((code) => {
@@ -1046,24 +792,18 @@ export default function FxRatesChart({
                   <span
                     key={code}
                     className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm sm:text-xs font-semibold"
-                    style={{
-                      backgroundColor: `${color}22`,
-                      color,
-                      border: `1px solid ${color}55`,
-                    }}
+                    style={{ backgroundColor: `${color}22`, color, border: `1px solid ${color}55` }}
                   >
                     <span className="inline-flex items-center justify-center w-7 h-7 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1.35rem', lineHeight: 1 }}>{CURRENCY_FLAGS[code] ?? '🏳️'}</span>
                     {code}
-                    {activeCurrencies.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => setActiveCurrencies((prev) => prev.filter((c) => c !== code))}
-                        className="ml-0.5 leading-none opacity-50 hover:opacity-100 transition"
-                        aria-label={`Remove ${code}`}
-                      >
-                        ×
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setActiveCurrencies((prev) => prev.filter((c) => c !== code))}
+                      className="ml-0.5 leading-none opacity-50 hover:opacity-100 transition"
+                      aria-label={`Remove ${code}`}
+                    >
+                      ×
+                    </button>
                   </span>
                 )
               })}
@@ -1116,9 +856,31 @@ export default function FxRatesChart({
                   )}
                 </div>
               )}
+
+              {/* Filters toggle button */}
+              <button
+                type="button"
+                onClick={() => setFiltersOpen((v) => !v)}
+                className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide transition flex-shrink-0 ${
+                  filtersOpen ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:text-white'
+                }`}
+              >
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M1 3h14v1.5l-5 5V14l-4-2V9.5L1 4.5V3z"/>
+                </svg>
+                Filters
+              </button>
             </div>
 
-            <svg
+            {!chart && (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-slate-900 border border-slate-800 py-20 text-center">
+                <span className="text-3xl">📊</span>
+                <p className="text-slate-400 text-sm font-medium">No currencies selected</p>
+                <p className="text-slate-600 text-xs">Pick a vs. currency using the <strong className="text-slate-500">Filters</strong> panel, or use the <strong className="text-slate-500">+</strong> button above.</p>
+              </div>
+            )}
+
+            {chart && <svg
               ref={svgRef}
               viewBox={`0 0 ${chart.width} ${chart.height}`}
               className="w-full h-auto"
@@ -1224,9 +986,9 @@ export default function FxRatesChart({
                   )
                 })}
               </g>
-            </svg>
+            </svg>}
 
-            {hoveredIndex !== null && displayData[hoveredIndex] && (
+            {chart && hoveredIndex !== null && displayData[hoveredIndex] && (
               <div
                 ref={tooltipRef}
                 className="pointer-events-none absolute left-0 top-0 z-10 rounded-md bg-slate-900/95 px-3 py-2 text-xs text-slate-100 shadow-lg"
@@ -1236,7 +998,7 @@ export default function FxRatesChart({
                 </div>
                 {activeCurrencies.map((code) => (
                   <div key={code} style={{ color: getCurrencyColor(code, allCurrencies) }}>
-                    {code}/{baseCurrency}: {formatValue(displayData[hoveredIndex].rates[code] ?? 0)}
+                    1 {baseCurrency} = {formatValue(displayData[hoveredIndex].rates[code] ?? 0)} {code}
                   </div>
                 ))}
               </div>
@@ -1518,6 +1280,302 @@ export default function FxRatesChart({
                 )}
               </div>
             )}
+
+              </div>{/* closes ref={chartRef} */}
+            </div>{/* closes flex-1 min-w-0 */}
+
+            {/* ── Filter sidebar ── */}
+            <div className={`transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 ${filtersOpen ? 'w-72 opacity-100' : 'w-0 opacity-0'}`}>
+              <div className="w-72 pl-5 border-l border-gray-800 flex flex-col gap-5 pt-1">
+
+                {/* Base currency */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs uppercase tracking-widest text-gray-500">{t.baseCurrency}</span>
+                  <div className="flex flex-wrap gap-1">
+                    {BASE_OPTIONS.map((code) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => { setBaseCurrency(code); setShowBaseDropdown(false); setBaseSearch('') }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide transition ${
+                          baseCurrency === code ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:text-white'
+                        }`}
+                      >
+                        {code}
+                      </button>
+                    ))}
+                    <div className="relative" ref={baseDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setShowBaseDropdown((v) => !v)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide transition ${
+                          !BASE_OPTIONS.includes(baseCurrency) ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:text-white'
+                        }`}
+                      >
+                        {!BASE_OPTIONS.includes(baseCurrency) ? (
+                          <>
+                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full overflow-hidden" style={{ fontSize: '0.85rem', lineHeight: 1 }}>
+                              {CURRENCY_FLAGS[baseCurrency] ?? '🏳️'}
+                            </span>
+                            {baseCurrency}
+                          </>
+                        ) : <>Custom ▾</>}
+                      </button>
+                      {showBaseDropdown && (
+                        <div className="absolute left-0 top-full mt-2 z-30 w-48 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl overflow-hidden">
+                          <div className="p-2 border-b border-slate-700">
+                            <input
+                              autoFocus
+                              type="text"
+                              placeholder="Search currency…"
+                              value={baseSearch}
+                              onChange={(e) => setBaseSearch(e.target.value.toUpperCase())}
+                              className="w-full bg-slate-800 text-slate-100 text-xs rounded-lg px-3 py-2 outline-none placeholder-slate-500 border border-slate-600 focus:border-purple-500 transition"
+                            />
+                          </div>
+                          <div className="max-h-48 overflow-y-auto py-1">
+                            {allCurrencies.filter((c) => c !== baseCurrency && c.includes(baseSearch)).map((code) => {
+                              const color = getCurrencyColor(code, allCurrencies)
+                              return (
+                                <button
+                                  key={code}
+                                  type="button"
+                                  onClick={() => { setBaseCurrency(code); setShowBaseDropdown(false); setBaseSearch('') }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-slate-700 transition"
+                                >
+                                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1rem', lineHeight: 1 }}>
+                                    {CURRENCY_FLAGS[code] ?? '🏳️'}
+                                  </span>
+                                  <span style={{ color }} className="font-semibold">{code}</span>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* vs. currencies */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs uppercase tracking-widest text-gray-500">vs.</span>
+                  <div className="flex flex-wrap gap-1">
+                    {[...new Set([...DEFAULT_COMPARE, ...activeCurrencies])].filter((c) => c !== baseCurrency).map((code) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() =>
+                          setActiveCurrencies((prev) =>
+                            prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
+                          )
+                        }
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide transition ${
+                          activeCurrencies.includes(code) ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:text-white'
+                        }`}
+                      >
+                        {code}
+                      </button>
+                    ))}
+                    <div className="relative" ref={addVsMenuRef}>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddVsMenu((prev) => !prev)}
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-500 hover:text-white transition text-base font-bold leading-none"
+                      >
+                        +
+                      </button>
+                      {showAddVsMenu && (
+                        <div className="absolute left-0 top-full mt-2 z-30 rounded-lg bg-slate-800 border border-slate-700 shadow-xl w-36 overflow-hidden">
+                          <div className="p-2 border-b border-slate-700">
+                            <input
+                              autoFocus
+                              type="text"
+                              placeholder="Search…"
+                              value={addVsSearch}
+                              onChange={(e) => setAddVsSearch(e.target.value.toUpperCase())}
+                              className="w-full bg-slate-700 text-slate-100 text-xs rounded-md px-2 py-1.5 outline-none placeholder-slate-500 border border-slate-600 focus:border-purple-500 transition"
+                            />
+                          </div>
+                          <div className="max-h-40 overflow-y-auto py-1">
+                            {allCurrencies
+                              .filter((c) => !activeCurrencies.includes(c) && c !== baseCurrency && c.includes(addVsSearch))
+                              .map((code) => {
+                                const color = getCurrencyColor(code, allCurrencies)
+                                return (
+                                  <button
+                                    key={code}
+                                    type="button"
+                                    onClick={() => { setActiveCurrencies((prev) => [...prev, code]); setShowAddVsMenu(false); setAddVsSearch('') }}
+                                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left hover:bg-slate-700 transition"
+                                  >
+                                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full overflow-hidden flex-shrink-0" style={{ fontSize: '1rem', lineHeight: 1 }}>
+                                      {CURRENCY_FLAGS[code] ?? '🏳️'}
+                                    </span>
+                                    <span style={{ color }} className="font-semibold">{code}</span>
+                                  </button>
+                                )
+                              })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Range */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs uppercase tracking-widest text-gray-500">Range</span>
+                  <div className="flex flex-wrap gap-1">
+                    {(['all', 'last12', 'ytd', 'last30'] as FxRange[]).map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setRange(option)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide transition ${
+                          range === option ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:text-white'
+                        }`}
+                      >
+                        {t.range[option]}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Custom date range */}
+                  <div className="relative" ref={calendarRef}>
+                    <button
+                      type="button"
+                      onClick={() => { setRange('custom'); setShowCalendar((v) => !v) }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide transition border ${
+                        range === 'custom'
+                          ? 'bg-purple-600 border-purple-500 text-white'
+                          : 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white hover:border-gray-500'
+                      }`}
+                    >
+                      <span>📅</span>
+                      {range === 'custom' && customStart && customEnd
+                        ? `${customStart.toLocaleDateString('en', { month: 'short', day: 'numeric' })} – ${customEnd.toLocaleDateString('en', { month: 'short', day: 'numeric' })}`
+                        : t.range.custom}
+                    </button>
+
+                    {showCalendar && (() => {
+                      const today = new Date()
+                      today.setHours(0, 0, 0, 0)
+                      const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
+                      const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa']
+                      const firstDay = new Date(calViewYear, calViewMonth, 1).getDay()
+                      const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate()
+                      const prevMonth = () => {
+                        if (calViewMonth === 0) { setCalViewMonth(11); setCalViewYear(y => y - 1) }
+                        else setCalViewMonth(m => m - 1)
+                      }
+                      const nextMonth = () => {
+                        if (calViewMonth === 11) { setCalViewMonth(0); setCalViewYear(y => y + 1) }
+                        else setCalViewMonth(m => m + 1)
+                      }
+                      const handleDay = (day: number) => {
+                        const d = new Date(calViewYear, calViewMonth, day)
+                        if (d > today) return
+                        if (calendarStep === 'start') { setCustomStart(d); setCustomEnd(null); setCalendarStep('end') }
+                        else { setCustomEnd(d); setCalendarStep('start'); setShowCalendar(false) }
+                      }
+                      const inRange = (day: number) => {
+                        const d = new Date(calViewYear, calViewMonth, day)
+                        const end = calendarStep === 'end' ? (calendarHover ?? customEnd) : customEnd
+                        if (!customStart || !end) return false
+                        const s = customStart < end ? customStart : end
+                        const e = customStart < end ? end : customStart
+                        return d > s && d < e
+                      }
+                      const isSelected = (day: number) => {
+                        const d = new Date(calViewYear, calViewMonth, day)
+                        return (customStart && d.toDateString() === customStart.toDateString()) ||
+                               (customEnd && d.toDateString() === customEnd.toDateString()) || false
+                      }
+                      return (
+                        <div className="absolute left-0 top-full mt-2 z-50 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-4 w-64 select-none">
+                          <div className="text-xs text-slate-400 text-center mb-3 font-medium">
+                            {calendarStep === 'start' ? 'Select start date' : 'Select end date'}
+                          </div>
+                          <div className="flex items-center justify-between mb-3">
+                            <button type="button" onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">‹</button>
+                            <span className="text-sm font-semibold text-white">{MONTHS[calViewMonth]} {calViewYear}</span>
+                            <button type="button" onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 transition">›</button>
+                          </div>
+                          <div className="grid grid-cols-7 mb-1">
+                            {DAYS.map(d => <div key={d} className="text-center text-xs text-slate-500 font-medium py-1">{d}</div>)}
+                          </div>
+                          <div className="grid grid-cols-7">
+                            {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} />)}
+                            {Array.from({ length: daysInMonth }).map((_, i) => {
+                              const day = i + 1
+                              const d = new Date(calViewYear, calViewMonth, day)
+                              const future = d > today
+                              const sel = isSelected(day)
+                              const inR = inRange(day)
+                              return (
+                                <button
+                                  key={day}
+                                  type="button"
+                                  disabled={future}
+                                  onClick={() => handleDay(day)}
+                                  onMouseEnter={() => !future && calendarStep === 'end' && setCalendarHover(new Date(calViewYear, calViewMonth, day))}
+                                  onMouseLeave={() => setCalendarHover(null)}
+                                  className={`h-8 w-full text-xs rounded-full transition font-medium
+                                    ${future ? 'text-slate-700 cursor-not-allowed' : ''}
+                                    ${!future && sel ? 'bg-purple-600 text-white' : ''}
+                                    ${!future && inR && !sel ? 'bg-purple-900/50 text-purple-200' : ''}
+                                    ${!future && !sel && !inR ? 'text-slate-300 hover:bg-slate-700' : ''}
+                                  `}
+                                >
+                                  {day}
+                                </button>
+                              )
+                            })}
+                          </div>
+                          <div className="mt-3 flex justify-between items-center border-t border-slate-700 pt-3">
+                            <button
+                              type="button"
+                              onClick={() => { setCustomStart(null); setCustomEnd(null); setCalendarStep('start'); setRange('all'); setShowCalendar(false) }}
+                              className="text-xs text-slate-400 hover:text-white transition"
+                            >
+                              Clear
+                            </button>
+                            {customStart && customEnd && (
+                              <span className="text-xs text-slate-400">
+                                {customStart.toLocaleDateString()} – {customEnd.toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                </div>
+
+                {/* Granularity */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs uppercase tracking-widest text-gray-500">Granularity</span>
+                  <div className="flex flex-wrap gap-1">
+                    {(['daily', 'weekly', 'monthly'] as FxGranularity[]).map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setGranularity(option)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide transition ${
+                          granularity === option ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:text-white'
+                        }`}
+                      >
+                        {t.granularity[option]}
+                      </button>
+                    ))}
+                  </div>
+                  {granularity !== 'daily' && (
+                    <div className="text-xs text-gray-500">{t.granularity.average}</div>
+                  )}
+                </div>
+
+              </div>
+            </div>{/* closes sidebar */}
 
           </div>
         )}

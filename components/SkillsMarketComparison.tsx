@@ -18,9 +18,8 @@ type MarketSkill = {
 }
 
 // ── Static data ────────────────────────────────────────────────────────────────
-// emery score  = proficiency weight (strong=100, weak=65, beginning=35)
-//                adjusted for how heavily the skill appeared across all 5 jobs
-// market score = estimated demand based on 2025 data-role job postings
+// emery score  = 1–5 proficiency scale (Expert=5, Above Average=4, Average=3, Learning & Growing=2, Basic=1)
+// market score = 1–5 demand scale (Very High=5, High=4, Moderate=3, Low=2, Minimal=1)
 
 const TOP_SKILLS: MarketSkill[] = [
   {
@@ -28,7 +27,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'Complex SQL',
     fullName: 'Writing complex SQL (CTEs, window functions)',
     laneTitle: 'Data Analytics', laneColor: '#185FA5',
-    emery: 95, market: 94,
+    emery: 5, market: 5,
     note: 'Used at every role — the single most universal skill in data work.',
   },
   {
@@ -36,7 +35,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'Defining KPIs',
     fullName: 'Defining & documenting KPIs',
     laneTitle: 'Data Analytics', laneColor: '#185FA5',
-    emery: 93, market: 87,
+    emery: 5, market: 4,
     note: 'Led KPI standardisation across all 4 companies, from start-up to Big 4.',
   },
   {
@@ -44,7 +43,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'A/B Testing',
     fullName: 'A/B test analysis & significance testing',
     laneTitle: 'Data Analytics', laneColor: '#185FA5',
-    emery: 92, market: 81,
+    emery: 5, market: 4,
     note: 'Core to product analytics at Coveo — designed and evaluated experiments end-to-end.',
   },
   {
@@ -52,7 +51,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'Cross-team Delivery',
     fullName: 'Facilitating cross-team delivery',
     laneTitle: 'Project Management', laneColor: '#5F5E5A',
-    emery: 90, market: 77,
+    emery: 5, market: 4,
     note: 'Programme ownership spanning multiple stakeholder groups at PwC and Compass.',
   },
   {
@@ -60,7 +59,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'Presenting Findings',
     fullName: 'Presenting findings to non-technical stakeholders',
     laneTitle: 'Data Analytics', laneColor: '#185FA5',
-    emery: 88, market: 85,
+    emery: 5, market: 4,
     note: 'Consistently translating complex models into actionable business decisions.',
   },
   {
@@ -68,7 +67,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'Self-serve Dashboards',
     fullName: 'Building self-serve dashboards (Looker, Tableau)',
     laneTitle: 'Data Analytics', laneColor: '#185FA5',
-    emery: 85, market: 88,
+    emery: 4, market: 4,
     note: 'Looker & Tableau across Coveo, Compass, and PwC — fluent in the full BI stack.',
   },
   {
@@ -76,7 +75,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'Funnel & Cohort',
     fullName: 'Funnel & cohort analysis',
     laneTitle: 'Data Analytics', laneColor: '#185FA5',
-    emery: 88, market: 75,
+    emery: 5, market: 4,
     note: 'Deep product analytics experience — highly valued in SaaS and tech companies.',
   },
   {
@@ -84,7 +83,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'Causal Inference',
     fullName: 'Causal inference',
     laneTitle: 'Data Science', laneColor: '#534AB7',
-    emery: 85, market: 53,
+    emery: 5, market: 3,
     note: 'A rare differentiator — measuring true impact rather than spurious correlation.',
   },
   {
@@ -92,7 +91,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'DiD Analysis',
     fullName: 'Differences-in-differences',
     laneTitle: 'Data Science', laneColor: '#534AB7',
-    emery: 82, market: 47,
+    emery: 5, market: 2,
     note: 'Econometric rigour that separates deep analysts from standard data generalists.',
   },
   {
@@ -100,7 +99,7 @@ const TOP_SKILLS: MarketSkill[] = [
     shortName: 'dbt / ELT',
     fullName: 'Building ELT pipelines (dbt)',
     laneTitle: 'Data Engineering', laneColor: '#0F6E56',
-    emery: 68, market: 85,
+    emery: 4, market: 4,
     note: 'Practised at Compass & Coveo. dbt is one of the most in-demand skills in 2025.',
   },
 ]

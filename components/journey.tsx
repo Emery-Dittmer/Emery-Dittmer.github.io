@@ -5,7 +5,7 @@ import FeatImage02 from '@/public/images/Montreal.jpg'
 import FeatImage03 from '@/public/images/Ottawa.jpg'
 import FeatImage04 from '@/public/images/Montreal2.jpg'
 import FeatImage05 from '@/public/images/features-03-image-01.png'
-import FeatImage06 from '@/public/images/features-03-image-02.png'
+import FeatImage06 from '@/public/images/Paris Stock.jpg'
 import { Locale } from '@/lib/i18n'
 
 export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
@@ -162,7 +162,72 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
 
   return (
-    <section>
+    <section className="relative overflow-hidden">
+
+      {/* Meandering vertical line with dots */}
+      <svg
+        className="absolute left-0 top-0 pointer-events-none select-none opacity-[0.10]"
+        style={{ width: '80px', height: '3000px' }}
+        viewBox="0 0 80 3000"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M40 0 C8 300 72 600 40 900 C8 1200 72 1500 35 1800 C5 2100 75 2400 40 2700 C15 2850 65 2950 40 3000"
+          stroke="white"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <circle cx="8"  cy="300"  r="2.5" fill="white" />
+        <circle cx="72" cy="600"  r="2"   fill="white" />
+        <circle cx="40" cy="900"  r="3"   fill="white" />
+        <circle cx="55" cy="450"  r="1.8" fill="white" />
+        <circle cx="20" cy="750"  r="1.5" fill="white" />
+        <circle cx="8"  cy="1200" r="2"   fill="white" />
+        <circle cx="72" cy="1500" r="2.5" fill="white" />
+        <circle cx="60" cy="1050" r="2"   fill="white" />
+        <circle cx="25" cy="1350" r="1.8" fill="white" />
+        <circle cx="35" cy="1800" r="2"   fill="white" />
+        <circle cx="5"  cy="2100" r="3"   fill="white" />
+        <circle cx="65" cy="1650" r="1.5" fill="white" />
+        <circle cx="20" cy="1950" r="2"   fill="white" />
+        <circle cx="75" cy="2400" r="2"   fill="white" />
+        <circle cx="40" cy="2700" r="2.5" fill="white" />
+        <circle cx="60" cy="2250" r="1.8" fill="white" />
+        <circle cx="30" cy="2600" r="1.5" fill="white" />
+      </svg>
+
+      {/* Topographic contour lines — upper right */}
+      <svg
+        className="absolute pointer-events-none select-none opacity-[0.10]"
+        style={{ right: '-20px', top: '5%', width: '300px', height: '280px' }}
+        viewBox="0 0 300 280"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path d="M148 15 C235 5 298 62 290 148 C282 230 220 278 138 272 C56 266 8 218 18 140 C28 62 64 25 148 15 Z"   stroke="rgb(196 181 253)" strokeWidth="1.2" />
+        <path d="M150 40 C226 32 278 80 270 155 C262 226 208 264 135 258 C62 252 22 208 30 140 C38 72 74 48 150 40 Z"   stroke="rgb(196 181 253)" strokeWidth="1.2" />
+        <path d="M151 65 C214 58 256 98 250 162 C244 222 198 252 135 246 C72 240 38 200 44 148 C50 96 88 72 151 65 Z"   stroke="rgb(196 181 253)" strokeWidth="1.2" />
+        <path d="M153 90 C204 84 236 116 230 168 C224 216 186 238 134 232 C82 226 56 192 60 153 C64 114 104 96 153 90 Z"  stroke="rgb(196 181 253)" strokeWidth="1.2" />
+        <path d="M154 113 C192 108 214 132 210 174 C206 212 174 228 134 222 C94 216 72 186 76 157 C80 128 116 118 154 113 Z" stroke="rgb(196 181 253)" strokeWidth="1.2" />
+        <path d="M155 136 C180 132 196 152 192 180 C188 204 164 214 136 210 C108 206 90 184 94 162 C98 140 130 140 155 136 Z" stroke="rgb(196 181 253)" strokeWidth="1.2" />
+      </svg>
+
+      {/* Topographic contour lines — lower left */}
+      <svg
+        className="absolute pointer-events-none select-none opacity-[0.07]"
+        style={{ left: '-30px', bottom: '8%', width: '240px', height: '220px' }}
+        viewBox="0 0 240 220"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path d="M118 12 C188 4 238 50 232 118 C226 184 176 222 108 216 C40 210 2 168 8 104 C14 40 50 20 118 12 Z"   stroke="rgb(196 181 253)" strokeWidth="1.1" />
+        <path d="M119 34 C178 28 218 66 212 124 C206 178 162 208 104 202 C46 196 14 158 20 106 C26 54 62 40 119 34 Z"  stroke="rgb(196 181 253)" strokeWidth="1.1" />
+        <path d="M120 56 C168 51 198 82 193 130 C188 174 150 196 100 190 C50 184 26 150 30 108 C34 66 74 61 120 56 Z"  stroke="rgb(196 181 253)" strokeWidth="1.1" />
+        <path d="M121 78 C158 74 178 98 174 136 C170 170 140 184 102 179 C64 174 44 146 48 116 C52 86 88 82 121 78 Z"  stroke="rgb(196 181 253)" strokeWidth="1.1" />
+        <path d="M122 100 C148 97 162 114 158 142 C154 166 130 174 104 170 C78 166 62 144 66 124 C70 104 98 103 122 100 Z" stroke="rgb(196 181 253)" strokeWidth="1.1" />
+      </svg>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="py-12 md:py-20 border-t border-gray-800">
 

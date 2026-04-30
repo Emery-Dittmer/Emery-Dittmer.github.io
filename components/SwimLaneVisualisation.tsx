@@ -15,10 +15,7 @@ import SkillChip from './SkillChip'
 import CustomisePanel from './CustomisePanel'
 
 const proficiencyOrder: Record<Proficiency, number> = {
-  'strong': 0,
-  'weak': 1,
-  'beginning': 2,
-  'no-skill': 3,
+  5: 0, 4: 1, 3: 2, 2: 3, 1: 4,
 }
 
 export default function SwimLaneVisualisation() {
@@ -192,7 +189,7 @@ export default function SwimLaneVisualisation() {
 
       {/* Proficiency legend */}
       <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 px-1">
-        {(Object.keys(proficiencyMeta) as Proficiency[]).map(level => {
+        {([1, 2, 3, 4, 5] as Proficiency[]).map(level => {
           const meta = proficiencyMeta[level]
           return (
             <div key={level} className="flex items-start gap-1.5 group relative">

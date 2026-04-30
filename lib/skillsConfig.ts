@@ -7,16 +7,17 @@ export type LaneId =
   | 'ml-ai-engineering'
   | 'project-management'
 
-export type Proficiency = 'strong' | 'weak' | 'beginning' | 'no-skill'
+export type Proficiency = 1 | 2 | 3 | 4 | 5
 
 export const proficiencyMeta: Record<
   Proficiency,
   { label: string; color: string; description: string }
 > = {
-  'strong':    { label: 'Strong',    color: '#4ade80', description: 'Applied independently in production environments.' },
-  'weak':      { label: 'Weak',      color: '#fbbf24', description: 'Some hands-on experience; not yet fully production-ready.' },
-  'beginning': { label: 'Beginning', color: '#fb923c', description: 'Awareness and limited hands-on experience.' },
-  'no-skill':  { label: 'No Skill',  color: '#6b7280', description: 'No current knowledge or experience.' },
+  1: { label: '1 – Basic',              color: '#6b7280', description: 'Basic familiarity with the concept or tool.' },
+  2: { label: '2 – Learning & Growing', color: '#fb923c', description: 'Actively developing skills with some hands-on experience.' },
+  3: { label: '3 – Average',            color: '#fbbf24', description: 'Solid working knowledge, applied in real projects.' },
+  4: { label: '4 – Above Average',      color: '#4ade80', description: 'Applied independently and confidently across multiple projects.' },
+  5: { label: '5 – Expert',             color: '#a78bfa', description: 'Top-of-field expertise with deep, specialised knowledge.' },
 }
 
 export type SkillContribution = {
@@ -71,7 +72,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Regularised regression (Lasso, Ridge)',
           id: 'regularised-regression-lasso-ridge',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Linear models with L1/L2 penalties to prevent overfitting and enable automatic feature selection.',
           contributions: [
             { laneId: 'data-science', percentage: 90 },
@@ -82,7 +83,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Tree-based methods (XGBoost, Random Forest)',
           id: 'tree-based-methods-xgboost-random-forest',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Ensemble methods that combine many decision trees for robust classification and regression tasks.',
           contributions: [
             { laneId: 'data-science', percentage: 90 },
@@ -93,7 +94,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Cross-validation & hyperparameter tuning',
           id: 'cross-validation-hyperparameter-tuning',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Techniques for evaluating model generalisation and systematically optimising model configuration.',
           contributions: [
             { laneId: 'data-science', percentage: 85 },
@@ -104,7 +105,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Natural language processing',
           id: 'natural-language-processing',
-          proficiency: 'weak',
+          proficiency: 4,
           description: 'Computational techniques for analysing, understanding, and generating human language from text data.',
           contributions: [
             { laneId: 'data-science', percentage: 70 },
@@ -114,7 +115,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Time series & panel data',
           id: 'time-series-panel-data',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Statistical methods for data indexed over time or across multiple entities and time periods simultaneously.',
           contributions: [
             { laneId: 'data-science', percentage: 85 },
@@ -125,7 +126,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Differences-in-differences',
           id: 'differences-in-differences',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Quasi-experimental method comparing outcome changes between treatment and control groups over time.',
           contributions: [
             { laneId: 'data-science', percentage: 90 },
@@ -135,7 +136,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Instrumental variables',
           id: 'instrumental-variables',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'Causal estimation technique using external instruments to address endogeneity in observational data.',
           contributions: [
             { laneId: 'data-science', percentage: 95 },
@@ -145,7 +146,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Causal inference',
           id: 'causal-inference',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Frameworks and methods for establishing cause-and-effect relationships from observational or experimental data.',
           contributions: [
             { laneId: 'data-science', percentage: 90 },
@@ -163,7 +164,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Setting up a cloud repo (GitHub/GitLab)',
           id: 'setting-up-a-cloud-repo-github-gitlab',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Creating and configuring version-controlled repositories in the cloud for collaborative code management.',
           contributions: [
             { laneId: 'data-engineering', percentage: 90 },
@@ -174,7 +175,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Writing & scheduling DAGs (Airflow/Prefect)',
           id: 'writing-scheduling-dags-airflow-prefect',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Defining directed acyclic graphs that specify task dependencies and orchestrating their execution on a schedule.',
           contributions: [
             { laneId: 'data-engineering', percentage: 95 },
@@ -184,7 +185,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Building ELT pipelines (dbt)',
           id: 'building-elt-pipelines-dbt',
-          proficiency: 'weak',
+          proficiency: 4,
           description: 'Extract-Load-Transform workflows that ingest raw data into a warehouse and apply transformations in SQL.',
           contributions: [
             { laneId: 'data-engineering', percentage: 90 },
@@ -195,7 +196,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Provisioning cloud storage (S3, GCS, ADLS)',
           id: 'provisioning-cloud-storage-s3-gcs-adls',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'Setting up scalable object and blob storage services on major cloud platforms for data pipelines.',
           contributions: [
             { laneId: 'data-engineering', percentage: 90 },
@@ -205,7 +206,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Containerising workloads (Docker)',
           id: 'containerising-workloads-docker',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'Packaging applications and their dependencies into portable, isolated containers for consistent deployment.',
           contributions: [
             { laneId: 'data-engineering', percentage: 85 },
@@ -215,7 +216,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Schema design & data modelling',
           id: 'schema-design-data-modelling',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Defining the structure, relationships, and constraints of data stored in relational or analytical databases.',
           contributions: [
             { laneId: 'data-engineering', percentage: 80 },
@@ -224,9 +225,20 @@ export const skillsConfig: { lanes: Lane[] } = {
           ],
         },
         {
+          name: 'Data architecture',
+          id: 'data-architecture',
+          proficiency: 4,
+          description: 'Designing the overall structure of data systems — storage layers, integration patterns, and how data flows between platforms end-to-end.',
+          contributions: [
+            { laneId: 'data-engineering', percentage: 85 },
+            { laneId: 'data-governance', percentage: 30 },
+            { laneId: 'business-intelligence', percentage: 25 },
+          ],
+        },
+        {
           name: 'Stream processing (Kafka, Kinesis)',
           id: 'stream-processing-kafka-kinesis',
-          proficiency: 'no-skill',
+          proficiency: 1,
           description: 'Processing continuous event streams in real time as data arrives, rather than in scheduled batches.',
           contributions: [
             { laneId: 'data-engineering', percentage: 90 },
@@ -236,7 +248,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Infra-as-code (Terraform)',
           id: 'infra-as-code-terraform',
-          proficiency: 'no-skill',
+          proficiency: 1,
           description: 'Defining and provisioning cloud infrastructure through version-controlled declarative configuration files.',
           contributions: [
             { laneId: 'data-engineering', percentage: 90 },
@@ -253,7 +265,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Writing complex SQL (CTEs, window functions)',
           id: 'writing-complex-sql-ctes-window-functions',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Advanced SQL constructs for multi-step transformations and row-level calculations across ordered partitions.',
           contributions: [
             { laneId: 'data-analytics', percentage: 90 },
@@ -264,7 +276,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Funnel & cohort analysis',
           id: 'funnel-cohort-analysis',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Tracking user progression through defined conversion steps and comparing behaviour across user groups over time.',
           contributions: [
             { laneId: 'data-analytics', percentage: 90 },
@@ -274,7 +286,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'A/B test analysis & significance testing',
           id: 'ab-test-analysis-significance-testing',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Statistical evaluation of controlled experiments to determine which variant produces a reliably better outcome.',
           contributions: [
             { laneId: 'data-analytics', percentage: 80 },
@@ -284,7 +296,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Building self-serve dashboards (Looker, Tableau)',
           id: 'building-self-serve-dashboards-looker-tableau',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Interactive visualisations that allow stakeholders to explore data without requiring analyst involvement.',
           contributions: [
             { laneId: 'data-analytics', percentage: 80 },
@@ -294,7 +306,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Defining & documenting KPIs',
           id: 'defining-documenting-kpis',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Establishing, agreeing, and formally documenting the metrics used to measure business performance.',
           contributions: [
             { laneId: 'data-analytics', percentage: 70 },
@@ -305,7 +317,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Root cause analysis',
           id: 'root-cause-analysis',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Systematic investigation to identify the underlying cause of a metric change or operational incident.',
           contributions: [
             { laneId: 'data-analytics', percentage: 80 },
@@ -315,7 +327,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Ad hoc analysis & rapid prototyping',
           id: 'ad-hoc-analysis-rapid-prototyping',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Quick, exploratory data work to answer immediate business questions without a pre-specified methodology.',
           contributions: [
             { laneId: 'data-analytics', percentage: 90 },
@@ -325,7 +337,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Presenting findings to non-technical stakeholders',
           id: 'presenting-findings-to-non-technical-stakeholders',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Communicating data insights and recommendations clearly to audiences without a quantitative background.',
           contributions: [
             { laneId: 'data-analytics', percentage: 70 },
@@ -342,7 +354,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Star & snowflake schema design',
           id: 'star-snowflake-schema-design',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Dimensional modelling patterns that organise data into fact and dimension tables for fast analytical queries.',
           contributions: [
             { laneId: 'business-intelligence', percentage: 90 },
@@ -353,7 +365,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Building semantic / metrics layers',
           id: 'building-semantic-metrics-layers',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'An abstraction layer that translates raw tables into business-friendly, consistently defined metrics and dimensions.',
           contributions: [
             { laneId: 'business-intelligence', percentage: 90 },
@@ -364,7 +376,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Writing optimised SQL for reporting',
           id: 'writing-optimised-sql-for-reporting',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'SQL tuned for large-scale analytical workloads — minimising scan cost, leveraging partitioning, and reducing latency.',
           contributions: [
             { laneId: 'business-intelligence', percentage: 85 },
@@ -374,7 +386,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Setting up automated report delivery',
           id: 'setting-up-automated-report-delivery',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Scheduling and distributing reports or snapshots to stakeholders automatically on a defined cadence.',
           contributions: [
             { laneId: 'business-intelligence', percentage: 80 },
@@ -384,7 +396,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Connecting BI tools to data warehouses',
           id: 'connecting-bi-tools-to-data-warehouses',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Configuring live or cached connections between BI platforms and cloud data warehouses like BigQuery or Snowflake.',
           contributions: [
             { laneId: 'business-intelligence', percentage: 90 },
@@ -394,7 +406,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Row-level security & access control',
           id: 'row-level-security-access-control',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'Restricting which data rows a user can see based on their role or attributes within a BI tool.',
           contributions: [
             { laneId: 'business-intelligence', percentage: 80 },
@@ -404,7 +416,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Standardising metrics across teams',
           id: 'standardising-metrics-across-teams',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Aligning definitions and calculation logic of shared metrics so all teams report from a single source of truth.',
           contributions: [
             { laneId: 'business-intelligence', percentage: 80 },
@@ -415,7 +427,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Version-controlling BI assets',
           id: 'version-controlling-bi-assets',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Applying git-based workflows to BI code, dashboard definitions, and metric logic for traceability and collaboration.',
           contributions: [
             { laneId: 'business-intelligence', percentage: 70 },
@@ -432,7 +444,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Writing data quality checks (Great Expectations)',
           id: 'writing-data-quality-checks-great-expectations',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'Automated tests that validate data against expected patterns, value ranges, and formats before it is consumed.',
           contributions: [
             { laneId: 'data-governance', percentage: 90 },
@@ -443,7 +455,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Building & maintaining a data catalogue',
           id: 'building-maintaining-a-data-catalogue',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'A centralised inventory of data assets enriched with metadata, ownership, and lineage for discoverability.',
           contributions: [
             { laneId: 'data-governance', percentage: 90 },
@@ -454,7 +466,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Documenting data lineage end-to-end',
           id: 'documenting-data-lineage-end-to-end',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Tracing exactly how data flows from source systems through all transformations to its final reporting destination.',
           contributions: [
             { laneId: 'data-governance', percentage: 90 },
@@ -464,7 +476,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Drafting data policy & ownership rules',
           id: 'drafting-data-policy-ownership-rules',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Formal documentation of data responsibilities, acceptable usage policies, and accountability structures.',
           contributions: [
             { laneId: 'data-governance', percentage: 90 },
@@ -474,7 +486,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Implementing GDPR / data retention policies',
           id: 'implementing-gdpr-data-retention-policies',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Applying regulatory requirements governing how personal data is stored, accessed, and eventually deleted.',
           contributions: [
             { laneId: 'data-governance', percentage: 90 },
@@ -484,7 +496,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Classifying & tagging sensitive data',
           id: 'classifying-tagging-sensitive-data',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'Identifying and labelling data assets by sensitivity level so appropriate access controls can be applied.',
           contributions: [
             { laneId: 'data-governance', percentage: 85 },
@@ -494,7 +506,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Setting up alerting on data freshness',
           id: 'setting-up-alerting-on-data-freshness',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Monitoring pipeline outputs to detect and alert when data stops updating within its expected time window.',
           contributions: [
             { laneId: 'data-governance', percentage: 80 },
@@ -505,7 +517,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Running data quality reviews with teams',
           id: 'running-data-quality-reviews-with-teams',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Collaborative sessions to surface, prioritise, and resolve data quality issues across the organisation.',
           contributions: [
             { laneId: 'data-governance', percentage: 85 },
@@ -523,7 +535,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Packaging models as REST APIs (FastAPI, Flask)',
           id: 'packaging-models-as-rest-apis-fastapi-flask',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Wrapping trained models in HTTP endpoints so applications can query predictions in real time.',
           contributions: [
             { laneId: 'ml-ai-engineering', percentage: 90 },
@@ -533,7 +545,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Setting up CI/CD for model deployment',
           id: 'setting-up-cicd-for-model-deployment',
-          proficiency: 'beginning',
+          proficiency: 3,
           description: 'Automated pipelines that test, validate, and deploy new model versions to production with minimal manual steps.',
           contributions: [
             { laneId: 'ml-ai-engineering', percentage: 80 },
@@ -543,7 +555,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Monitoring model drift in production',
           id: 'monitoring-model-drift-in-production',
-          proficiency: 'beginning',
+          proficiency: 3,
           description: 'Detecting when the distribution of model inputs or outputs shifts in ways that degrade prediction quality.',
           contributions: [
             { laneId: 'ml-ai-engineering', percentage: 90 },
@@ -554,7 +566,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Fine-tuning LLMs (LoRA, RLHF)',
           id: 'fine-tuning-llms-lora-rlhf',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'Adapting pre-trained large language models to specific tasks or human preferences using parameter-efficient methods.',
           contributions: [
             { laneId: 'ml-ai-engineering', percentage: 90 },
@@ -564,7 +576,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Building RAG pipelines',
           id: 'building-rag-pipelines',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Retrieval-augmented generation systems that combine document search with LLM generation for grounded responses.',
           contributions: [
             { laneId: 'ml-ai-engineering', percentage: 85 },
@@ -575,7 +587,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Managing feature stores (Feast, Tecton)',
           id: 'managing-feature-stores-feast-tecton',
-          proficiency: 'no-skill',
+          proficiency: 1,
           description: 'Centralised repositories for storing, serving, and sharing ML features consistently across training and inference.',
           contributions: [
             { laneId: 'ml-ai-engineering', percentage: 80 },
@@ -586,7 +598,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Writing model cards & evaluation suites',
           id: 'writing-model-cards-evaluation-suites',
-          proficiency: 'beginning',
+          proficiency: 2,
           description: 'Documenting model capabilities, limitations, and benchmark results to support transparency and responsible use.',
           contributions: [
             { laneId: 'ml-ai-engineering', percentage: 80 },
@@ -597,7 +609,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Orchestrating training jobs (Kubeflow, SageMaker)',
           id: 'orchestrating-training-jobs-kubeflow-sagemaker',
-          proficiency: 'no-skill',
+          proficiency: 1,
           description: 'Automating large-scale model training workflows on distributed compute infrastructure in the cloud.',
           contributions: [
             { laneId: 'ml-ai-engineering', percentage: 85 },
@@ -614,7 +626,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Writing & prioritising a product backlog',
           id: 'writing-prioritising-a-product-backlog',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Maintaining an ordered list of work items, each with clear scope and business value, ready for sprint planning.',
           contributions: [
             { laneId: 'project-management', percentage: 90 },
@@ -624,7 +636,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Running sprint planning & retrospectives',
           id: 'running-sprint-planning-retrospectives',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Agile ceremonies for committing to upcoming work and reflecting on process improvements after each iteration.',
           contributions: [
             { laneId: 'project-management', percentage: 90 },
@@ -633,7 +645,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Building & maintaining a project roadmap',
           id: 'building-maintaining-a-project-roadmap',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'A high-level plan showing milestones, inter-team dependencies, and the expected delivery timeline.',
           contributions: [
             { laneId: 'project-management', percentage: 90 },
@@ -643,7 +655,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Defining success criteria & acceptance tests',
           id: 'defining-success-criteria-acceptance-tests',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Setting clear, measurable conditions agreed with stakeholders that determine when a deliverable is complete.',
           contributions: [
             { laneId: 'project-management', percentage: 85 },
@@ -654,7 +666,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Managing stakeholder sign-off',
           id: 'managing-stakeholder-sign-off',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Obtaining formal approval from key stakeholders at project milestones to maintain alignment and accountability.',
           contributions: [
             { laneId: 'project-management', percentage: 90 },
@@ -664,7 +676,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Producing risk & dependency logs',
           id: 'producing-risk-dependency-logs',
-          proficiency: 'weak',
+          proficiency: 3,
           description: 'Documenting potential blockers and inter-team dependencies that could affect delivery timelines.',
           contributions: [
             { laneId: 'project-management', percentage: 90 },
@@ -674,7 +686,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Scoping & estimating data projects',
           id: 'scoping-estimating-data-projects',
-          proficiency: 'strong',
+          proficiency: 4,
           description: 'Defining the boundaries, deliverables, and effort required for a data initiative before work begins.',
           contributions: [
             { laneId: 'project-management', percentage: 85 },
@@ -686,7 +698,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Facilitating cross-team delivery',
           id: 'facilitating-cross-team-delivery',
-          proficiency: 'strong',
+          proficiency: 5,
           description: 'Coordinating work across multiple teams with different priorities to achieve a shared programme objective.',
           contributions: [
             { laneId: 'project-management', percentage: 90 },
