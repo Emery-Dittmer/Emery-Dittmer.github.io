@@ -152,6 +152,62 @@ const QUAD_META: Record<Quadrant, { label: string; color: string; subtleBg: stri
   },
 }
 
+// ── Scatter-plot collision resolution ─────────────────────────────────────────
+
+const BUBBLE_R = 10
+
+interface PlotPos { cx: number; cy: number; clusterCx?: number; clusterCy?: number }
+
+function computeScatterPositions(skills: MarketSkill[]): Map<string, PlotPos> {
+  const raw = skills.map(s => ({ id: s.id, cx: px(s.market), cy: py(s.emery) }))
+  const groupOf = new Array(raw.length).fill(-1)
+  const groups: number[][] = []
+
+  // Build connected components — any two bubbles whose centres are closer than
+  // 2.2 × BUBBLE_R belong to the same cluster
+  for (let i = 0; i < raw.length; i++) {
+    if (groupOf[i] !== -1) continue
+    const g = groups.length
+    groups.push([i])
+    groupOf[i] = g
+    for (let j = i + 1; j < raw.length; j++) {
+      if (groupOf[j] !== -1) continue
+      const dx = raw[j].cx - raw[i].cx
+      const dy = raw[j].cy - raw[i].cy
+      if (Math.sqrt(dx * dx + dy * dy) < BUBBLE_R * 2.2) {
+        groups[g].push(j)
+        groupOf[j] = g
+      }
+    }
+  }
+
+  const out = new Map<string, PlotPos>()
+
+  for (const group of groups) {
+    const n = group.length
+    if (n === 1) {
+      const { id, cx, cy } = raw[group[0]]
+      out.set(id, { cx, cy })
+      continue
+    }
+    const clusterCx = group.reduce((s, i) => s + raw[i].cx, 0) / n
+    const clusterCy = group.reduce((s, i) => s + raw[i].cy, 0) / n
+    // Minimum ring radius so adjacent bubbles never overlap
+    const ringR = (BUBBLE_R * 2 + 4) / (2 * Math.sin(Math.PI / n))
+    group.forEach((rawIdx, k) => {
+      const angle = (2 * Math.PI * k) / n - Math.PI / 2
+      out.set(raw[rawIdx].id, {
+        cx: clusterCx + Math.cos(angle) * ringR,
+        cy: clusterCy + Math.sin(angle) * ringR,
+        clusterCx,
+        clusterCy,
+      })
+    })
+  }
+
+  return out
+}
+
 // ── Scatter plot constants ─────────────────────────────────────────────────────
 
 const VW = 580
@@ -412,30 +468,69 @@ export default function SkillsMarketComparison() {
 
           <rect x={PL} y={PT} width={plotW} height={plotH} fill="none" stroke="#1f2937" strokeWidth={1} />
 
-          {sorted.map((skill, i) => {
-            const bx    = px(skill.market)
-            const by    = py(skill.emery)
-            const isHov = hovered === skill.id
-            const q     = quadrant(skill)
-            const r     = isHov ? 13 : 10
+          {(() => {
+            const positions = computeScatterPositions(sorted)
+
+            // Collect unique cluster centres so we can render them once
+            const clusterCentres = new Map<string, { cx: number; cy: number }>()
+            sorted.forEach(skill => {
+              const pos = positions.get(skill.id)!
+              if (pos.clusterCx !== undefined && pos.clusterCy !== undefined) {
+                const key = `${pos.clusterCx},${pos.clusterCy}`
+                clusterCentres.set(key, { cx: pos.clusterCx, cy: pos.clusterCy })
+              }
+            })
+
             return (
-              <g key={skill.id}
-                onMouseEnter={() => setHovered(skill.id)}
-                onMouseLeave={() => setHovered(null)}
-                style={{ cursor: 'pointer' }}>
-                {isHov && (
-                  <circle cx={bx} cy={by} r={r + 5}
-                    fill="none" stroke={skill.laneColor} strokeWidth={1} strokeOpacity={0.4} />
-                )}
-                <circle cx={bx} cy={by} r={r} fill={skill.laneColor} opacity={isHov ? 1 : 0.82} />
-                {q === 'shine' && !isHov && (
-                  <circle cx={bx + 7} cy={by - 7} r={3.5} fill={QUAD_META.shine.color} opacity={0.9} />
-                )}
-                <text x={bx} y={by + 4} textAnchor="middle" fontSize={8.5} fontWeight={800} fill="white"
-                  style={{ pointerEvents: 'none' }}>{i + 1}</text>
-              </g>
+              <>
+                {/* Connector lines + cluster-centre dots (rendered below bubbles) */}
+                {sorted.map(skill => {
+                  const pos = positions.get(skill.id)!
+                  if (pos.clusterCx === undefined) return null
+                  return (
+                    <line key={`ln-${skill.id}`}
+                      x1={pos.clusterCx} y1={pos.clusterCy}
+                      x2={pos.cx} y2={pos.cy}
+                      stroke={skill.laneColor} strokeWidth={0.9}
+                      strokeOpacity={0.28} strokeDasharray="2 2"
+                    />
+                  )
+                })}
+                {Array.from(clusterCentres.values()).map(({ cx, cy }) => (
+                  <circle key={`cc-${cx}-${cy}`} cx={cx} cy={cy} r={3}
+                    fill="white" opacity={0.18} />
+                ))}
+
+                {/* Bubbles */}
+                {sorted.map((skill, i) => {
+                  const { cx: bx, cy: by } = positions.get(skill.id)!
+                  const isHov = hovered === skill.id
+                  const q     = quadrant(skill)
+                  const r     = isHov ? 13 : BUBBLE_R
+                  return (
+                    <g key={skill.id}
+                      onMouseEnter={() => setHovered(skill.id)}
+                      onMouseLeave={() => setHovered(null)}
+                      style={{ cursor: 'pointer' }}>
+                      {isHov && (
+                        <circle cx={bx} cy={by} r={r + 5}
+                          fill="none" stroke={skill.laneColor} strokeWidth={1} strokeOpacity={0.4} />
+                      )}
+                      <circle cx={bx} cy={by} r={r}
+                        fill={skill.laneColor} opacity={isHov ? 1 : 0.82} />
+                      {q === 'shine' && !isHov && (
+                        <circle cx={bx + 7} cy={by - 7} r={3.5}
+                          fill={QUAD_META.shine.color} opacity={0.9} />
+                      )}
+                      <text x={bx} y={by + 4} textAnchor="middle"
+                        fontSize={8.5} fontWeight={800} fill="white"
+                        style={{ pointerEvents: 'none' }}>{i + 1}</text>
+                    </g>
+                  )
+                })}
+              </>
             )
-          })}
+          })()}
         </svg>
       </div>
 

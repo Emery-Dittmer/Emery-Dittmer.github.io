@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import Image, { StaticImageData } from 'next/image'
-import rbcLogo    from '@/assets/companies/rbc_logo.png'
-import pwcLogo    from '@/assets/companies/pwc_logo.png'
-import mcgillLogo from '@/assets/companies/McGill_University.png'
+import rbcLogo      from '@/assets/companies/rbc_logo.png'
+import pwcLogo      from '@/assets/companies/pwc_logo.png'
+import mcgillLogo   from '@/assets/companies/McGill_University.png'
+import coveoLogo    from '@/assets/companies/Coveo logo.png'
+import compassLogo  from '@/assets/companies/compass-logo-2025-scaled.png'
 
 type View     = 'timeline' | 'industry'
 type Industry = 'Technology' | 'Consulting' | 'Financial Services' | 'Education'
@@ -52,6 +54,7 @@ const roles: Role[] = [
     role: 'Data Science Analytics Manager',
     start: [2023, 8], end: null,
     industry: 'Technology', color: '#059669',
+    logo: compassLogo,
     bullets: [
       'Orchestrated intake & delivery of analytics and ML initiatives',
       'Built scalable data pipelines on Dataiku & Snowflake with MLOps',
@@ -74,6 +77,7 @@ const roles: Role[] = [
     role: 'BI Analyst & Data Scientist',
     start: [2023, 10], end: [2024, 7],
     industry: 'Technology', color: '#ea580c',
+    logo: coveoLogo,
     bullets: [
       'KPI dashboards supporting $2M ARR growth',
       'A/B testing & uplift modelling — 5× improved monetization efficiency',
@@ -156,40 +160,63 @@ function fmtDur(m: number): string {
 
 // ── Root component ────────────────────────────────────────────────────────────
 export default function ExperienceSection() {
-  const [view, setView] = useState<View>('timeline')
+  const [view,   setView]   = useState<View>('timeline')
+  const [recent, setRecent] = useState(false)
+
+  // "Most recent" = the ongoing role, or the latest-started role if none is ongoing
+  const mostRecent = roles.find(r => r.end === null)
+    ?? [...roles].sort((a, b) => toMonths(b.start) - toMonths(a.start))[0]
+
+  const visibleRoles = recent ? [mostRecent] : roles
 
   return (
     <div>
-      {/* View toggle */}
-      <div className="flex gap-2 mb-6">
-        {([['timeline', 'Timeline'], ['industry', 'By Industry']] as [View, string][]).map(([v, label]) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg border transition-colors duration-150 ${
-              view === v
-                ? 'border-blue-600 text-blue-400 bg-blue-900/20'
-                : 'border-gray-600 text-gray-400 hover:border-gray-400 hover:text-gray-200'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        {/* View toggle */}
+        <div className="flex gap-2">
+          {([['timeline', 'Timeline'], ['industry', 'By Industry']] as [View, string][]).map(([v, label]) => (
+            <button
+              key={v}
+              onClick={() => setView(v as View)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-lg border transition-colors duration-150 ${
+                view === v
+                  ? 'border-blue-600 text-blue-400 bg-blue-900/20'
+                  : 'border-gray-600 text-gray-400 hover:border-gray-400 hover:text-gray-200'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Most-recent filter */}
+        <button
+          onClick={() => setRecent(r => !r)}
+          className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-lg border transition-colors duration-150 ${
+            recent
+              ? 'border-green-600 text-green-400 bg-green-900/20'
+              : 'border-gray-600 text-gray-400 hover:border-gray-400 hover:text-gray-200'
+          }`}
+        >
+          <span className={`w-1.5 h-1.5 rounded-full ${recent ? 'bg-green-400' : 'bg-gray-500'}`} />
+          Most Recent
+        </button>
       </div>
 
-      {view === 'timeline' ? <TimelineView /> : <IndustryView />}
+      {view === 'timeline' ? <TimelineView roles={visibleRoles} /> : <IndustryView roles={visibleRoles} />}
     </div>
   )
 }
 
 // ── Timeline view ─────────────────────────────────────────────────────────────
-function TimelineView() {
+function TimelineView({ roles }: { roles: Role[] }) {
   const nowX        = toX(NOW)
   const yearTicks   = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
-  const ARROW       = 8
+  const ARROW       = 10
   const assignments = computeTrackAssignments(roles)
-  const maxTrack    = Math.max(...assignments.values())
-  const svgH        = Math.max(420, trackToY(maxTrack) + 80)
+  const maxTrack    = roles.length ? Math.max(...assignments.values()) : 0
+  const svgH        = Math.max(460, trackToY(maxTrack) + 115)
 
   return (
     <div className="w-full overflow-x-auto">
@@ -204,8 +231,8 @@ function TimelineView() {
           const x = toX([yr, 0])
           return (
             <g key={yr}>
-              <line x1={x} y1={AXIS_Y - 5} x2={x} y2={AXIS_Y + 5} stroke="#4b5563" strokeWidth={1} />
-              <text x={x} y={AXIS_Y + 19} textAnchor="middle" fontSize={10} fill="#6b7280">{yr}</text>
+              <line x1={x} y1={AXIS_Y - 6} x2={x} y2={AXIS_Y + 6} stroke="#4b5563" strokeWidth={1.2} />
+              <text x={x} y={AXIS_Y + 21} textAnchor="middle" fontSize={12} fill="#6b7280">{yr}</text>
             </g>
           )
         })}
@@ -213,19 +240,41 @@ function TimelineView() {
         {/* Present marker */}
         <line x1={nowX} y1={60} x2={nowX} y2={AXIS_Y + 5}
           stroke="#4b5563" strokeWidth={1} strokeDasharray="4 3" />
-        <text x={nowX} y={AXIS_Y + 30} textAnchor="middle" fontSize={9} fill="#6b7280" fontStyle="italic">
+        <text x={nowX} y={AXIS_Y + 32} textAnchor="middle" fontSize={11} fill="#6b7280" fontStyle="italic">
           Present
         </text>
 
         {/* Roles */}
         {roles.map(role => {
           const trackIdx = assignments.get(role.company)!
-          const x1    = toX(role.start)
-          const x2    = role.end ? toX(role.end) : nowX
-          const y     = trackToY(trackIdx)
-          const above = trackIdx === 0
-          const mid   = (x1 + x2) / 2
-          const dur   = durMonths(role)
+          const x1       = toX(role.start)
+          const x2       = role.end ? toX(role.end) : nowX
+          const y        = trackToY(trackIdx)
+          const above    = trackIdx === 0
+          const mid      = (x1 + x2) / 2
+          const dur      = durMonths(role)
+          const durText  = fmtDur(dur)
+
+          // Single label row: [LOGO] [Name  ·  Duration]
+          const LOGO_SIZE    = 32
+          const LOGO_GAP     = 7
+          const NAME_CPX     = 8.2   // px per char at fontSize 14 bold
+          const DUR_CPX      = 6.8   // px per char at fontSize 11
+          const SEP_W        = 16    // " · " separator width
+          const approxNameW  = role.company.length * NAME_CPX
+          const approxDurW   = durText.length * DUR_CPX
+          const groupW       = LOGO_SIZE + LOGO_GAP + approxNameW + SEP_W + approxDurW
+          const groupLeft    = mid - groupW / 2
+
+          // Vertical centre of the label row relative to the bar
+          const rowCY   = above ? y - 38 : y + 38
+          const logoY   = rowCY - LOGO_SIZE / 2
+          const textBL  = rowCY + 6   // text baseline ≈ centred on logo
+
+          const logoX   = groupLeft
+          const nameX   = logoX + LOGO_SIZE + LOGO_GAP
+          const sepX    = nameX + approxNameW + 4
+          const durX    = sepX + SEP_W - 4
 
           return (
             <g key={role.company}>
@@ -237,53 +286,57 @@ function TimelineView() {
               />
 
               {/* Axis dot */}
-              <circle cx={x1} cy={AXIS_Y} r={4} fill={role.color} opacity={0.9} />
+              <circle cx={x1} cy={AXIS_Y} r={5} fill={role.color} opacity={0.9} />
 
               {/* Duration bar */}
               <line
                 x1={x1 + ARROW * 0.5} y1={y} x2={x2} y2={y}
-                stroke={role.color} strokeWidth={10} strokeLinecap="round" opacity={0.82}
+                stroke={role.color} strokeWidth={13} strokeLinecap="round" opacity={0.82}
               />
 
               {/* Arrowhead */}
               <polygon
-                points={`${x2 + ARROW},${y} ${x2},${y - ARROW * 0.55} ${x2},${y + ARROW * 0.55}`}
+                points={`${x2 + ARROW},${y} ${x2},${y - ARROW * 0.6} ${x2},${y + ARROW * 0.6}`}
                 fill={role.color} opacity={0.82}
               />
 
               {/* Dashed "ongoing" tail */}
               {!role.end && (
-                <line x1={nowX} y1={y} x2={nowX + 20} y2={y}
+                <line x1={nowX} y1={y} x2={nowX + 22} y2={y}
                   stroke={role.color} strokeWidth={2} strokeDasharray="4 4" opacity={0.4} />
               )}
 
-              {/* Company logo badge at the start of the bar */}
+              {/* Logo */}
               {role.logo && (
                 <g>
                   <rect
-                    x={x1 - 12} y={y - 12}
-                    width={24} height={24} rx={5}
+                    x={logoX - 2} y={logoY - 2}
+                    width={LOGO_SIZE + 4} height={LOGO_SIZE + 4} rx={5}
                     fill="white" opacity={0.95}
                   />
                   <image
                     href={role.logo.src}
-                    x={x1 - 9} y={y - 9}
-                    width={18} height={18}
+                    x={logoX} y={logoY}
+                    width={LOGO_SIZE} height={LOGO_SIZE}
                     preserveAspectRatio="xMidYMid meet"
                   />
                 </g>
               )}
 
-              {/* Company label */}
-              <text x={mid} y={above ? y - 22 : y + 24}
-                textAnchor="middle" fontSize={11} fontWeight={700} fill={role.color}>
+              {/* Company name */}
+              <text x={nameX} y={textBL}
+                textAnchor="start" fontSize={14} fontWeight={700} fill={role.color}>
                 {role.company}
               </text>
 
-              {/* Duration label */}
-              <text x={mid} y={above ? y - 10 : y + 36}
-                textAnchor="middle" fontSize={9} fill="#9ca3af">
-                {fmtDur(dur)}
+              {/* Separator · */}
+              <text x={sepX} y={textBL}
+                textAnchor="start" fontSize={12} fill="#4b5563">·</text>
+
+              {/* Duration inline */}
+              <text x={durX} y={textBL}
+                textAnchor="start" fontSize={11} fill="#9ca3af">
+                {durText}
               </text>
             </g>
           )
@@ -304,7 +357,7 @@ function TimelineView() {
 }
 
 // ── Industry view ─────────────────────────────────────────────────────────────
-function IndustryView() {
+function IndustryView({ roles }: { roles: Role[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {industryOrder.map(industry => {

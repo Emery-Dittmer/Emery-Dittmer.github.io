@@ -167,15 +167,21 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
       {/* Meandering vertical line with dots */}
       <svg
         className="absolute left-0 top-0 pointer-events-none select-none opacity-[0.10]"
-        style={{ width: '80px', height: '3000px' }}
-        viewBox="0 0 80 3000"
+        style={{ width: '1400px', height: '3500px' }}
+        viewBox="0 0 100 3000"
         fill="none"
         aria-hidden="true"
       >
         <path
-          d="M40 0 C8 300 72 600 40 900 C8 1200 72 1500 35 1800 C5 2100 75 2400 40 2700 C15 2850 65 2950 40 3000"
+          d="
+            M700 0
+            C700 400, 100 600, 100 900
+            C100 1200, 700 1500, 700 1800
+            C700 2100, 100 2400, 100 2700
+            C100 2850, 700 2950, 700 3000
+          "
           stroke="white"
-          strokeWidth="1.5"
+          strokeWidth="2"
           strokeLinecap="round"
         />
         <circle cx="8"  cy="300"  r="2.5" fill="white" />
@@ -227,6 +233,23 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
         <path d="M121 78 C158 74 178 98 174 136 C170 170 140 184 102 179 C64 174 44 146 48 116 C52 86 88 82 121 78 Z"  stroke="rgb(196 181 253)" strokeWidth="1.1" />
         <path d="M122 100 C148 97 162 114 158 142 C154 166 130 174 104 170 C78 166 62 144 66 124 C70 104 98 103 122 100 Z" stroke="rgb(196 181 253)" strokeWidth="1.1" />
       </svg>
+
+      <svg
+        className="absolute pointer-events-none select-none opacity-[0.07]"
+        style={{ left: '-30px', bottom: '8%', width: '240px', height: '220px' }}
+        viewBox="0 0 240 220"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path d="M118 12 C188 4 238 50 232 118 C226 184 176 222 108 216 C40 210 2 168 8 104 C14 40 50 20 118 12 Z"   stroke="rgb(196 181 253)" strokeWidth="1.1" />
+        <path d="M119 34 C178 28 218 66 212 124 C206 178 162 208 104 202 C46 196 14 158 20 106 C26 54 62 40 119 34 Z"  stroke="rgb(196 181 253)" strokeWidth="1.1" />
+        <path d="M120 56 C168 51 198 82 193 130 C188 174 150 196 100 190 C50 184 26 150 30 108 C34 66 74 61 120 56 Z"  stroke="rgb(196 181 253)" strokeWidth="1.1" />
+        <path d="M121 78 C158 74 178 98 174 136 C170 170 140 184 102 179 C64 174 44 146 48 116 C52 86 88 82 121 78 Z"  stroke="rgb(196 181 253)" strokeWidth="1.1" />
+        <path d="M122 100 C148 97 162 114 158 142 C154 166 130 174 104 170 C78 166 62 144 66 124 C70 104 98 103 122 100 Z" stroke="rgb(196 181 253)" strokeWidth="1.1" />
+      </svg>
+
+
+
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="py-12 md:py-20 border-t border-gray-800">
