@@ -50,7 +50,7 @@ const TOP_SKILLS: MarketSkill[] = [
     id: 'facilitating-cross-team-delivery',
     shortName: 'Cross-team Delivery',
     fullName: 'Facilitating cross-team delivery',
-    laneTitle: 'Project Management', laneColor: '#5F5E5A',
+    laneTitle: 'Project Management', laneColor: '#185FA5',
     emery: 5, market: 4,
     note: 'Programme ownership spanning multiple stakeholder groups at PwC and Compass.',
   },
