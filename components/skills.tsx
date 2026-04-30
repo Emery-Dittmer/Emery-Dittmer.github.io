@@ -73,9 +73,9 @@ export default function Skills({
           <SkillsMarketComparison />
         </CollapsibleSection>
 
-        {/* Skills Network Diagram */}
-        <CollapsibleSection title={sectionTitles.network[locale]} defaultOpen>
-          <NetworkDiagram />
+        {/* Work Experience */}
+        <CollapsibleSection title={sectionTitles.experience[locale]}>
+          <ExperienceSection />
         </CollapsibleSection>
 
         {/* Swim Lane Visualisation */}
@@ -83,10 +83,11 @@ export default function Skills({
           <SwimLaneVisualisation />
         </CollapsibleSection>
 
-        {/* Work Experience */}
-        <CollapsibleSection title={sectionTitles.experience[locale]}>
-          <ExperienceSection />
+        {/* Skills Network Diagram */}
+        <CollapsibleSection title={sectionTitles.network[locale]} defaultOpen>
+          <NetworkDiagram />
         </CollapsibleSection>
+
 
         {/* Tools & Certifications */}
         <CollapsibleSection title={sectionTitles.tools[locale]}>
