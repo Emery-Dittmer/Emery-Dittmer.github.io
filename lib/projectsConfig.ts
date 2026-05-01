@@ -666,6 +666,93 @@ export const projectsConfig: Project[] = [
     certifications: ['PSMI', 'CAPM'],
   },
 
+  // ── FX Rates · 2026 ──────────────────────────────────────────────────────────
+  {
+    id: 'fx-rates',
+    title: {
+      en: 'FX Rates – Currency Converter & Strength Index',
+      fr: 'Taux de change – Convertisseur et indice de force des devises',
+    },
+    company: { en: 'Personal Project', fr: 'Projet personnel' },
+    mediaSrc: accrual_forecast,
+    year: 2026,
+    projectType: 'professional',
+    industry: 'Finance & Technology',
+    laneIds: ['data-analytics', 'business-intelligence'],
+    description: {
+      en: 'An interactive currency conversion tool that lets you convert most major currencies and measure how strong a currency is relative to others. Built to replace existing tools that are slow, cluttered, and lacking context — delivering a fast and informative experience.',
+      fr: 'Un outil interactif de conversion de devises permettant de convertir la plupart des grandes devises et de mesurer leur force relative. Conçu pour remplacer les outils existants lents et peu informatifs.',
+    },
+    purpose: {
+      en: 'Provide a fast, clean alternative to the cluttered and slow FX tools available online — enabling users to not only convert currencies but understand currency strength and context at a glance.',
+      fr: 'Offrir une alternative rapide et claire aux outils de change en ligne encombrés, permettant aux utilisateurs de convertir des devises et de comprendre leur force relative en un coup d\'œil.',
+    },
+    howToUse: {
+      en: 'Select a base currency and target currency to see the live exchange rate and conversion. Use the strength index view to compare how a currency is performing relative to a basket of others.',
+      fr: 'Sélectionnez une devise de base et une devise cible pour voir le taux de change en direct. Utilisez la vue de l\'indice de force pour comparer les performances d\'une devise par rapport à un panier d\'autres.',
+    },
+    architecture: {
+      overview: {
+        en: 'Live exchange rate data is fetched and stored in Google Sheets via Apps Script. The data powers a React-based web app hosted on GitHub Pages, providing clean conversion and currency strength views.',
+        fr: 'Les données de taux de change en direct sont récupérées et stockées dans Google Sheets via Apps Script. Ces données alimentent une application web React hébergée sur GitHub Pages.',
+      },
+      nodes: [
+        { id: '1', label: 'Exchange Rate Feed', type: 'input',   technology: 'github', description: 'Live FX rate data source' },
+        { id: '2', label: 'Google Sheets',      type: 'storage', technology: 'excel',  description: 'Data storage & Apps Script processing' },
+        { id: '3', label: 'GitHub Pages',        type: 'service', technology: 'github', description: 'Hosting and deployment pipeline' },
+        { id: '4', label: 'Web App',             type: 'output',  technology: 'react',  description: 'Interactive currency converter & strength index' },
+      ],
+    },
+    skills: [],
+    certifications: [],
+    linkUrl: 'https://emery-dittmer.github.io/FXRates/en',
+    linkText: { en: 'Try it here', fr: 'Essayez-le ici' },
+  },
+
+  // ── Transit Catchment · 2026 ──────────────────────────────────────────────
+  {
+    id: 'transit-catchment',
+    title: {
+      en: 'Transit Catchment – Area Explorer for House Hunting',
+      fr: 'Zone de desserte transit – Explorateur de quartier pour la recherche immobilière',
+    },
+    company: { en: 'Personal Project', fr: 'Projet personnel' },
+    mediaSrc: network,
+    year: 2026,
+    projectType: 'professional',
+    industry: 'Technology & Urban Planning',
+    laneIds: ['data-analytics', 'data-science'],
+    description: {
+      en: 'An interactive tool that maps what is accessible around any address via public transit (buses and metros), designed to help with house hunting. Enter an address and explore nearby transit routes, stops, and catchment areas. More features including noise levels, flood zones, year of construction, walkability scores, and other neighbourhood calculations coming soon.',
+      fr: 'Un outil interactif cartographiant ce qui est accessible depuis une adresse via les transports en commun (bus et métros), conçu pour la recherche immobilière. Prochainement : niveaux de bruit, zones inondables, score de marchabilité et plus.',
+    },
+    purpose: {
+      en: 'Help prospective home buyers quickly assess transit accessibility and neighbourhood context for any address — filling a gap where existing tools are too complex, fragmented, or fail to present catchment data in a useful way.',
+      fr: 'Aider les acheteurs potentiels à évaluer rapidement l\'accessibilité aux transports en commun et le contexte de quartier pour n\'importe quelle adresse, là où les outils existants sont trop complexes ou fragmentés.',
+    },
+    howToUse: {
+      en: 'Enter a home address to generate a transit catchment map. The tool renders nearby bus and metro routes, stop locations, and accessibility zones using interactive Mapbox layers. Upcoming features will overlay noise zones, flood risk, walkability, and building age data.',
+      fr: 'Saisissez une adresse pour générer une carte de desserte transit. L\'outil affiche les lignes et arrêts de bus et de métro sur des couches Mapbox interactives. Les fonctionnalités à venir incluront les zones de bruit, risques d\'inondation et scores de marchabilité.',
+    },
+    architecture: {
+      overview: {
+        en: 'A user-provided address is geocoded and used to query transit stop and route data. Mapbox renders an interactive catchment map, with additional neighbourhood data layers planned for future releases.',
+        fr: 'L\'adresse fournie est géocodée pour interroger les données d\'arrêts et de lignes de transport en commun. Mapbox affiche une carte de desserte interactive.',
+      },
+      nodes: [
+        { id: '1', label: 'Address Input',    type: 'input',   technology: 'react', description: 'User-entered home address' },
+        { id: '2', label: 'Geocoding API',    type: 'service', technology: 'esri',  description: 'Address-to-coordinate resolution' },
+        { id: '3', label: 'Transit Data',     type: 'storage', technology: 'mysql', description: 'GTFS bus & metro route and stop data' },
+        { id: '4', label: 'Mapbox Renderer',  type: 'service', technology: 'react', description: 'Interactive catchment map layers' },
+        { id: '5', label: 'Catchment Map',    type: 'output',  technology: 'react', description: 'Visual transit accessibility explorer' },
+      ],
+    },
+    skills: [],
+    certifications: [],
+    linkUrl: 'https://emery-dittmer.github.io/TransitReach/en',
+    linkText: { en: 'Try it here', fr: 'Essayez-le ici' },
+  },
+
   // ── Qlik → Power BI & Databricks Migration · 2025 ─────────────────────────
   {
     id: 'qlik-powerbi-databricks-migration',
