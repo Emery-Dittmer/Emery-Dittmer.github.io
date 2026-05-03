@@ -1,5 +1,6 @@
 import React from 'react';
 import CertificationCard from './CertificationCard'; // Import the CertificationCard component
+import BookSection from './BookSection';
 import Image from "next/image";
 
 import bishops from "@/assets/coolstuff/Bishops.png";
@@ -71,6 +72,10 @@ export default function CoolStuff({
         </div>
       </div>
     </div>
+    <div className="max-w-sm mx-auto grid mx-auto">
+      <div className="py-1 md:py-2 border-t border-gray-800"></div>
+    </div>
+    <BookSection locale={locale} />
     </>
   );
 }

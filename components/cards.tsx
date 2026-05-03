@@ -106,6 +106,7 @@ export default function Cards({ locale = 'en' }: { locale?: Locale }) {
     all:          locale === 'fr' ? 'Tous' : 'All',
     academic:     locale === 'fr' ? 'Académique' : 'Academic',
     professional: locale === 'fr' ? 'Professionnel' : 'Professional',
+    personal:     locale === 'fr' ? 'Personnel' : 'Personal',
     type:         locale === 'fr' ? 'Type' : 'Type',
     domain:       locale === 'fr' ? 'Domaine' : 'Domain',
     industry:     locale === 'fr' ? 'Industrie' : 'Industry',
@@ -152,7 +153,7 @@ export default function Cards({ locale = 'en' }: { locale?: Locale }) {
   // ── Dropdown trigger labels ─────────────────────────────────────────────
   const typeLabel = multiLabel(
     t.type,
-    selectedTypes.map((v) => v === 'academic' ? t.academic : t.professional),
+    selectedTypes.map((v) => v === 'academic' ? t.academic : v === 'personal' ? t.personal : t.professional),
     t.all,
   )
   const domainLabel = multiLabel(
@@ -193,6 +194,7 @@ export default function Cards({ locale = 'en' }: { locale?: Locale }) {
           <Dropdown label={typeLabel} active={selectedTypes.length > 0} open={openDropdown === 'type'} onToggle={() => toggleDropdown('type')}>
             <CheckOption checked={selectedTypes.includes('professional')} onClick={() => toggle<ProjectType>('professional', setSelectedTypes)}>{t.professional}</CheckOption>
             <CheckOption checked={selectedTypes.includes('academic')}     onClick={() => toggle<ProjectType>('academic',     setSelectedTypes)}>{t.academic}</CheckOption>
+            <CheckOption checked={selectedTypes.includes('personal')}     onClick={() => toggle<ProjectType>('personal',     setSelectedTypes)}>{t.personal}</CheckOption>
             {selectedTypes.length > 0 && <ClearLink onClear={() => setSelectedTypes([])} label={t.clearFilters} />}
           </Dropdown>
 
@@ -270,9 +272,11 @@ export default function Cards({ locale = 'en' }: { locale?: Locale }) {
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
                         project.projectType === 'academic'
                           ? 'border-blue-700/60 text-blue-400 bg-blue-900/20'
+                          : project.projectType === 'personal'
+                          ? 'border-purple-700/60 text-purple-400 bg-purple-900/20'
                           : 'border-green-700/60 text-green-400 bg-green-900/20'
                       }`}>
-                        {project.projectType === 'academic' ? t.academic : t.professional}
+                        {project.projectType === 'academic' ? t.academic : project.projectType === 'personal' ? t.personal : t.professional}
                       </span>
                       <span className="text-xs text-gray-600">·</span>
                       <span className="text-xs text-gray-500">{project.industry}</span>

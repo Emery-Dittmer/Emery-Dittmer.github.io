@@ -12,7 +12,7 @@ export type ArchitectureNode = {
   technology?: string
 }
 
-export type ProjectType = 'academic' | 'professional'
+export type ProjectType = 'academic' | 'professional' | 'personal'
 
 export type Project = {
   id: string                          // URL slug
@@ -676,7 +676,7 @@ export const projectsConfig: Project[] = [
     company: { en: 'Personal Project', fr: 'Projet personnel' },
     mediaSrc: accrual_forecast,
     year: 2026,
-    projectType: 'professional',
+    projectType: 'personal',
     industry: 'Finance & Technology',
     laneIds: ['data-analytics', 'business-intelligence'],
     description: {
@@ -719,7 +719,7 @@ export const projectsConfig: Project[] = [
     company: { en: 'Personal Project', fr: 'Projet personnel' },
     mediaSrc: network,
     year: 2026,
-    projectType: 'professional',
+    projectType: 'personal',
     industry: 'Technology & Urban Planning',
     laneIds: ['data-analytics', 'data-science'],
     description: {
