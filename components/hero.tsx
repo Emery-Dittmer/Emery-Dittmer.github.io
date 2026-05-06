@@ -10,9 +10,9 @@ import { Locale } from '@/lib/i18n';
 export default function Hero({ locale = 'en' }: { locale?: Locale }) {
   const copy = {
     en: {
-      heading: "Hello I'm Emery",
+      heading: "Hello, I'm Emery",
       body:
-        'A Data Scientist, strategist and UI/UX specialist. Merging the best of data strategy and insights.',
+        'A Data Scientist and Project Manager. I build predictive models, lead data-driven teams, and turn complex data into decisions that move the needle.',
       projects: 'Projects',
       resume: 'Resume',
       github: 'GitHub',
@@ -21,7 +21,7 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
     fr: {
       heading: 'Bonjour, je suis Emery',
       body:
-        'Data scientist, stratège et spécialiste UI/UX. Je combine le meilleur de la stratégie data et des insights.',
+        'Data Scientist et chef de projet. Je construis des modèles prédictifs, dirige des équipes data et transforme des données complexes en décisions à fort impact.',
       projects: 'Projets',
       resume: 'CV',
       github: 'GitHub',

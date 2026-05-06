@@ -3,58 +3,58 @@ import { Locale } from '@/lib/i18n'
 export default function Features({ locale = 'en' }: { locale?: Locale }) {
   const copy = {
     en: {
-      title: 'What does Emery bring to the table?',
+      title: ‘What does Emery bring to the table?’,
       intro:
-        'Accelerating data to insights is easy with the right mindset and skills. Emery Brings these skills and mindsets to every role',
+        ‘From statistical modelling to stakeholder delivery — Emery combines deep data science expertise with structured project leadership to ship results that matter.’,
       items: [
         {
-          title: 'Data Strategy',
+          title: ‘Data Science’,
           body:
-            'Data strategy, with a focus on delivering value for business users, involves defining the processes, technology, and rules necessary for managing information assets effectively.',
+            ‘Building predictive models, forecasting pipelines, and machine learning systems that translate messy real-world data into reliable, actionable outputs for business teams.’,
           emphasis:
-            'More than 4 years of successful ETL, and process automoation implementation.',
+            ‘5+ years of modelling, forecasting, and ML implementation across finance, manufacturing, retail, and pharmaceuticals.’,
         },
         {
-          title: 'Data Visualizations',
+          title: ‘Data Analytics & BI’,
           body:
-            'Data visualization, geared toward business users, is the art of representing data graphically, aiding in understanding complex information at a glance.',
+            ‘Turning raw data into clear, self-serve intelligence through dashboards, KPI frameworks, and analytics platforms that business users can operate independently.’,
           emphasis:
-            '6+ years of dashboarding, KPI development, custum visulais and geographic data visualizations.',
+            ‘6+ years of Power BI, Tableau, and Alteryx delivery — including a $1M+ Qlik-to-Power BI migration.’,
         },
         {
-          title: 'Project Management',
+          title: ‘Project Management’,
           body:
-            "Project management, with a business user's perspective in mind, is the systematic planning and organization of resources to achieve project goals efficiently.",
+            ‘Leading cross-functional data and engineering teams from requirements through launch — with structured agile delivery, stakeholder alignment, and budget ownership.’,
           emphasis:
-            'Emery brings over 3 years of successful project management including a CAPM certification.',
+            ‘CAPM and Scrum Master (PSM I) certified. 4+ years managing teams of up to 5 and budgets up to $150K.’,
         },
       ],
     },
     fr: {
-      title: 'Ce qu’Emery apporte',
+      title: ‘Ce qu’Emery apporte’,
       intro:
-        'Accélérer le passage des données aux insights est plus simple avec le bon état d’esprit et les bonnes compétences. Emery apporte ces compétences et cette mentalité à chaque rôle.',
+        ‘De la modélisation statistique à la livraison aux parties prenantes — Emery allie une expertise approfondie en science des données à un leadership de projet structuré pour livrer des résultats concrets.’,
       items: [
         {
-          title: 'Stratégie data',
+          title: ‘Science des données’,
           body:
-            'La stratégie data, axée sur la valeur pour les utilisateurs métier, consiste à définir les processus, technologies et règles nécessaires pour gérer efficacement les actifs informationnels.',
+            ‘Conception de modèles prédictifs, de pipelines de prévision et de systèmes d’apprentissage automatique qui transforment des données réelles complexes en sorties fiables et exploitables.’,
           emphasis:
-            'Plus de 4 ans d’implémentation réussie d’ETL et d’automatisation de processus.',
+            ‘Plus de 5 ans de modélisation, prévision et mise en œuvre de ML en finance, fabrication, commerce de détail et pharmaceutique.’,
         },
         {
-          title: 'Visualisation de données',
+          title: ‘Analytique & BI’,
           body:
-            'La visualisation de données, orientée utilisateurs métier, est l’art de représenter les données graphiquement afin de comprendre rapidement des informations complexes.',
+            ‘Transformer les données brutes en intelligence claire et en libre-service grâce à des tableaux de bord, des cadres de KPI et des plateformes analytiques accessibles aux utilisateurs métier.’,
           emphasis:
-            'Plus de 6 ans de tableaux de bord, développement de KPI, visualisations sur mesure et visualisations géographiques.',
+            ‘Plus de 6 ans de livraison Power BI, Tableau et Alteryx — dont une migration Qlik vers Power BI de plus d’un million de dollars.’,
         },
         {
-          title: 'Gestion de projet',
+          title: ‘Gestion de projet’,
           body:
-            'La gestion de projet, pensée pour les utilisateurs métier, est la planification et l’organisation systématiques des ressources pour atteindre efficacement les objectifs.',
+            ‘Piloter des équipes data et ingénierie pluridisciplinaires de la définition des besoins au lancement — avec une livraison agile structurée, l’alignement des parties prenantes et la gestion budgétaire.’,
           emphasis:
-            'Emery apporte plus de 3 ans de gestion de projet réussie, dont une certification CAPM.',
+            ‘Certifié CAPM et Scrum Master (PSM I). Plus de 4 ans à diriger des équipes de jusqu’à 5 personnes et des budgets allant jusqu’à 150 000 $.’,
         },
       ],
     },
