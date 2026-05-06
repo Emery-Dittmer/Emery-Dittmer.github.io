@@ -3,58 +3,58 @@ import { Locale } from '@/lib/i18n'
 export default function Features({ locale = 'en' }: { locale?: Locale }) {
   const copy = {
     en: {
-      title: ‘What does Emery bring to the table?’,
+      title: 'What does Emery bring to the table?',
       intro:
-        ‘From statistical modelling to stakeholder delivery — Emery combines deep data science expertise with structured project leadership to ship results that matter.’,
+        'From statistical modelling to stakeholder delivery — Emery combines deep data science expertise with structured project leadership to ship results that matter.',
       items: [
         {
-          title: ‘Data Science’,
+          title: 'Data Science',
           body:
-            ‘Building predictive models, forecasting pipelines, and machine learning systems that translate messy real-world data into reliable, actionable outputs for business teams.’,
+            'Building predictive models, forecasting pipelines, and machine learning systems that translate messy real-world data into reliable, actionable outputs for business teams.',
           emphasis:
-            ‘5+ years of modelling, forecasting, and ML implementation across finance, manufacturing, retail, and pharmaceuticals.’,
+            '5+ years of modelling, forecasting, and ML implementation across finance, manufacturing, retail, and pharmaceuticals.',
         },
         {
-          title: ‘Data Analytics & BI’,
+          title: 'Data Analytics & BI',
           body:
-            ‘Turning raw data into clear, self-serve intelligence through dashboards, KPI frameworks, and analytics platforms that business users can operate independently.’,
+            'Turning raw data into clear, self-serve intelligence through dashboards, KPI frameworks, and analytics platforms that business users can operate independently.',
           emphasis:
-            ‘6+ years of Power BI, Tableau, and Alteryx delivery — including a $1M+ Qlik-to-Power BI migration.’,
+            '6+ years of Power BI, Tableau, and Alteryx delivery — including a $1M+ Qlik-to-Power BI migration.',
         },
         {
-          title: ‘Project Management’,
+          title: 'Project Management',
           body:
-            ‘Leading cross-functional data and engineering teams from requirements through launch — with structured agile delivery, stakeholder alignment, and budget ownership.’,
+            'Leading cross-functional data and engineering teams from requirements through launch — with structured agile delivery, stakeholder alignment, and budget ownership.',
           emphasis:
-            ‘CAPM and Scrum Master (PSM I) certified. 4+ years managing teams of up to 5 and budgets up to $150K.’,
+            'CAPM and Scrum Master (PSM I) certified. 4+ years managing teams of up to 5 and budgets up to $150K.',
         },
       ],
     },
     fr: {
-      title: ‘Ce qu’Emery apporte’,
+      title: "Ce qu'Emery apporte",
       intro:
-        ‘De la modélisation statistique à la livraison aux parties prenantes — Emery allie une expertise approfondie en science des données à un leadership de projet structuré pour livrer des résultats concrets.’,
+        "De la modélisation statistique à la livraison aux parties prenantes — Emery allie une expertise approfondie en science des données à un leadership de projet structuré pour livrer des résultats concrets.",
       items: [
         {
-          title: ‘Science des données’,
+          title: 'Science des données',
           body:
-            ‘Conception de modèles prédictifs, de pipelines de prévision et de systèmes d’apprentissage automatique qui transforment des données réelles complexes en sorties fiables et exploitables.’,
+            "Conception de modèles prédictifs, de pipelines de prévision et de systèmes d'apprentissage automatique qui transforment des données réelles complexes en sorties fiables et exploitables.",
           emphasis:
-            ‘Plus de 5 ans de modélisation, prévision et mise en œuvre de ML en finance, fabrication, commerce de détail et pharmaceutique.’,
+            'Plus de 5 ans de modélisation, prévision et mise en oeuvre de ML en finance, fabrication, commerce de détail et pharmaceutique.',
         },
         {
-          title: ‘Analytique & BI’,
+          title: 'Analytique & BI',
           body:
-            ‘Transformer les données brutes en intelligence claire et en libre-service grâce à des tableaux de bord, des cadres de KPI et des plateformes analytiques accessibles aux utilisateurs métier.’,
+            "Transformer les données brutes en intelligence claire et en libre-service grâce à des tableaux de bord, des cadres de KPI et des plateformes analytiques accessibles aux utilisateurs métier.",
           emphasis:
-            ‘Plus de 6 ans de livraison Power BI, Tableau et Alteryx — dont une migration Qlik vers Power BI de plus d’un million de dollars.’,
+            "Plus de 6 ans de livraison Power BI, Tableau et Alteryx — dont une migration Qlik vers Power BI de plus d'un million de dollars.",
         },
         {
-          title: ‘Gestion de projet’,
+          title: 'Gestion de projet',
           body:
-            ‘Piloter des équipes data et ingénierie pluridisciplinaires de la définition des besoins au lancement — avec une livraison agile structurée, l’alignement des parties prenantes et la gestion budgétaire.’,
+            "Piloter des équipes data et ingénierie pluridisciplinaires de la définition des besoins au lancement — avec une livraison agile structurée, l'alignement des parties prenantes et la gestion budgétaire.",
           emphasis:
-            ‘Certifié CAPM et Scrum Master (PSM I). Plus de 4 ans à diriger des équipes de jusqu’à 5 personnes et des budgets allant jusqu’à 150 000 $.’,
+            "Certifié CAPM et Scrum Master (PSM I). Plus de 4 ans à diriger des équipes de jusqu'à 5 personnes et des budgets allant jusqu'à 150 000 $.",
         },
       ],
     },
@@ -64,7 +64,7 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
   return (
     <section>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-      
+
         <div className="py-12 md:py-20">
 
           {/* Section header */}
@@ -87,7 +87,7 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
               <p className="text-lg text-gray-400 text-center">
                 {t.items[0].body}
                 &nbsp;
-                <em><strong className="white-text"> 
+                <em><strong className="white-text">
                 {t.items[0].emphasis}
                 </strong></em>
                 </p>
@@ -106,10 +106,6 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
                 &nbsp;
                 <em><strong className="white-text">
                 {t.items[1].emphasis}
-                
-{/*                 <a href="/Visualizations" className="text-purple underline">
-                Click here for details.
-                </a> */}
                 </strong></em>
               </p>
             </div>
@@ -130,10 +126,6 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
                 &nbsp;
                 <em><strong className="white-text">
                 {t.items[2].emphasis}
-              
-{/*                 <a href="/Visualizations" className="text-purple underline">
-                Click here for details.
-                </a> */}
                 </strong></em>
               </p>
             </div>
