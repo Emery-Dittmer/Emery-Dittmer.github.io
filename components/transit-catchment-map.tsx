@@ -24,6 +24,15 @@ const METRO_CLUSTER_RADIUS_METERS = 150
 const CITY_FETCH_RADIUS_METERS = 10000
 const CACHE_KEY = 'transit_stops_cache'
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000
+const ROADS_SOURCE_ID = 'road-catchment'
+const ROAD_CACHE_TTL_MS = 6 * 60 * 60 * 1000
+
+const roadNetworkCache: {
+  center: LngLat | null
+  radius: number
+  elements: any[]
+  timestamp: number
+} = { center: null, radius: 0, elements: [], timestamp: 0 }
 
 type StopsCache = {
   center: LngLat
@@ -208,6 +217,16 @@ function createCircle(center: LngLat, radiusMeters: number, steps = 72): GeoJSON
   }
 }
 
+function buildRoadsQuery(center: LngLat, radiusMeters: number) {
+  return `
+[out:json][timeout:60];
+(
+  way(around:${Math.round(radiusMeters)},${center.lat},${center.lng})["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|service|living_street|pedestrian|footway|path|cycleway|track|steps)$"];
+);
+out geom;
+`
+}
+
 function buildStopsQuery(center: LngLat, radiusMeters: number) {
   return `
 [out:json][timeout:25];
@@ -324,6 +343,144 @@ function clusterMetroStops(stops: StopItem[]): StopItem[] {
   return [...others, ...clustered]
 }
 
+class MinHeap {
+  private data: { id: string; cost: number }[] = []
+  get size() { return this.data.length }
+  push(item: { id: string; cost: number }) {
+    this.data.push(item)
+    let i = this.data.length - 1
+    while (i > 0) {
+      const p = (i - 1) >> 1
+      if (this.data[p].cost <= this.data[i].cost) break
+      ;[this.data[p], this.data[i]] = [this.data[i], this.data[p]]
+      i = p
+    }
+  }
+  pop() {
+    if (!this.data.length) return undefined
+    const top = this.data[0]
+    const last = this.data.pop()!
+    if (this.data.length) {
+      this.data[0] = last
+      let i = 0
+      for (;;) {
+        let s = i
+        const l = 2 * i + 1, r = 2 * i + 2
+        if (l < this.data.length && this.data[l].cost < this.data[s].cost) s = l
+        if (r < this.data.length && this.data[r].cost < this.data[s].cost) s = r
+        if (s === i) break
+        ;[this.data[s], this.data[i]] = [this.data[i], this.data[s]]
+        i = s
+      }
+    }
+    return top
+  }
+}
+
+type RoadGraph = {
+  nodes: Map<string, LngLat>
+  adjacency: Map<string, { to: string; distance: number }[]>
+  edgeList: { from: string; to: string; from_lng: number; from_lat: number; to_lng: number; to_lat: number }[]
+}
+
+function buildGraph(elements: any[]): RoadGraph {
+  const nodes = new Map<string, LngLat>()
+  const adjacency = new Map<string, { to: string; distance: number }[]>()
+  const edgeList: RoadGraph['edgeList'] = []
+
+  for (const el of elements) {
+    if (el.type !== 'way') continue
+    const nodeIds: string[] = (el.nodes ?? []).map(String)
+    const geom: { lat: number; lon: number }[] = el.geometry ?? []
+    if (nodeIds.length !== geom.length || nodeIds.length < 2) continue
+
+    for (let i = 0; i < nodeIds.length; i++) {
+      if (!nodes.has(nodeIds[i])) nodes.set(nodeIds[i], { lat: geom[i].lat, lng: geom[i].lon })
+    }
+
+    for (let i = 0; i < nodeIds.length - 1; i++) {
+      const a = nodeIds[i], b = nodeIds[i + 1]
+      const dist = distanceMeters(
+        { lat: geom[i].lat, lng: geom[i].lon },
+        { lat: geom[i + 1].lat, lng: geom[i + 1].lon }
+      )
+      if (!adjacency.has(a)) adjacency.set(a, [])
+      if (!adjacency.has(b)) adjacency.set(b, [])
+      adjacency.get(a)!.push({ to: b, distance: dist })
+      adjacency.get(b)!.push({ to: a, distance: dist })
+      edgeList.push({ from: a, to: b, from_lng: geom[i].lon, from_lat: geom[i].lat, to_lng: geom[i + 1].lon, to_lat: geom[i + 1].lat })
+    }
+  }
+
+  return { nodes, adjacency, edgeList }
+}
+
+function runDijkstra(
+  adjacency: Map<string, { to: string; distance: number }[]>,
+  startId: string,
+  budget: number
+): Map<string, number> {
+  const costs = new Map<string, number>([[startId, 0]])
+  const heap = new MinHeap()
+  heap.push({ id: startId, cost: 0 })
+  while (heap.size > 0) {
+    const { id, cost } = heap.pop()!
+    if (cost > (costs.get(id) ?? Infinity)) continue
+    for (const { to, distance } of (adjacency.get(id) ?? [])) {
+      const nc = cost + distance
+      if (nc <= budget && nc < (costs.get(to) ?? Infinity)) {
+        costs.set(to, nc)
+        heap.push({ id: to, cost: nc })
+      }
+    }
+  }
+  return costs
+}
+
+function nearestNode(graph: RoadGraph, point: LngLat): string | null {
+  let best: string | null = null
+  let bestDist = Infinity
+  for (const [id, node] of graph.nodes) {
+    const d = distanceMeters(point, node)
+    if (d < bestDist) { bestDist = d; best = id }
+  }
+  return best
+}
+
+function buildStreetGeoJSON(
+  graph: RoadGraph,
+  directCosts: Map<string, number>,
+  transitCosts: Map<string, number>
+): GeoJSON.FeatureCollection {
+  const reachType = new Map<string, 'direct' | 'transit'>()
+  for (const id of directCosts.keys()) reachType.set(id, 'direct')
+  for (const id of transitCosts.keys()) {
+    if (!reachType.has(id)) reachType.set(id, 'transit')
+  }
+
+  const seen = new Set<string>()
+  const features: GeoJSON.Feature[] = []
+
+  for (const edge of graph.edgeList) {
+    const key = edge.from < edge.to ? `${edge.from}|${edge.to}` : `${edge.to}|${edge.from}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    const tA = reachType.get(edge.from)
+    const tB = reachType.get(edge.to)
+    if (!tA || !tB) continue
+    features.push({
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: [[edge.from_lng, edge.from_lat], [edge.to_lng, edge.to_lat]],
+      },
+      properties: { reachType: tA === 'direct' && tB === 'direct' ? 'direct' : 'transit' },
+    })
+  }
+
+  return { type: 'FeatureCollection', features }
+}
+
 export default function TransitCatchmentMap({
   locale = 'en',
 }: {
@@ -341,6 +498,11 @@ export default function TransitCatchmentMap({
   const [sortKey, setSortKey] = useState<'name' | 'mode' | 'distance'>('distance')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const [coordStep, setCoordStep] = useState(0.001)
+  const [viewMode, setViewMode] = useState<'circle' | 'street'>('circle')
+  const [streetStatus, setStreetStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [streetData, setStreetData] = useState<GeoJSON.FeatureCollection | null>(null)
+  const [transitExtend, setTransitExtend] = useState(true)
+  const roadGraphCacheRef = useRef<{ elements: any[]; graph: RoadGraph } | null>(null)
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
@@ -382,6 +544,13 @@ export default function TransitCatchmentMap({
       latLabel: 'Latitude',
       lngLabel: 'Longitude',
       stepLabel: 'Step',
+      viewModeLabel: 'View',
+      viewCircle: 'Circle',
+      viewStreet: 'Street Network',
+      streetWarning: 'Street catchment can take 10–20s to load',
+      transitExtendLabel: 'Include transit',
+      streetLoadingOverlay: 'Computing walkable streets…',
+      streetError: 'Could not compute street catchment.',
     },
     fr: {
       title: 'Carte des zones de marche',
@@ -414,6 +583,13 @@ export default function TransitCatchmentMap({
       latLabel: 'Latitude',
       lngLabel: 'Longitude',
       stepLabel: 'Pas',
+      viewModeLabel: 'Vue',
+      viewCircle: 'Cercle',
+      viewStreet: 'Reseau routier',
+      streetWarning: 'Le calcul peut prendre 10-20s',
+      transitExtendLabel: 'Inclure les transports',
+      streetLoadingOverlay: 'Calcul des rues accessibles…',
+      streetError: 'Impossible de calculer le reseau.',
     },
   }
   const t = copy[locale]
@@ -503,6 +679,29 @@ export default function TransitCatchmentMap({
           'line-color': '#a855f7',
           'line-width': 2,
         },
+      })
+    }
+
+    if (!map.getSource(ROADS_SOURCE_ID)) {
+      map.addSource(ROADS_SOURCE_ID, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      })
+      map.addLayer({
+        id: 'road-transit',
+        type: 'line',
+        source: ROADS_SOURCE_ID,
+        filter: ['==', ['get', 'reachType'], 'transit'],
+        layout: { visibility: 'none' },
+        paint: { 'line-color': '#22d3ee', 'line-width': 3, 'line-opacity': 0.7 },
+      })
+      map.addLayer({
+        id: 'road-direct',
+        type: 'line',
+        source: ROADS_SOURCE_ID,
+        filter: ['==', ['get', 'reachType'], 'direct'],
+        layout: { visibility: 'none' },
+        paint: { 'line-color': '#a855f7', 'line-width': 3, 'line-opacity': 0.9 },
       })
     }
 
@@ -667,6 +866,103 @@ export default function TransitCatchmentMap({
     }
   }, [mapReady, stopsData])
 
+  // Street catchment computation
+  useEffect(() => {
+    if (!mapReady || viewMode !== 'street') return
+    let isCurrent = true
+    setStreetStatus('loading')
+
+    const run = async () => {
+      try {
+        const fetchRadius = Math.min(radiusMeters * 2, 5000)
+        const now = Date.now()
+
+        let elements: any[]
+        if (
+          roadNetworkCache.center &&
+          distanceMeters(roadNetworkCache.center, selected) + fetchRadius <= roadNetworkCache.radius + 200 &&
+          now - roadNetworkCache.timestamp < ROAD_CACHE_TTL_MS
+        ) {
+          elements = roadNetworkCache.elements
+        } else {
+          const res = await fetch(OVERPASS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: buildRoadsQuery(selected, fetchRadius),
+            cache: 'no-store',
+          })
+          if (!res.ok) throw new Error('overpass_roads_failed')
+          const data = await res.json()
+          elements = data.elements ?? []
+          roadNetworkCache.center = selected
+          roadNetworkCache.radius = fetchRadius
+          roadNetworkCache.elements = elements
+          roadNetworkCache.timestamp = now
+        }
+
+        if (!isCurrent) return
+
+        let graph: RoadGraph
+        if (roadGraphCacheRef.current?.elements === elements) {
+          graph = roadGraphCacheRef.current.graph
+        } else {
+          graph = buildGraph(elements)
+          roadGraphCacheRef.current = { elements, graph }
+        }
+
+        const startId = nearestNode(graph, selected)
+        if (!startId) throw new Error('no_start_node')
+
+        const directCosts = runDijkstra(graph.adjacency, startId, radiusMeters)
+
+        const transitCosts = new Map<string, number>()
+        if (transitExtend && stopsData) {
+          for (const feature of stopsData.features) {
+            const [lng, lat] = (feature.geometry as GeoJSON.Point).coordinates
+            const stopNode = nearestNode(graph, { lat, lng })
+            if (!stopNode) continue
+            const costToStop = directCosts.get(stopNode)
+            if (costToStop === undefined) continue
+            const remaining = radiusMeters - costToStop
+            if (remaining <= 0) continue
+            const sub = runDijkstra(graph.adjacency, stopNode, remaining)
+            for (const [nodeId] of sub) {
+              if (!transitCosts.has(nodeId)) transitCosts.set(nodeId, 1)
+            }
+          }
+        }
+
+        if (!isCurrent) return
+
+        setStreetData(buildStreetGeoJSON(graph, directCosts, transitCosts))
+        setStreetStatus('idle')
+      } catch {
+        if (isCurrent) setStreetStatus('error')
+      }
+    }
+
+    run()
+    return () => { isCurrent = false }
+  }, [mapReady, viewMode, selected, radiusMeters, stopsData, transitExtend])
+
+  // Sync road GeoJSON to map source
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return
+    const source = mapRef.current.getSource(ROADS_SOURCE_ID) as GeoJSONSource | undefined
+    if (source) source.setData(streetData ?? { type: 'FeatureCollection', features: [] })
+  }, [mapReady, streetData])
+
+  // Toggle layer visibility based on view mode
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return
+    const map = mapRef.current
+    const street = viewMode === 'street'
+    const vis = (show: boolean) => (show ? 'visible' : 'none') as 'visible' | 'none'
+    if (map.getLayer('catchment-fill')) map.setLayoutProperty('catchment-fill', 'visibility', vis(!street))
+    if (map.getLayer('catchment-outline')) map.setLayoutProperty('catchment-outline', 'visibility', vis(!street))
+    if (map.getLayer('road-direct')) map.setLayoutProperty('road-direct', 'visibility', vis(street))
+    if (map.getLayer('road-transit')) map.setLayoutProperty('road-transit', 'visibility', vis(street))
+  }, [mapReady, viewMode])
 
   const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -794,6 +1090,22 @@ export default function TransitCatchmentMap({
                   <span role="status" aria-live="polite">{t.mapLoading}</span>
                 </div>
               )}
+              {viewMode === 'street' && streetStatus === 'loading' && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-950/60 text-sm text-gray-200">
+                  <div className="h-9 w-9 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" aria-hidden="true" />
+                  <span role="status" aria-live="polite">{t.streetLoadingOverlay}</span>
+                </div>
+              )}
+              {viewMode === 'street' && streetStatus !== 'loading' && (
+                <div className="absolute top-3 left-3 z-10 rounded-lg border border-amber-700/60 bg-amber-900/80 px-3 py-1.5 text-xs text-amber-200 backdrop-blur-sm">
+                  ⚠ {t.streetWarning}
+                </div>
+              )}
+              {viewMode === 'street' && streetStatus === 'error' && (
+                <div className="absolute bottom-3 left-3 z-10 rounded-lg bg-red-900/80 px-3 py-1.5 text-xs text-red-200">
+                  {t.streetError}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -801,6 +1113,49 @@ export default function TransitCatchmentMap({
         {/* Controls — below the map */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-lg">
+            {/* View mode toggle */}
+            <div className="flex flex-wrap items-center gap-3 mb-5 pb-5 border-b border-slate-800">
+              <span className="text-sm text-gray-400">{t.viewModeLabel}:</span>
+              <div className="inline-flex rounded-full bg-slate-900 p-1">
+                {(['circle', 'street'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setViewMode(mode)}
+                    className={`px-4 py-1.5 rounded-full text-sm transition ${
+                      viewMode === mode ? 'bg-purple-600 text-white' : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    {mode === 'circle' ? t.viewCircle : t.viewStreet}
+                  </button>
+                ))}
+              </div>
+              {viewMode === 'street' && (
+                <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={transitExtend}
+                    onChange={(e) => setTransitExtend(e.target.checked)}
+                    className="accent-purple-500"
+                  />
+                  {t.transitExtendLabel}
+                </label>
+              )}
+              {viewMode === 'street' && (
+                <div className="flex items-center gap-3 text-xs text-gray-500 ml-2">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block h-2 w-5 rounded-full bg-purple-500" />
+                    Walk
+                  </span>
+                  {transitExtend && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="inline-block h-2 w-5 rounded-full bg-cyan-400" />
+                      Transit
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
             <form onSubmit={handleSearch} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Search */}
               <div className="sm:col-span-2 lg:col-span-1">

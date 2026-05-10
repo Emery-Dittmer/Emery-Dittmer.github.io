@@ -13,12 +13,14 @@ import Newsletter from '@/components/newsletter'
 import Zigzag from '@/components/journey'
 import Testimonials from '@/components/testimonials'
 import Certifications from '@/components/certifications'
+import ProjectCarousel from '@/components/project-carousel'
 
 export default function Home() {
   const locale = 'en'
   return (
     <>
       <Hero locale={locale} />
+      <ProjectCarousel locale={locale} />
       <Features locale={locale} />
       <Certifications locale={locale} />
       <Testimonials locale={locale} />
