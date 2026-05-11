@@ -68,15 +68,17 @@ export default function Skills({
       {/* ── All collapsible sections ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-12 pb-24 space-y-4">
 
+        {/* Work Experience */}
+        <CollapsibleSection title={sectionTitles.experience[locale]} defaultOpen>
+          <ExperienceSection />
+        </CollapsibleSection>
+
         {/* Market comparison */}
         <CollapsibleSection title={sectionTitles.market[locale]} defaultOpen>
           <SkillsMarketComparison />
         </CollapsibleSection>
 
-        {/* Work Experience */}
-        <CollapsibleSection title={sectionTitles.experience[locale]}>
-          <ExperienceSection />
-        </CollapsibleSection>
+
 
         {/* Swim Lane Visualisation */}
         <CollapsibleSection title={sectionTitles.swimlane[locale]} defaultOpen>
@@ -84,7 +86,7 @@ export default function Skills({
         </CollapsibleSection>
 
         {/* Skills Network Diagram */}
-        <CollapsibleSection title={sectionTitles.network[locale]} defaultOpen>
+        <CollapsibleSection title={sectionTitles.network[locale]} >
           <NetworkDiagram />
         </CollapsibleSection>
 

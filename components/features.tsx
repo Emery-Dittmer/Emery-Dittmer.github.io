@@ -3,58 +3,58 @@ import { Locale } from '@/lib/i18n'
 export default function Features({ locale = 'en' }: { locale?: Locale }) {
   const copy = {
     en: {
-      title: 'What does Emery bring to the table?',
+      title: 'Delivering data projects end to end',
       intro:
-        'From statistical modelling to stakeholder delivery — Emery combines deep data science expertise with structured project leadership to ship results that matter.',
+        'Most data work stalls between insight and action. Emery bridges that gap — leading projects from problem definition to production, with the technical depth to build what gets decided.',
       items: [
         {
-          title: 'Data Science',
+          title: 'Project Delivery',
           body:
-            'Building predictive models, forecasting pipelines, and machine learning systems that translate messy real-world data into reliable, actionable outputs for business teams.',
+            'Running data and engineering projects from brief to launch — scope, team, timeline, and stakeholders managed in one place. Agile ceremonies, structured risk tracking, and clear ownership at every stage.',
           emphasis:
-            '5+ years of modelling, forecasting, and ML implementation across finance, manufacturing, retail, and pharmaceuticals.',
+            'CAPM & PSM I certified. 4+ years leading cross-functional teams up to 5, with $2M+ in documented cost savings delivered across concurrent programs.',
         },
         {
-          title: 'Data Analytics & BI',
+          title: 'Data Science & Analytics',
           body:
-            'Turning raw data into clear, self-serve intelligence through dashboards, KPI frameworks, and analytics platforms that business users can operate independently.',
+            'Building predictive models, forecasting pipelines, and self-serve BI platforms that teams keep using after handoff — not just polished demos. Python, Power BI, Databricks, and Alteryx in production.',
           emphasis:
-            '6+ years of Power BI, Tableau, and Alteryx delivery — including a $1M+ Qlik-to-Power BI migration.',
+            '5+ years across finance, pharma, retail, and manufacturing — including a $1M+ Qlik-to-Power BI migration and beverage demand forecasting at scale.',
         },
         {
-          title: 'Project Management',
+          title: 'Business Impact',
           body:
-            'Leading cross-functional data and engineering teams from requirements through launch — with structured agile delivery, stakeholder alignment, and budget ownership.',
+            'Every technical output is tied to a decision: a cost to cut, a risk to reduce, an operation to speed up. The work is scoped around measurable outcomes, not deliverables for their own sake.',
           emphasis:
-            'CAPM and Scrum Master (PSM I) certified. 4+ years managing teams of up to 5 and budgets up to $150K.',
+            'Projects span RBC, PwC, Coveo, Molson Coors, and Apotex — each anchored to a quantified business problem and a result that can be reported upward.',
         },
       ],
     },
     fr: {
-      title: "Ce qu'Emery apporte",
+      title: 'Livrer des projets data de bout en bout',
       intro:
-        "De la modélisation statistique à la livraison aux parties prenantes — Emery allie une expertise approfondie en science des données à un leadership de projet structuré pour livrer des résultats concrets.",
+        "La plupart des projets data échouent entre l'analyse et l'action. Emery comble cet écart — pilotant les projets de la définition du problème à la production, avec la profondeur technique pour construire ce qui a été décidé.",
       items: [
         {
-          title: 'Science des données',
+          title: 'Livraison de projets',
           body:
-            "Conception de modèles prédictifs, de pipelines de prévision et de systèmes d'apprentissage automatique qui transforment des données réelles complexes en sorties fiables et exploitables.",
+            "Piloter des projets data et ingénierie de la définition à la mise en production — périmètre, équipe, calendrier et parties prenantes gérés en un seul endroit. Cérémonies agiles, suivi structuré des risques et responsabilités claires à chaque étape.",
           emphasis:
-            'Plus de 5 ans de modélisation, prévision et mise en oeuvre de ML en finance, fabrication, commerce de détail et pharmaceutique.',
+            "Certifié CAPM et PSM I. Plus de 4 ans à diriger des équipes pluridisciplinaires jusqu'à 5 personnes, avec plus de 2 M$ d'économies documentées sur des programmes simultanés.",
         },
         {
-          title: 'Analytique & BI',
+          title: 'Science des données & BI',
           body:
-            "Transformer les données brutes en intelligence claire et en libre-service grâce à des tableaux de bord, des cadres de KPI et des plateformes analytiques accessibles aux utilisateurs métier.",
+            "Conception de modèles prédictifs, de pipelines de prévision et de plateformes BI en libre-service que les équipes continuent d'utiliser après la livraison. Python, Power BI, Databricks et Alteryx en production.",
           emphasis:
-            "Plus de 6 ans de livraison Power BI, Tableau et Alteryx — dont une migration Qlik vers Power BI de plus d'un million de dollars.",
+            "Plus de 5 ans en finance, pharma, commerce de détail et fabrication — dont une migration Qlik vers Power BI de plus d'1 M$ et des prévisions de demande à grande échelle.",
         },
         {
-          title: 'Gestion de projet',
+          title: 'Impact business',
           body:
-            "Piloter des équipes data et ingénierie pluridisciplinaires de la définition des besoins au lancement — avec une livraison agile structurée, l'alignement des parties prenantes et la gestion budgétaire.",
+            "Chaque livrable technique est lié à une décision : un coût à réduire, un risque à diminuer, une opération à accélérer. Le travail est cadré autour de résultats mesurables, pas de livrables pour eux-mêmes.",
           emphasis:
-            "Certifié CAPM et Scrum Master (PSM I). Plus de 4 ans à diriger des équipes de jusqu'à 5 personnes et des budgets allant jusqu'à 150 000 $.",
+            "Projets chez RBC, PwC, Coveo, Molson Coors et Apotex — chacun ancré dans un problème business quantifié et un résultat communicable à la direction.",
         },
       ],
     },

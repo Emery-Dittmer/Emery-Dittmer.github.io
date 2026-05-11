@@ -20,8 +20,8 @@ export default function Home() {
   return (
     <>
       <Hero locale={locale} />
-      <ProjectCarousel locale={locale} />
       <Features locale={locale} />
+      <ProjectCarousel locale={locale} />
       <Certifications locale={locale} />
       <Testimonials locale={locale} />
       <Newsletter locale={locale} />
