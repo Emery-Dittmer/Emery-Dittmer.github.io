@@ -7,6 +7,9 @@ import pwcLogo      from '@/assets/companies/pwc_logo.png'
 import mcgillLogo   from '@/assets/companies/McGill_University.png'
 import coveoLogo    from '@/assets/companies/Coveo logo.png'
 import compassLogo  from '@/assets/companies/compass-logo-2025-scaled.png'
+import wivoologo  from '@/assets/companies/wivoo_logo.jpeg'
+
+
 
 type View     = 'timeline' | 'industry'
 type Industry = 'Technology' | 'Consulting' | 'Financial Services' | 'Education'
@@ -22,7 +25,8 @@ interface Role {
   bullets:  string[]
 }
 
-const NOW: [number, number] = [2026, 3] // April 2026
+const _now = new Date()
+const NOW: [number, number] = [_now.getFullYear(), _now.getMonth() + 1]
 
 const roles: Role[] = [
   {
@@ -88,8 +92,8 @@ const roles: Role[] = [
     company: 'Wivoo',
     role: 'BI Analyst & Data Scientist',
     start: [2026, 5], end: null,
-    industry: 'Consulting', color: '#2a0cea',
-    logo: coveoLogo,
+    industry: 'Consulting', color: '#6a50c0',
+    logo: wivoologo,
     bullets: [
       'Product Development lead for scaleup',
       '',
