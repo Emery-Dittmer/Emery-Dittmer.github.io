@@ -52,8 +52,8 @@ const roles: Role[] = [
   {
     company: 'Compass Data',
     role: 'Data Science Analytics Manager',
-    start: [2023, 8], end: null,
-    industry: 'Technology', color: '#059669',
+    start: [2023, 8], end: [2026, 3],
+    industry: 'Consulting', color: '#059669',
     logo: compassLogo,
     bullets: [
       'Orchestrated intake & delivery of analytics and ML initiatives',
@@ -75,7 +75,7 @@ const roles: Role[] = [
   {
     company: 'Coveo',
     role: 'BI Analyst & Data Scientist',
-    start: [2023, 10], end: [2024, 7],
+    start: [2023, 9], end: [2024, 8],
     industry: 'Technology', color: '#ea580c',
     logo: coveoLogo,
     bullets: [
@@ -84,6 +84,18 @@ const roles: Role[] = [
       'Built MLOps & ETL pipelines on dbt, Snowflake & AWS',
     ],
   },
+    {
+    company: 'Wivoo',
+    role: 'BI Analyst & Data Scientist',
+    start: [2026, 5], end: null,
+    industry: 'Consulting', color: '#2a0cea',
+    logo: coveoLogo,
+    bullets: [
+      'Product Development lead for scaleup',
+      '',
+      '',
+    ],
+  }
 ]
 
 const industryMeta: Record<Industry, { color: string }> = {
