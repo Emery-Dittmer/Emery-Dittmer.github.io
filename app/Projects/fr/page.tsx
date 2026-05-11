@@ -6,18 +6,15 @@ export const metadata = {
   colorScheme: 'dark'
 }
 
-import Hero from '@/components/hero'
 import Cards from '@/components/cards'
-import Features from '@/components/features'
 import Newsletter from '@/components/newsletter'
-import Zigzag from '@/components/journey'
-import Testimonials from '@/components/testimonials'
-import Certifications from '@/components/certifications'
+import ProjectCarousel from '@/components/project-carousel'
 
 export default function Home() {
   const locale = 'fr'
   return (
     <>
+      <ProjectCarousel locale={locale} />
       <Cards locale={locale} />
       <Newsletter locale={locale} />
     </>

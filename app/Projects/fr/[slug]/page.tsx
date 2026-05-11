@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { projectsConfig } from '@/lib/projectsConfig'
+import { getProjectImages } from '@/lib/getProjectImages'
 import ProjectDetail from '@/components/ProjectDetail'
 
 export function generateStaticParams() {
@@ -19,5 +20,14 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
   const project = projectsConfig.find((p) => p.id === params.slug)
   if (!project) notFound()
 
-  return <ProjectDetail project={project} locale="fr" />
+  const { cover, gallery } = getProjectImages(params.slug)
+
+  return (
+    <ProjectDetail
+      project={project}
+      locale="fr"
+      coverImage={cover}
+      galleryImages={gallery}
+    />
+  )
 }

@@ -6,6 +6,7 @@ import { ArrowLeft, ExternalLink, Tag, Award } from 'lucide-react'
 import { Project } from '@/lib/projectsConfig'
 import { skillsConfig } from '@/lib/skillsConfig'
 import ArchitectureDiagram from '@/components/ArchitectureDiagram'
+import ProjectGallery from '@/components/ProjectGallery'
 import { Locale } from '@/lib/i18n'
 
 // Flatten all skills from the skills config into a lookup map id → skill
@@ -40,9 +41,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function ProjectDetail({
   project,
   locale,
+  coverImage,
+  galleryImages = [],
 }: {
   project: Project
   locale: Locale
+  coverImage?: string | null
+  galleryImages?: string[]
 }) {
   const t = {
     backToProjects: locale === 'fr' ? '← Retour aux projets' : '← Back to Projects',
@@ -50,6 +55,7 @@ export default function ProjectDetail({
     purpose:        locale === 'fr' ? 'Objectif' : 'Purpose',
     howToUse:       locale === 'fr' ? 'Comment utiliser' : 'How to Use',
     architecture:   locale === 'fr' ? 'Architecture' : 'Architecture',
+    gallery:        locale === 'fr' ? 'Galerie' : 'Gallery',
     skills:         locale === 'fr' ? 'Compétences utilisées' : 'Skills Used',
     certifications: locale === 'fr' ? 'Certifications' : 'Certifications',
     viewProject:    locale === 'fr' ? 'Voir le projet' : 'View Project',
@@ -76,14 +82,23 @@ export default function ProjectDetail({
       {/* Hero */}
       <div className="flex flex-col sm:flex-row items-start gap-6 mb-4">
         <div className="shrink-0 bg-gray-800/60 rounded-2xl p-4 flex items-center justify-center w-28 h-28">
-          <Image
-            src={project.mediaSrc}
-            alt={project.title[locale]}
-            width={80}
-            height={80}
-            className="object-contain"
-            unoptimized
-          />
+          {coverImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={coverImage}
+              alt={project.title[locale]}
+              className="w-20 h-20 object-contain"
+            />
+          ) : (
+            <Image
+              src={project.mediaSrc}
+              alt={project.title[locale]}
+              width={80}
+              height={80}
+              className="object-contain"
+              unoptimized
+            />
+          )}
         </div>
         <div className="flex-1">
           <p className="text-sm font-medium text-purple-400 mb-1">{project.company[locale]}</p>
@@ -167,6 +182,13 @@ export default function ProjectDetail({
           </div>
         )}
       </Section>
+
+      {/* Gallery */}
+      {galleryImages.length > 0 && (
+        <Section title={t.gallery}>
+          <ProjectGallery images={galleryImages} />
+        </Section>
+      )}
 
       {/* External link */}
       {project.linkUrl && (
