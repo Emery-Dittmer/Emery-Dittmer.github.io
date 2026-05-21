@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react';
 import CertificationCard from './CertificationCard'; // Import the CertificationCard component
@@ -111,24 +111,6 @@ const certsByLocale = {
       'section': 'Data Analytics',
       'certification': [
         {
-          'name': 'Alteryx Designer Advanced Certification',
-          'image': alteryx_advanced, // Update with the correct image import
-          'company': 'Issued by: Alteryx',
-          'link': 'https://www.credly.com/users/emery-dittmer/badges',
-          'linktxt': 'View Details',
-          h: 100,
-          year: '2021',
-        },
-        {
-          'name': 'Alteryx Designer Core Certification',
-          'image': alteryx_core, // Update with the correct image import
-          'company': 'Issued by: Alteryx',
-          'link': 'https://www.credly.com/users/emery-dittmer/badges',
-          'linktxt': 'View Details',
-          h: 100,
-          year: '2021',
-        },
-        {
           'name': 'Dataiku Core Designer',
           'image': data_iku, // Update with the correct image import
           'company': 'Issued by: Dataiku',
@@ -155,6 +137,24 @@ const certsByLocale = {
           h: 100,
           year: '2024',
         },
+                {
+          'name': 'Alteryx Designer Advanced Certification',
+          'image': alteryx_advanced, // Update with the correct image import
+          'company': 'Issued by: Alteryx',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
+          year: '2021',
+        },
+        {
+          'name': 'Alteryx Designer Core Certification',
+          'image': alteryx_core, // Update with the correct image import
+          'company': 'Issued by: Alteryx',
+          'link': 'https://www.credly.com/users/emery-dittmer/badges',
+          'linktxt': 'View Details',
+          h: 100,
+          year: '2021',
+        }
       ]
     },
     {
