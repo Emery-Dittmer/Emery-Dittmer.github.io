@@ -37,3 +37,6 @@ next-env.d.ts
 
 # contentlayer
 .contentlayer
+
+# SNCF map keys
+/public/sncf-map/config.js

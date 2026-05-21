@@ -753,6 +753,52 @@ export const projectsConfig: Project[] = [
     linkText: { en: 'Try it here', fr: 'Essayez-le ici' },
   },
 
+  // ── SNCF GTFS Collector & Live Train Map · 2026 ───────────────────────────
+  {
+    id: 'sncf-gtfs-collector',
+    title: {
+      en: 'SNCF GTFS Collector & Live Train Map',
+      fr: 'Collecteur GTFS SNCF & carte ferroviaire en direct',
+    },
+    company: { en: 'Personal Project', fr: 'Projet personnel' },
+    mediaSrc: network,
+    year: 2026,
+    projectType: 'personal',
+    industry: 'Technology & Transportation',
+    laneIds: ['data-engineering', 'data-analytics'],
+    description: {
+      en: 'A fully serverless AWS data pipeline that collects SNCF (French national rail) schedule and real-time delay data every 2 minutes, stores it in S3 and PostgreSQL, and powers an interactive live train map. The map renders 500+ daily trains with animated positions, delay colour-coding, route overlays, and a full-day timeline scrubber.',
+      fr: 'Un pipeline de données entièrement serverless sur AWS qui collecte les horaires SNCF et les données de retard en temps réel toutes les 2 minutes, les stocke dans S3 et PostgreSQL, et alimente une carte ferroviaire interactive en direct.',
+    },
+    purpose: {
+      en: 'Build a personal real-time train tracking system for France\'s national rail network from scratch — ingesting public GTFS and GTFS-RT feeds, storing them at minimal cost (~$0.72/month), and visualizing all active trains with live delay data on an interactive map.',
+      fr: 'Construire un système personnel de suivi des trains en temps réel pour le réseau ferroviaire national français, en ingérant les flux GTFS publics, en les stockant à coût minimal (~0,72$/mois) et en visualisant tous les trains actifs avec les données de retard en direct.',
+    },
+    howToUse: {
+      en: 'Open the live map to see all active SNCF trains with animated positions interpolated from GTFS schedules. Click any train to view its full route, stop sequence, and per-stop delays. Use the settings panel to filter by train type (TGV, TER, OUIGO, etc.) or delay level, toggle rail-line and terrain overlays, and scrub through the full day\'s service history with the timeline.',
+      fr: 'Ouvrez la carte en direct pour voir tous les trains SNCF actifs avec des positions animées interpolées à partir des horaires GTFS. Cliquez sur un train pour voir son itinéraire complet, la séquence d\'arrêts et les retards par arrêt.',
+    },
+    architecture: {
+      overview: {
+        en: 'Two EventBridge-scheduled Lambda functions ingest GTFS static data (daily) and GTFS-RT real-time updates (every 2 min) into S3 and PostgreSQL. A Lambda API serves live train positions to a Mapbox-powered browser map. Terraform manages the full infrastructure.',
+        fr: 'Deux fonctions Lambda déclenchées par EventBridge ingèrent les données statiques GTFS (quotidiennement) et les mises à jour en temps réel GTFS-RT (toutes les 2 min) dans S3 et PostgreSQL. Une Lambda API sert les positions en direct à une carte Mapbox.',
+      },
+      nodes: [
+        { id: '1', label: 'SNCF GTFS API',       type: 'input',   technology: 'github',  description: 'Public static schedule feed (stops, trips, shapes, stop_times)' },
+        { id: '2', label: 'SNCF GTFS-RT API',    type: 'input',   technology: 'github',  description: 'Real-time trip updates & delay feed (every 2 min via protobuf)' },
+        { id: '3', label: 'Lambda Ingest',        type: 'process', technology: 'python',  description: 'lambda_static (daily) + lambda_rt (2 min) — fetch, parse & store' },
+        { id: '4', label: 'S3 Data Lake',         type: 'storage', technology: 'mysql',   description: 'Raw protobuf & processed Parquet files partitioned by date' },
+        { id: '5', label: 'PostgreSQL (RDS)',     type: 'storage', technology: 'mysql',   description: 'Queryable store: stops, trips, stop_times, trip_updates, shapes' },
+        { id: '6', label: 'Lambda API',           type: 'service', technology: 'python',  description: 'REST endpoints: /trains (live), /trains/all, /trains/{id}/route' },
+        { id: '7', label: 'Live Train Map',       type: 'output',  technology: 'react',   description: 'Mapbox GL map — animated positions, delays, routes, timeline' },
+      ],
+    },
+    skills: [],
+    certifications: [],
+    linkUrl: 'https://emery-dittmer.github.io/SNCFMap/en',
+    linkText: { en: 'View live map', fr: 'Voir la carte en direct' },
+  },
+
   // ── Qlik → Power BI & Databricks Migration · 2025 ─────────────────────────
   {
     id: 'qlik-powerbi-databricks-migration',

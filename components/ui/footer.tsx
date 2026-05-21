@@ -20,6 +20,7 @@ export default function Footer() {
       coolStuff: 'Cool Stuff',
       fxRates: 'FX Rates',
       transitReach: 'Transit Catchment',
+      sncfMap: 'SNCF Live Map',
     },
     fr: {
       skills: 'Competences',
@@ -32,6 +33,7 @@ export default function Footer() {
       coolStuff: 'Loisirs',
       fxRates: 'Taux de change',
       transitReach: 'Rayon transport',
+      sncfMap: 'Carte SNCF en direct',
     },
   }
   const t = copy[locale]
@@ -102,6 +104,11 @@ export default function Footer() {
                   <li className="mb-1">
                     <Link href={`/TransitReach/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
                       {t.transitReach}
+                    </Link>
+                  </li>
+                  <li className="mb-1">
+                    <Link href={`/SNCFMap/${locale}`} className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      {t.sncfMap}
                     </Link>
                   </li>
 

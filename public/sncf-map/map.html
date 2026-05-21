@@ -1,0 +1,3514 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>SNCF Live Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+  <!-- Keys loaded from config.js (gitignored). Copy config.example.js → config.js to run locally. -->
+  <script src="config.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #0e1117; color: #fff; }
+    #map { width: 100vw; height: 100vh; }
+
+    #hud {
+      position: absolute; top: 12px; left: 12px; z-index: 10;
+      background: rgba(14,17,23,0.85); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; border-radius: 10px;
+      padding: 12px 16px; min-width: 200px;
+    }
+    #hud h1 { font-size: 14px; font-weight: 600; letter-spacing: .03em; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    #sncf-logo { height: 22px; width: auto; display: block; flex-shrink: 0; }
+    #count { font-size: 28px; font-weight: 700; line-height: 1; }
+    #count span { font-size: 13px; font-weight: 400; color: #8b949e; }
+    #updated { font-size: 11px; color: #8b949e; margin-top: 6px; line-height: 1.6; }
+    #updated-next { font-size: 10px; color: #6b7280; }
+    #updated-note { font-size: 10px; color: #6b7280; font-style: italic; margin-top: 1px; }
+
+    #legend {
+      position: absolute; bottom: 76px; left: 12px; z-index: 10;
+      background: rgba(14,17,23,0.85); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; border-radius: 10px;
+      padding: 10px 14px;
+    }
+    .leg { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 4px 0; cursor: pointer; border-radius: 6px; padding: 2px 4px; transition: background 0.15s; user-select: none; }
+    .leg:hover { background: rgba(255,255,255,0.07); }
+    .leg.leg-dimmed { opacity: 0.35; }
+    .leg-icon { width: 36px; height: 16px; flex-shrink: 0; }
+    #legend-header { display: none; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #2a2f3a; }
+    #legend-filter-label { font-size: 11px; color: #8b949e; margin-bottom: 2px; }
+    #legend-filter-name { font-size: 12px; font-weight: 600; color: #e6edf3; }
+    #legend-select-all { display: inline-block; margin-top: 4px; font-size: 11px; color: #3b82f6; cursor: pointer; text-decoration: underline; }
+    #legend-select-all:hover { color: #60a5fa; }
+
+    .mapboxgl-popup-content {
+      position: relative;
+      background: #1c2029; color: #e6edf3; border-radius: 8px;
+      padding: 12px 14px; font-size: 13px; min-width: 240px; max-width: 290px;
+      border: 1px solid #2a2f3a; box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    }
+    .mapboxgl-popup-tip { border-top-color: #1c2029 !important; }
+    .mapboxgl-popup-close-button { display: none !important; }
+    .popup-header { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .popup-type { font-weight: 600; font-size: 14px; }
+    .popup-num { font-size: 11px; color: #8b949e; background: #2a2f3a; padding: 2px 7px; border-radius: 4px; }
+    .popup-badge { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+    .popup-actions { margin-left: auto; display: flex; gap: 4px; flex-shrink: 0; }
+    .popup-action-btn {
+      width: 20px; height: 20px; border-radius: 4px;
+      border: 1px solid #3a4050; background: #2a2f3a;
+      color: #8b949e; font-size: 13px; line-height: 1;
+      cursor: pointer; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .popup-action-btn:hover { background: #3a4050; color: #e6edf3; }
+    .badge-late     { background: rgba(249,115,22,.15); color: #f97316; }
+    .badge-warn     { background: rgba(234,179,8,.15);  color: #eab308; }
+    .badge-ok       { background: rgba(34,197,94,.15);  color: #22c55e; }
+    .badge-estimate { background: rgba(148,163,184,.15); color: #94a3b8; }
+    .popup-route { border-top: 1px solid #2a2f3a; padding-top: 8px; margin-bottom: 8px; }
+    .route-stop { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #8b949e; }
+    .rs-next    { color: #e6edf3; }
+    .rdot { width: 8px; height: 8px; border-radius: 50%; background: #4b5563; flex-shrink: 0; }
+    .rdot-next { background: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,.3); }
+    .rdot-dest { background: #3b82f6; }
+    .stime { margin-left: auto; font-size: 11px; color: #6b7280; flex-shrink: 0; }
+    .stime-wrap { margin-left: auto; font-size: 11px; color: #6b7280; flex-shrink: 0; display: flex; gap: 4px; align-items: center; }
+    .stime-orig { text-decoration: line-through; opacity: 0.6; }
+    .stime-new  { color: #f97316; }
+    .rs-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rs-past { opacity: 0.4; }
+    .popup-route-scroll { max-height: 190px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #2a2f3a transparent; }
+    .route-vdots { color: #4b5563; font-size: 10px; width: 8px; text-align: center; line-height: 1; margin: 1px 0; user-select: none; }
+    .popup-line-name { font-size: 10px; color: #60a5fa; background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.25); padding: 2px 7px; border-radius: 4px; margin-bottom: 6px; display: inline-block; }
+    .popup-sncf { display: block; margin-top: 8px; font-size: 11px; color: #60a5fa; text-decoration: none; }
+    .popup-sncf:hover { color: #93c5fd; text-decoration: underline; }
+    .popup-id { font-size: 10px; color: #374151; margin-top: 4px; word-break: break-all; line-height: 1.4; }
+    .popup-loading { font-size: 12px; color: #6b7280; padding: 6px 0; }
+    .popup-expand-btn {
+      display: block; width: 100%; margin-top: 6px; padding: 5px 0 0;
+      background: none; border: none; border-top: 1px solid #2a2f3a;
+      font-size: 11px; color: #60a5fa; cursor: pointer; text-align: left;
+    }
+    .popup-expand-btn:hover { color: #93c5fd; }
+
+    #train-dock {
+      position: absolute; bottom: 64px; left: 50%; transform: translateX(-50%);
+      z-index: 10; display: none;
+      background: rgba(14,17,23,0.95); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; border-radius: 8px;
+      padding: 8px 12px; align-items: center; gap: 10px;
+      max-width: 420px; min-width: 260px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    }
+    .dock-type  { font-size: 10px; font-weight: 600; color: #8b949e; background: #2a2f3a; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+    .dock-title { font-size: 12px; font-weight: 600; color: #e6edf3; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dock-restore { padding: 4px 10px; border-radius: 5px; border: 1px solid #3a4050; background: #1c2029; color: #60a5fa; font-size: 11px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+    .dock-restore:hover { background: #2a2f3a; }
+    .dock-close { padding: 4px 8px; border-radius: 5px; border: none; background: transparent; color: #6b7280; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+    .dock-close:hover { color: #e6edf3; }
+    .delay-late { color: #f97316; }
+    .delay-ok   { color: #22c55e; }
+    #late-count { font-size: 11px; color: #f97316; margin-top: 3px; min-height: 14px; }
+    .type-grid { display: flex; flex-wrap: wrap; gap: 4px; }
+    .type-btn {
+      padding: 3px 8px; border-radius: 4px; border: 1px solid #2a2f3a;
+      background: #1c2029; color: #6b7280; font-size: 10px; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .type-btn.on { background: #334155; border-color: #64748b; color: #e6edf3; }
+    .type-icon { width: 28px; height: 10px; flex-shrink: 0; object-fit: contain; }
+    #select-all-btn {
+      width: 100%; margin-bottom: 4px; padding: 4px 8px; border-radius: 4px;
+      border: 1px solid #64748b; background: #334155; color: #e6edf3;
+      font-size: 10px; font-weight: 600; cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    #select-all-btn:hover { background: #3e4f66; }
+    .delay-btn-ok.on   { border-color: #22c55e; color: #22c55e; background: rgba(34,197,94,.12); }
+    .delay-btn-warn.on { border-color: #eab308; color: #eab308; background: rgba(234,179,8,.12); }
+    .delay-btn-late.on { border-color: #f97316; color: #f97316; background: rgba(249,115,22,.12); }
+
+    #timeline {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+      background: rgba(14,17,23,0.92); backdrop-filter: blur(6px);
+      border-top: 1px solid #2a2f3a;
+      padding: 10px 16px 12px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    #tl-wrap { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    #tl-slider {
+      width: 100%; height: 4px; cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      background: #2a2f3a; border-radius: 2px; outline: none;
+    }
+    #tl-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; cursor: pointer; box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+    }
+    #tl-slider::-moz-range-thumb {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; cursor: pointer; border: none;
+    }
+    #tl-slider:disabled { opacity: 0.4; cursor: default; }
+    #tl-slider:disabled::-webkit-slider-thumb { cursor: default; }
+    #tl-track-wrap { position: relative; }
+    #tl-thumb-tip {
+      position: absolute; bottom: calc(100% + 8px);
+      transform: translateX(-50%);
+      background: rgba(28,32,41,0.97); border: 1px solid #2a2f3a; border-radius: 6px;
+      padding: 3px 9px; font-size: 12px; font-weight: 600; color: #e6edf3;
+      white-space: nowrap; pointer-events: none; z-index: 20;
+    }
+    #tl-thumb-tip::after {
+      content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: #2a2f3a;
+    }
+    #tl-times { display: flex; justify-content: space-between; font-size: 11px; color: #8b949e; }
+    #tl-live {
+      padding: 6px 12px; border-radius: 6px; border: 1px solid #2a2f3a;
+      background: #1c2029; color: #8b949e; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    #tl-live.is-live { background: #dc2626; border-color: #dc2626; color: #fff; }
+    #tl-play {
+      padding: 6px 13px; border-radius: 6px; border: 1px solid #2a2f3a;
+      background: #1c2029; color: #e6edf3; font-size: 15px;
+      cursor: pointer; transition: background .15s;
+    }
+    #tl-play:hover { background: #2a2f3a; }
+    #tl-speeds { display: flex; gap: 4px; }
+    .tl-spd {
+      padding: 5px 8px; border-radius: 6px; border: 1px solid #2a2f3a;
+      background: #1c2029; color: #8b949e; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+    }
+    .tl-spd.active { background: #334155; border-color: #64748b; color: #e6edf3; }
+
+    /* ── Advanced Options ────────────────────────────────────────────── */
+    .adv-toggle { cursor: pointer; user-select: none; transition: color .15s; }
+    .adv-toggle:hover { color: #e6edf3; }
+
+    /* ── Train number search ─────────────────────────────────────────── */
+    #train-search-wrap { margin-bottom: 10px; }
+    #train-search-drop { z-index: 30; }
+    .ts-badge { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px; background: #2a2f3a; flex-shrink: 0; }
+    .ts-label { font-size: 11px; color: #e6edf3; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ts-od { font-size: 10px; color: #6b7280; }
+
+    /* ── Schedule results ────────────────────────────────────────────── */
+    #sched-results { max-height: 200px; overflow-y: auto; margin-top: 4px; scrollbar-width: thin; scrollbar-color: #2a2f3a transparent; }
+    .sched-item { display: flex; align-items: center; gap: 5px; padding: 5px 3px; border-bottom: 1px solid #1a1f28; cursor: pointer; border-radius: 4px; }
+    .sched-item:last-child { border-bottom: none; }
+    .sched-item:hover { background: rgba(255,255,255,0.05); }
+    .sched-time { font-size: 11px; font-weight: 600; color: #e6edf3; flex-shrink: 0; }
+    .sched-arrow { font-size: 10px; color: #4b5563; flex-shrink: 0; }
+    .sched-arr  { font-size: 10px; color: #6b7280; flex-shrink: 0; }
+    .sched-badge { font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 3px; background: #2a2f3a; flex-shrink: 0; }
+    .sched-name { font-size: 11px; color: #8b949e; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sched-delay { font-size: 10px; color: #f97316; flex-shrink: 0; }
+    #sched-search-btn { width: 100%; justify-content: center; margin-top: 6px; }
+
+    #settings-btn {
+      position: absolute; top: 116px; right: 10px; z-index: 10;
+      padding: 6px 10px; border-radius: 6px; border: 1px solid #2a2f3a;
+      background: rgba(14,17,23,0.92); color: #8b949e; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s;
+    }
+    #settings-btn:hover, #settings-btn.open { background: #2a2f3a; color: #e6edf3; }
+
+    #settings-panel {
+      position: absolute; top: 12px; right: 56px; z-index: 10;
+      background: rgba(14,17,23,0.92); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; border-radius: 10px;
+      padding: 14px 16px; width: 192px; display: none;
+    }
+    #settings-panel.open { display: block; }
+    .sp-label {
+      font-size: 10px; font-weight: 600; color: #8b949e;
+      text-transform: uppercase; letter-spacing: .08em; margin: 10px 0 6px;
+    }
+    .sp-label:first-child { margin-top: 0; }
+    .style-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .style-btn {
+      padding: 6px 4px; border-radius: 6px; border: 1px solid #2a2f3a;
+      background: #1c2029; color: #8b949e; font-size: 11px; font-weight: 500;
+      cursor: pointer; text-align: center;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .style-btn.active { background: #334155; border-color: #64748b; color: #e6edf3; }
+    .overlay-row {
+      display: flex; align-items: center; justify-content: space-between; margin: 5px 0;
+    }
+    .overlay-label { font-size: 12px; color: #e6edf3; }
+    .tog {
+      width: 34px; height: 18px; border-radius: 9px; flex-shrink: 0;
+      background: #2a2f3a; border: 1px solid #3a4050; cursor: pointer;
+      position: relative; transition: background .2s, border-color .2s;
+    }
+    .tog::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #6b7280; transition: left .2s, background .2s;
+    }
+    .tog.on { background: #334155; border-color: #64748b; }
+    .tog.on::after { left: 18px; background: #e6edf3; }
+
+    /* ── Segment Picker ─────────────────────────────────────────────── */
+    #picker-btn {
+      position: absolute; top: 156px; right: 10px; z-index: 10;
+      width: 36px; height: 36px; border-radius: 8px;
+      background: rgba(14,17,23,0.92); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; color: #8b949e; font-size: 17px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    #picker-btn:hover { background: #2a2f3a; color: #e6edf3; }
+    #picker-btn.active { background: #1c2a1c; border-color: #f97316; color: #f97316; }
+    #picker-panel {
+      position: absolute; top: 12px; right: 56px; z-index: 10;
+      background: rgba(14,17,23,0.95); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; border-radius: 10px;
+      padding: 14px 16px; width: 224px; display: none;
+    }
+    #picker-panel.open { display: block; }
+    #picker-status { font-size: 10px; color: #8b949e; margin: 4px 0 2px; min-height: 28px; line-height: 1.4; }
+    .ac-wrap { position: relative; margin-top: 4px; }
+    .ac-input {
+      width: 100%; box-sizing: border-box;
+      background: #0e1117; border: 1px solid #2a2f3a; border-radius: 4px;
+      color: #e6edf3; font-size: 11px; padding: 5px 8px; outline: none;
+      font-family: inherit;
+    }
+    .ac-input:focus { border-color: #64748b; }
+    .ac-input::placeholder { color: #4b5563; }
+    .ac-drop {
+      position: absolute; top: calc(100% + 3px); left: 0; right: 0; z-index: 20;
+      background: #161b22; border: 1px solid #2a2f3a; border-radius: 6px;
+      max-height: 180px; overflow-y: auto; display: none;
+    }
+    .ac-drop.open { display: block; }
+    .ac-item {
+      padding: 6px 10px; font-size: 11px; color: #c9d1d9; cursor: pointer;
+      border-bottom: 1px solid #21262d;
+    }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover, .ac-item.focused { background: #21262d; color: #e6edf3; }
+    .ac-empty { padding: 6px 10px; font-size: 11px; color: #4b5563; }
+    #picker-stats { font-size: 10px; color: #4b5563; margin-top: 6px; }
+    #picker-actions { display: flex; gap: 6px; margin-top: 10px; }
+    #picker-actions .type-btn { flex: 1; justify-content: center; }
+    #picker-save { background: #1a2e1a !important; border-color: #4a7c4a !important;
+      color: #86efac !important; }
+    #picker-save:hover:not(:disabled) { background: #243424 !important; }
+    #picker-save:disabled { opacity: 0.35; cursor: not-allowed; }
+    /* ── Search panel ──────────────────────────────────────────────── */
+    #search-btn {
+      position: absolute; top: 76px; right: 10px; z-index: 10;
+      width: 36px; height: 36px; border-radius: 8px;
+      background: rgba(14,17,23,0.92); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; color: #8b949e;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    #search-btn:hover, #search-btn.open { background: #2a2f3a; color: #e6edf3; }
+    #search-panel {
+      position: absolute; top: 12px; right: 56px; z-index: 10;
+      background: rgba(14,17,23,0.92); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; border-radius: 10px;
+      padding: 14px 16px; width: 220px; display: none;
+    }
+    #search-panel.open { display: block; }
+    /* ── Track Editor ───────────────────────────────────────────────── */
+    #track-btn {
+      position: absolute; top: 200px; right: 10px; z-index: 10;
+      width: 36px; height: 36px; border-radius: 8px;
+      background: rgba(14,17,23,0.92); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; color: #8b949e; font-size: 18px;
+      cursor: pointer; transition: color .15s, border-color .15s, background .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #track-btn:hover { background: #2a2f3a; color: #e6edf3; }
+    #track-btn.active { background: #0e1e26; border-color: #06b6d4; color: #06b6d4; }
+    #track-panel {
+      position: absolute; top: 12px; right: 56px; z-index: 10;
+      background: rgba(14,17,23,0.95); backdrop-filter: blur(6px);
+      border: 1px solid #2a2f3a; border-radius: 10px;
+      padding: 14px 16px; width: 224px; display: none;
+    }
+    #track-panel.open { display: block; }
+    #track-status { font-size: 10px; color: #8b949e; margin: 4px 0 6px; min-height: 28px; line-height: 1.4; }
+    #track-name {
+      width: 100%; box-sizing: border-box;
+      background: #161b22; border: 1px solid #2a2f3a; border-radius: 5px;
+      color: #e6edf3; font-size: 12px; padding: 5px 8px; outline: none;
+    }
+    #track-name:focus { border-color: #06b6d4; }
+    #track-name::placeholder { color: #4b5563; }
+    #track-stats { font-size: 10px; color: #4b5563; margin-top: 6px; }
+    #track-actions { display: flex; gap: 6px; margin-top: 10px; }
+    #track-actions .type-btn { flex: 1; justify-content: center; }
+    #track-save { background: #0e1e2e !important; border-color: #0e7490 !important; color: #67e8f9 !important; }
+    #track-save:hover:not(:disabled) { background: #132232 !important; }
+    #track-save:disabled { opacity: 0.35; cursor: not-allowed; }
+    #track-saved { margin-top: 10px; border-top: 1px solid #2a2f3a; padding-top: 8px; }
+    #track-saved-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    #track-saved-title { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; }
+    #track-saved-toggle { font-size: 11px; color: #4b5563; }
+    #track-saved-list { margin-top: 6px; max-height: 160px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #2a2f3a transparent; display: flex; flex-direction: column; gap: 2px; }
+    .saved-track-item { display: flex; align-items: center; gap: 5px; padding: 5px 6px; border-radius: 5px; font-size: 11px; border: 1px solid transparent; }
+    .saved-track-item:hover { background: #1c2029; border-color: #2a2f3a; }
+    .saved-track-item.active { background: #0e1e26; border-color: #0e7490; }
+    .sti-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #67e8f9; cursor: pointer; }
+    .sti-pts  { font-size: 10px; color: #4b5563; flex-shrink: 0; }
+    .sti-del  { font-size: 12px; color: #4b5563; cursor: pointer; flex-shrink: 0; line-height: 1; padding: 0 2px; }
+    .sti-del:hover { color: #f87171; }
+    #track-saved-empty { font-size: 11px; color: #4b5563; text-align: center; padding: 8px 0; }
+    #picker-saved { margin-top: 10px; border-top: 1px solid #2a2f3a; padding-top: 8px; }
+    #picker-saved-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    #picker-saved-title { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; }
+    #picker-saved-toggle { font-size: 11px; color: #4b5563; }
+    #picker-saved-list { margin-top: 6px; max-height: 160px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #2a2f3a transparent; display: flex; flex-direction: column; gap: 2px; }
+    .saved-route-item { display: flex; align-items: center; gap: 5px; padding: 5px 6px; border-radius: 5px; cursor: pointer; font-size: 11px; border: 1px solid transparent; }
+    .saved-route-item:hover { background: #1c2029; border-color: #2a2f3a; }
+    .saved-route-item.active { background: #1a2a1a; border-color: #4a7c4a; }
+    .sri-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sri-origin { color: #22c55e; }
+    .sri-dest   { color: #60a5fa; }
+    .sri-arrow  { color: #4b5563; }
+    .sri-trips  { font-size: 10px; color: #4b5563; flex-shrink: 0; }
+    #picker-saved-empty { font-size: 11px; color: #4b5563; text-align: center; padding: 8px 0; }
+    #picker-viewall { font-size: 10px; color: #3b82f6; cursor: pointer; margin-left: auto; margin-right: 6px; flex-shrink: 0; }
+    #picker-viewall:hover { color: #60a5fa; text-decoration: underline; }
+    #picker-saved-list.expanded { max-height: none !important; }
+    .sri-bidir { display: flex; align-items: center; gap: 2px; font-size: 11px; color: #4b5563; flex-shrink: 0; cursor: default; user-select: none; }
+    .sri-bidir input { width: 11px; height: 11px; cursor: pointer; accent-color: #22c55e; margin: 0; }
+    .sri-bidir.on { color: #22c55e; }
+    #picker-show-all-map {
+      width: 100%; margin-top: 6px; padding: 4px 8px; border-radius: 4px;
+      border: 1px solid #2a2f3a; background: #1c2029; color: #8b949e;
+      font-size: 10px; font-weight: 600; cursor: pointer; text-align: left;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    #picker-show-all-map:hover { background: #2a2f3a; color: #e6edf3; }
+    #picker-show-all-map.active { background: #1a2a1a; border-color: #f97316; color: #f97316; }
+
+    #loading-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(12,15,20,0.9); backdrop-filter: blur(6px);
+      transition: opacity 0.6s ease;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    #loading-card {
+      background: rgba(22,27,38,0.98); backdrop-filter: blur(10px);
+      border: 1px solid #2a2f3a; border-radius: 14px;
+      padding: 30px 48px; text-align: center;
+      box-shadow: 0 16px 48px rgba(0,0,0,.7);
+      margin-bottom: 18vh;
+    }
+    #loading-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; letter-spacing: .02em; }
+    #loading-card p  { font-size: 13px; color: #8b949e; margin: 0; }
+
+    #loading-scene {
+      position: absolute;
+      left: 0; right: 0;
+      bottom: 30%;
+      height: 100px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    #loading-track {
+      position: absolute;
+      bottom: 26px;
+      left: 0; right: 0;
+      height: 8px;
+      background:
+        linear-gradient(to right, transparent, #3d4f63 5%, #3d4f63 95%, transparent) 0 0   / 100% 2px no-repeat,
+        linear-gradient(to right, transparent, #3d4f63 5%, #3d4f63 95%, transparent) 0 100%/ 100% 2px no-repeat,
+        repeating-linear-gradient(to right, #1c2636 0, #1c2636 13px, transparent 13px, transparent 29px);
+    }
+    #loading-tgv {
+      position: absolute;
+      bottom: 22px;
+      width: 1190px;
+      height: 58px;
+      /* default palette — INOUI; overridden by randomizer script */
+      --ld-c1: #5e155b; --ld-c2: #c21758; --ld-c3: #eb1925;
+      --ld-cap: #3d0a38; --ld-uf: #1a0820; --ld-div: #8b0a14;
+      --ld-glow: rgba(194,23,88,0.55);
+      filter: drop-shadow(0 6px 20px var(--ld-glow));
+      animation: ld-train 3.8s linear infinite;
+    }
+    @keyframes ld-train {
+      from { left: -1300px; }
+      to   { left: 110vw;   }
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="loading-overlay">
+  <div id="loading-card">
+    <h2>SNCF Live Map</h2>
+    <p>Loading trains into the network…</p>
+  </div>
+  <div id="loading-scene">
+    <div id="loading-track"></div>
+    <div id="loading-tgv">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 0 1190 58" width="1190" height="58">
+        <defs>
+          <linearGradient id="ld-body" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   style="stop-color:var(--ld-c1)"/>
+            <stop offset="55%"  style="stop-color:var(--ld-c2)"/>
+            <stop offset="100%" style="stop-color:var(--ld-c3)"/>
+          </linearGradient>
+          <linearGradient id="ld-body-rev" x1="100%" y1="0%" x2="0%" y2="0%">
+            <stop offset="0%"   style="stop-color:var(--ld-c1)"/>
+            <stop offset="55%"  style="stop-color:var(--ld-c2)"/>
+            <stop offset="100%" style="stop-color:var(--ld-c3)"/>
+          </linearGradient>
+          <linearGradient id="ld-glass" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stop-color="#1a3045"/>
+            <stop offset="100%" stop-color="#0a1520"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Speed lines trailing left of the rear loco nose -->
+        <g opacity="0.28">
+          <line x1="-95" y1="15" x2="-23" y2="15" style="stroke:var(--ld-c2)" stroke-width="2"   stroke-linecap="round"/>
+          <line x1="-95" y1="22" x2="0"   y2="22" style="stroke:var(--ld-c3)" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="-95" y1="29" x2="0"   y2="29" style="stroke:var(--ld-c3)" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="-95" y1="36" x2="-23" y2="36" style="stroke:var(--ld-c2)" stroke-width="2"   stroke-linecap="round"/>
+          <line x1="-95" y1="19" x2="-50" y2="19" style="stroke:var(--ld-c1)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="-95" y1="32" x2="-50" y2="32" style="stroke:var(--ld-c1)" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+
+        <!-- ── Rear loco (mirrored): nose at x=0, tail at x=363, new_x = 420-old_x ── -->
+        <path d="M355 9 L90 7 C52 7 20 20 0 47 C20 47 52 49 90 49 L355 49 C359 49 363 46 363 42 L363 16 C363 12 359 9 355 9"
+              fill="url(#ld-body-rev)"/>
+        <rect x="358" y="16" width="5"   height="27" rx="2" style="fill:var(--ld-cap)"/>
+        <rect x="104" y="12" width="248" height="14" rx="2" fill="url(#ld-glass)" opacity="0.82"/>
+        <line x1="152" y1="12" x2="152" y2="26" style="stroke:var(--ld-div)" stroke-width="1.5"/>
+        <line x1="202" y1="12" x2="202" y2="26" style="stroke:var(--ld-div)" stroke-width="1.5"/>
+        <line x1="252" y1="12" x2="252" y2="26" style="stroke:var(--ld-div)" stroke-width="1.5"/>
+        <line x1="302" y1="12" x2="302" y2="26" style="stroke:var(--ld-div)" stroke-width="1.5"/>
+        <rect x="100" y="31" width="255" height="3"  fill="white" opacity="0.11"/>
+        <rect x="90"  y="47" width="273" height="5"  rx="1" style="fill:var(--ld-uf)"/>
+        <rect x="88"  y="50" width="54"  height="4"  rx="1" fill="#111"/>
+        <circle cx="101" cy="55" r="3.8" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.2"/>
+        <circle cx="129" cy="55" r="3.8" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.2"/>
+        <line x1="101" y1="55" x2="129" y2="55" stroke="#1a1a1a" stroke-width="1.2"/>
+        <rect x="298" y="50" width="54"  height="4"  rx="1" fill="#111"/>
+        <circle cx="311" cy="55" r="3.8" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.2"/>
+        <circle cx="339" cy="55" r="3.8" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.2"/>
+        <line x1="311" y1="55" x2="339" y2="55" stroke="#1a1a1a" stroke-width="1.2"/>
+
+        <!-- Coupler: rear loco tail → Car 3 -->
+        <rect x="363" y="24" width="7" height="10" rx="1" fill="#0d0d0d"/>
+
+        <!-- Cars + front loco, shifted right by 370px -->
+        <g transform="translate(370,0)">
+
+          <!-- ── Single long car ── -->
+          <rect x="3"   y="10" width="337" height="38" rx="2" style="fill:var(--ld-c2)"/>
+          <rect x="3"   y="10" width="337" height="3"  rx="1" fill="white" opacity="0.08"/>
+          <rect x="14"  y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="46"  y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="78"  y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="110" y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="142" y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="174" y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="206" y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="238" y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="270" y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="302" y="14" width="22"  height="13" rx="2" fill="url(#ld-glass)" opacity="0.85"/>
+          <rect x="3"   y="30" width="337" height="3"  fill="white" opacity="0.1"/>
+          <rect x="3"   y="47" width="337" height="5"  rx="1" style="fill:var(--ld-uf)"/>
+          <rect x="8"   y="50" width="28"  height="4"  rx="1" fill="#111"/>
+          <circle cx="15"  cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <circle cx="28"  cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <rect x="77"  y="50" width="28"  height="4"  rx="1" fill="#111"/>
+          <circle cx="84"  cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <circle cx="97"  cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <rect x="123" y="50" width="28"  height="4"  rx="1" fill="#111"/>
+          <circle cx="130" cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <circle cx="143" cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <rect x="192" y="50" width="28"  height="4"  rx="1" fill="#111"/>
+          <circle cx="199" cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <circle cx="212" cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <rect x="238" y="50" width="28"  height="4"  rx="1" fill="#111"/>
+          <circle cx="245" cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <circle cx="258" cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <rect x="307" y="50" width="28"  height="4"  rx="1" fill="#111"/>
+          <circle cx="314" cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <circle cx="327" cy="55" r="3.5" fill="#0d0d0d" stroke="#252525" stroke-width="1"/>
+          <rect x="340" y="24" width="7"   height="10" rx="1" fill="#0d0d0d"/>
+
+          <!-- ── Front loco (nose right) ── -->
+          <path d="M355 9 L620 7 C658 7 690 20 710 47 C690 47 658 49 620 49 L355 49 C351 49 347 46 347 42 L347 16 C347 12 351 9 355 9"
+                fill="url(#ld-body)"/>
+          <rect x="344" y="16" width="5"   height="27" rx="2" style="fill:var(--ld-cap)"/>
+          <rect x="358" y="12" width="248" height="14" rx="2" fill="url(#ld-glass)" opacity="0.82"/>
+          <line x1="408" y1="12" x2="408" y2="26" style="stroke:var(--ld-div)" stroke-width="1.5"/>
+          <line x1="458" y1="12" x2="458" y2="26" style="stroke:var(--ld-div)" stroke-width="1.5"/>
+          <line x1="508" y1="12" x2="508" y2="26" style="stroke:var(--ld-div)" stroke-width="1.5"/>
+          <line x1="558" y1="12" x2="558" y2="26" style="stroke:var(--ld-div)" stroke-width="1.5"/>
+          <rect x="355" y="31" width="255" height="3"  fill="white" opacity="0.11"/>
+          <rect x="347" y="47" width="273" height="5"  rx="1" style="fill:var(--ld-uf)"/>
+          <rect x="568" y="50" width="54"  height="4"  rx="1" fill="#111"/>
+          <circle cx="581" cy="55" r="3.8" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.2"/>
+          <circle cx="609" cy="55" r="3.8" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.2"/>
+          <line x1="581" y1="55" x2="609" y2="55" stroke="#1a1a1a" stroke-width="1.2"/>
+          <rect x="358" y="50" width="54"  height="4"  rx="1" fill="#111"/>
+          <circle cx="371" cy="55" r="3.8" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.2"/>
+          <circle cx="399" cy="55" r="3.8" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1.2"/>
+          <line x1="371" y1="55" x2="399" y2="55" stroke="#1a1a1a" stroke-width="1.2"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+<script>
+// Cycle the loading train's livery in order on each animation pass
+(function() {
+  var palettes = [
+    { label: "Maps",       c1: "#0a2a4a", c2: "#1e5799", c3: "#7db9e8", cap: "#061a2e", uf: "#03101c", div: "#1e5799", glow: "rgba(30,87,153,0.55)"   },
+    { label: "Routes",     c1: "#7a2800", c2: "#c44d00", c3: "#f07800", cap: "#4a1800", uf: "#220b00", div: "#a33800", glow: "rgba(196,77,0,0.55)"     },
+    { label: "Eurostar",   c1: "#002b5c", c2: "#003f8a", c3: "#f5cb00", cap: "#001530", uf: "#000d1a", div: "#003070", glow: "rgba(245,203,0,0.45)"    },
+    { label: "Ouigo",      c1: "#3b1c78", c2: "#c10079", c3: "#00a9ce", cap: "#24114a", uf: "#120824", div: "#8d0058", glow: "rgba(0,169,206,0.55)"     },
+    { label: "InOui",      c1: "#ffffff", c2: "#c21758", c3: "#eb1925", cap: "#3d0a38", uf: "#1a0820", div: "#8b0a14", glow: "rgba(194,23,88,0.55)"   },
+    { label: "Lyria",      c1: "#6b0012", c2: "#cc001a", c3: "#f54444", cap: "#420009", uf: "#1f0005", div: "#9e0015", glow: "rgba(204,0,26,0.55)"     },
+    { label: "Intercités", c1: "#2d0a6e", c2: "#5b21b6", c3: "#8b5cf6", cap: "#1a0545", uf: "#0d0228", div: "#3b0e8a", glow: "rgba(139,92,246,0.5)"   }
+  ];
+  var el = document.getElementById("loading-tgv");
+  var idx = 0;
+  function applyPalette(p) {
+    el.style.setProperty("--ld-c1",  p.c1);
+    el.style.setProperty("--ld-c2",  p.c2);
+    el.style.setProperty("--ld-c3",  p.c3);
+    el.style.setProperty("--ld-cap", p.cap);
+    el.style.setProperty("--ld-uf",  p.uf);
+    el.style.setProperty("--ld-div", p.div);
+    el.style.setProperty("--ld-glow",p.glow);
+    document.querySelector("#loading-card p").textContent =
+      "Loading trains into the network…  (" + p.label + ")";
+  }
+  function rollPalette() {
+    applyPalette(palettes[idx]);
+    idx = (idx + 1) % palettes.length;
+  }
+  rollPalette();
+  el.addEventListener("animationiteration", rollPalette);
+})();
+</script>
+
+<div id="hud">
+  <h1>
+    <svg id="sncf-logo" viewBox="0 0 448 235" xmlns="http://www.w3.org/2000/svg">
+      <defs><clipPath id="bg-clip"><path d="M12.2 3.7C7.2 3.9 4 6.2 4 11.1v219.6c0 3.8 2.7 7.3 7 7.3h391.9c3.5 0 6.3-.3 8-5 0 0 39.7-124.3 40.4-126.6 1.5-4.7.5-7.1-3.5-9.6C320.2 15 129.3 3.2 42.6 3.2c-12.4 0-22.7.2-30.4.5"/></clipPath></defs>
+      <linearGradient id="sg" x1="4" y1="120.5" x2="452" y2="120.5" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#7C2270"/><stop offset=".247" stop-color="#AA147E"/>
+        <stop offset=".815" stop-color="#E41D25"/><stop offset="1" stop-color="#E41D25"/>
+      </linearGradient>
+      <rect x="4" y="3" width="448" height="235" fill="url(#sg)" clip-path="url(#bg-clip)"/>
+      <path fill="#fff" d="M249.7 173.5c-5.5-6.4-7.7-14.6-6.3-23.8 3.2-21.9 24.6-35.8 53.1-35.8 6 0 12.2.4 17.8 1.1l5.6-16.5C313 97.4 304.7 97 296.5 97c-25.3 0-47.3 8.7-61.6 24.1-.4.5-.9.5-1.2.5-.4 0-.7-.1-.6-.5l7.1-22.4h-20.9l-22.9 71.7c-7.3-21.2-22.3-49-40.6-71.7h-22.4l-16.6 52.1c8.4 6.3 11.1 10.8 13.3 17.2.1.4.4.5.8.5.4 0 .6-.1.7-.5.2-.5 14.6-45.4 14.6-45.4 14.8 21.1 29.4 48.9 37.3 78.3h24.1l11.9-37.2c.1-.4.4-.5.8-.5.4 0 .7.1.7.5 3.6 23.3 26.8 39 59.7 39 21.3 0 40.5-5.6 45.3-8.1l12.5-39.3h47.9l4.9-15.2h-47.9l8.3-25.8h57.1l5-15.8h-80.2l-27.2 85.1c-5.8 1.5-12.9 2.2-20.4 2.2-16.1 0-29-3.8-36.3-12.3m-135.1-59.2 4.8-15c-6.8-1.3-11.7-1.9-19.9-2.1-26.3-.6-50 6.6-56.1 22-7.2 18.2 13.3 28.4 31.1 36.9 14.1 6.7 25.3 13.1 21.4 21.4-3.1 6.5-13 9.5-27.6 9.2C55.7 186.4 40 182.8 27.6 176.6l-7.4 15.9c9.1 4.2 27.9 10 43.9 10.3 30.1.7 49.5-6.9 57.3-23.2 9.2-19.4-13.7-30-32-38.8-14.4-6.9-24.2-10.6-21.8-17.6 2.8-8.3 17.3-11.4 30.4-11.1 6.5.1 11.2.9 16.6 2.2"/>
+    </svg>
+    Live
+  </h1>
+  <div id="count">— <span>trains</span></div>
+  <div id="late-count"></div>
+  <div id="updated">Chargement…</div>
+  <div id="updated-next"></div>
+  <div id="updated-note"></div>
+</div>
+
+<div id="legend">
+  <div id="legend-header">
+    <div id="legend-filter-label">Filtered on</div>
+    <div id="legend-filter-name"></div>
+    <span id="legend-select-all">Select all</span>
+  </div>
+</div>
+
+<button id="search-btn" title="Search trains &amp; schedules">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+</button>
+<div id="search-panel">
+  <div class="sp-label" style="margin-top:0">Search train</div>
+  <div id="train-search-wrap" class="ac-wrap" style="margin-top:4px">
+    <input class="ac-input" id="train-search-input" type="text" placeholder="Train number or name…" autocomplete="off">
+    <div class="ac-drop" id="train-search-drop"></div>
+  </div>
+  <div class="sp-label" style="margin-top:10px">Schedule between stops</div>
+  <div class="ac-wrap" style="margin-top:4px">
+    <input class="ac-input" id="sched-from" type="text" placeholder="From station…" autocomplete="off">
+    <div class="ac-drop" id="ac-sched-from-drop"></div>
+  </div>
+  <div class="ac-wrap" style="margin-top:5px">
+    <input class="ac-input" id="sched-to" type="text" placeholder="To station…" autocomplete="off">
+    <div class="ac-drop" id="ac-sched-to-drop"></div>
+  </div>
+  <button class="type-btn" id="sched-search-btn" disabled>Search trains</button>
+  <div id="sched-results"></div>
+</div>
+<button id="settings-btn">Layers</button>
+<button id="picker-btn" title="Segment picker — draw a route by clicking on rail lines">✏</button>
+<div id="picker-panel">
+  <div class="sp-label" style="margin-top:0">Segment Picker</div>
+  <div id="picker-status">Click on a rail line to place your first waypoint</div>
+  <div class="sp-label" style="margin-top:10px">Origin station</div>
+  <div class="ac-wrap" id="ac-origin-wrap">
+    <input class="ac-input" id="picker-origin" type="text" placeholder="Search station…" autocomplete="off">
+    <div class="ac-drop" id="ac-origin-drop"></div>
+  </div>
+  <div class="sp-label" style="margin-top:8px">Destination station</div>
+  <div class="ac-wrap" id="ac-dest-wrap">
+    <input class="ac-input" id="picker-dest" type="text" placeholder="Search station…" autocomplete="off">
+    <div class="ac-drop" id="ac-dest-drop"></div>
+  </div>
+  <div id="picker-stats"></div>
+  <div id="picker-edit-bar" style="display:none; margin-bottom:6px;">
+    <span id="picker-edit-label" style="font-size:10px;color:#f97316;">Editing saved route —</span>
+    <span id="picker-redraw-btn" style="font-size:10px;color:#60a5fa;cursor:pointer;margin-left:4px;">Redraw from scratch</span>
+  </div>
+  <div id="picker-actions">
+    <button class="type-btn" id="picker-undo">Undo</button>
+    <button class="type-btn" id="picker-clear">Clear</button>
+    <button class="type-btn" id="picker-save" disabled>Save</button>
+  </div>
+  <div id="picker-saved">
+    <div id="picker-saved-header">
+      <span id="picker-saved-title">Saved routes</span>
+      <span id="picker-viewall">View all</span>
+      <span id="picker-saved-toggle">▾</span>
+    </div>
+    <button id="picker-show-all-map">⊙ Show all on map</button>
+    <div id="picker-saved-list"><div id="picker-saved-empty">Loading…</div></div>
+  </div>
+</div>
+
+<button id="track-btn" title="Add missing track — click points on the map to draw a new rail line">+</button>
+<div id="track-panel">
+  <div class="sp-label" style="margin-top:0">Add Missing Track</div>
+  <div id="track-status">Click anywhere on the map to place track points</div>
+  <input id="track-name" type="text" placeholder="Track name (optional)" autocomplete="off">
+  <div id="track-stats"></div>
+  <div id="track-actions">
+    <button class="type-btn" id="track-undo">Undo</button>
+    <button class="type-btn" id="track-clear">Clear</button>
+    <button class="type-btn" id="track-save" disabled>Save</button>
+  </div>
+  <div id="track-saved">
+    <div id="track-saved-header">
+      <span id="track-saved-title">Saved tracks</span>
+      <span id="track-saved-toggle">▾</span>
+    </div>
+    <div id="track-saved-list">
+      <div id="track-saved-empty">No saved tracks</div>
+    </div>
+  </div>
+</div>
+<div id="settings-panel">
+  <div class="sp-label" style="margin-top:0">Filter trains</div>
+  <button id="select-all-btn">All types</button>
+  <div class="type-grid" id="type-filters">
+    <button class="type-btn on" data-type="TGV INOUI">INOUI</button>
+    <button class="type-btn on" data-type="OUIGO">OUIGO</button>
+    <button class="type-btn on" data-type="TER">TER</button>
+    <button class="type-btn on" data-type="Intercités">IC</button>
+    <button class="type-btn on" data-type="ICE">ICE</button>
+    <button class="type-btn on" data-type="Night train">Night</button>
+    <button class="type-btn on" data-type="Trenitalia">Treni</button>
+    <button class="type-btn on" data-type="Eurostar">Euro</button>
+    <button class="type-btn on" data-type="Transilien">Trans</button>
+    <button class="type-btn on" data-type="Rep. Bus">Bus</button>
+    <button class="type-btn on" data-type="Other">Other</button>
+  </div>
+  <div class="sp-label">Delay</div>
+  <div class="type-grid" id="delay-filters">
+    <button class="type-btn delay-btn-ok on"   data-delay="ok">On time</button>
+    <button class="type-btn delay-btn-warn on" data-delay="warn">1–5 min</button>
+    <button class="type-btn delay-btn-late on" data-delay="late">5+ min</button>
+  </div>
+  <div class="sp-label adv-toggle" id="adv-toggle">Advanced Options ▾</div>
+  <div id="adv-panel" style="display:none">
+    <div class="sp-label" style="margin-top:2px">Base map</div>
+    <div class="style-grid">
+      <button class="style-btn active" data-style="dark">Dark</button>
+      <button class="style-btn" data-style="light">Light</button>
+      <button class="style-btn" data-style="outdoors">Outdoors</button>
+      <button class="style-btn" data-style="satellite">Satellite</button>
+      <button class="style-btn" data-style="opentopomap" style="grid-column: 1 / -1;">OpenTopoMap</button>
+    </div>
+    <div class="sp-label" style="margin-top:8px">Overlays</div>
+    <div class="overlay-row">
+      <span class="overlay-label">LGV corridors</span>
+      <div class="tog on" id="tog-lgv"></div>
+    </div>
+    <div class="overlay-row">
+      <span class="overlay-label">Rail lines</span>
+      <div class="tog" id="tog-rail"></div>
+    </div>
+    <div class="overlay-row">
+      <span class="overlay-label">Terrain relief</span>
+      <div class="tog" id="tog-contour"></div>
+    </div>
+    <div class="overlay-row">
+      <span class="overlay-label">Contour lines</span>
+      <div class="tog" id="tog-contour-lines"></div>
+    </div>
+    <div class="sp-label" style="margin-top:8px">Train status</div>
+    <div class="type-grid" id="live-filters">
+      <button class="type-btn on" data-live="both">Both</button>
+      <button class="type-btn" data-live="live">Live</button>
+      <button class="type-btn" data-live="not-live">Not Live</button>
+    </div>
+    <div class="sp-label" style="margin-top:8px">Route shape</div>
+    <div class="type-grid" id="shape-filters">
+      <button class="type-btn on" data-shape="both">Both</button>
+      <button class="type-btn" data-shape="shaped">With shape</button>
+      <button class="type-btn" data-shape="no-shape">No shape</button>
+    </div>
+  </div>
+</div>
+
+<div id="train-dock">
+  <span class="dock-type" id="dock-type"></span>
+  <span class="dock-title" id="dock-title"></span>
+  <button class="dock-restore" onclick="restorePopup()">↑ Expand</button>
+  <button class="dock-close"   onclick="closeDock()">✕</button>
+</div>
+
+<div id="timeline">
+  <button id="tl-play">▶</button>
+  <div id="tl-wrap">
+    <div id="tl-track-wrap">
+      <div id="tl-thumb-tip">—</div>
+      <input type="range" id="tl-slider" min="0" max="0" value="0" step="1" disabled>
+    </div>
+    <div id="tl-times"><span id="tl-t0">04:00</span><span id="tl-t1">—:—</span></div>
+  </div>
+  <div id="tl-speeds">
+    <button class="tl-spd active" data-step="60">x1</button>
+    <button class="tl-spd" data-step="120">x2</button>
+    <button class="tl-spd" data-step="240">x4</button>
+  </div>
+  <button id="tl-live" class="is-live">● LIVE</button>
+</div>
+
+<script>
+const API_URL    = "https://gpvwn1lb29.execute-api.eu-west-3.amazonaws.com";
+const MAPBOX_KEY = (typeof SNCF_CONFIG !== 'undefined' && SNCF_CONFIG.mapboxKey) || "";
+const REFRESH_MS = 30_000;
+
+const TYPE_COLOR = {
+  "TGV INOUI":  "#ffffff",
+  "OUIGO":      "#00ABD9",
+  "TER":        "#3b82f6",
+  "Intercités": "#8b5cf6",
+  "ICE":        "#e03131",
+  "Night train":"#323232",
+  "Trenitalia": "#ce2b37",
+  "Eurostar":   "#f5cb00",
+  "Transilien": "#82368c",
+  "Rep. Bus":   "#f59e0b",
+  "Other":      "#440444",
+};
+
+// Gradient color stops per train type (start → end of completed route segment).
+// TGV INOUI and OUIGO match their SVG icon color schemes exactly.
+const ROUTE_GRADIENT = {
+  "TGV INOUI":  ["#7d206f", "#c21758", "#eb1925"],
+  "OUIGO":      ["#00ABD9", "#E30076"],
+  "TER":        ["#1e3a8a", "#3b82f6"],
+  "Intercités": ["#4c1d95", "#8b5cf6"],
+  "ICE":        ["#7f1d1d", "#e03131"],
+  "Night train":["#111827", "#4b5563"],
+  "Trenitalia": ["#009246", "#ce2b37"],
+  "Eurostar":   ["#002b5c", "#f5cb00"],
+  "Transilien": ["#4a1a5c", "#82368c"],
+  "Rep. Bus":   ["#92400e", "#f59e0b"],
+  "Other":      ["#1a001a", "#660066"],
+};
+
+function buildGradientExpr(stops) {
+  const expr = ["interpolate", ["linear"], ["line-progress"]];
+  stops.forEach((color, i) => expr.push(i / (stops.length - 1), color));
+  return expr;
+}
+
+const TRAIN_ICONS = {
+
+  // ================= TGV INOUI =================
+  "TGV INOUI": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <defs>
+      <linearGradient id="tgvGradient" x1="575" y1="80" x2="40" y2="80" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#eb1925"/>
+        <stop offset="50%" stop-color="#c21758"/>
+        <stop offset="100%" stop-color="#7d206f"/>
+      </linearGradient>
+    </defs>
+
+    <path d="M40 40 L420 40 C505 40 565 85 575 110 C580 135 535 160 455 160 L40 160 Z"
+          fill="${c}"/>
+
+    <path d="M520 80 C380 85 220 120 47 130"
+          fill="none"
+          stroke="url(#tgvGradient)"
+          stroke-width="18"
+          stroke-linecap="round"
+          opacity="0.95"/>
+  </svg>`,
+
+  // ================= OUIGO =================
+  "OUIGO": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <path d="M40 40 L420 40 C505 40 565 85 575 110 C580 135 535 160 455 160 L40 160 Z"
+          fill="${c}"/>
+    <circle cx="410" cy="110" r="40" fill="#E30076" opacity="0.9"/>
+  </svg>`,
+
+  // ================= TER =================
+  "TER": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <rect x="120" y="5" width="200" height="80" rx="4" fill="${c}"/>
+    <rect x="150" y="15" width="50" height="40" alpha="0.8" rx="4" fill="#9999A3"/>
+    <rect x="240" y="15" width="50" height="40" alpha="0.8" rx="4" fill="#9999A3"/>
+  </svg>`,
+
+  // ================= INTERCITÉS =================
+  "Intercités": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <rect x="120" y="5" width="200" height="80" rx="4" fill="${c}"/>
+    <rect x="150" y="15" width="50" height="40" alpha="0.8" rx="4" fill="#9999A3"/>
+    <rect x="240" y="15" width="50" height="40" alpha="0.8" rx="4" fill="#9999A3"/>
+  </svg>`,
+
+  // ================= ICE =================
+  "ICE": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <path d="M40 40 L420 40 C505 40 565 85 575 110 C580 135 535 160 455 160 L40 160 Z"
+          fill="${c}"/>
+    <rect x="40" y="80" width="340" height="15" fill="white" opacity="0.9"/>
+  </svg>`,
+
+  // ================= NIGHT TRAIN =================
+  "Night train": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <path d="M40 40 L420 40 C505 40 565 85 575 110 C580 135 535 160 455 160 L40 160 Z"
+          fill="${c}"/>
+
+    <circle cx="420" cy="110" r="40" fill="#ffd43b" opacity="0.9"/>
+  </svg>`,
+
+  // ================= REPLACEMENT BUS =================
+  "Rep. Bus": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <rect x="60" y="20" width="420" height="110" rx="18" fill="${c}"/>
+    <rect x="80"  y="35" width="70" height="50" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="170" y="35" width="70" height="50" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="260" y="35" width="70" height="50" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="350" y="35" width="70" height="50" rx="4" fill="#1c2029" opacity="0.7"/>
+    <circle cx="150" cy="145" r="28" fill="#1c2029"/>
+    <circle cx="150" cy="145" r="14" fill="#6b7280"/>
+    <circle cx="390" cy="145" r="28" fill="#1c2029"/>
+    <circle cx="390" cy="145" r="14" fill="#6b7280"/>
+  </svg>`,
+
+  // ================= TRENITALIA =================
+  "Trenitalia": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <path d="M40 40 L420 40 C505 40 565 85 575 110 C580 135 535 160 455 160 L40 160 Z"
+          fill="${c}"/>
+    <rect x="40" y="68" width="490" height="28" fill="#009246" opacity="0.92"/>
+  </svg>`,
+
+  // ================= EUROSTAR =================
+  "Eurostar": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <path d="M40 40 L420 40 C505 40 565 85 575 110 C580 135 535 160 455 160 L40 160 Z"
+          fill="#002b5c"/>
+    <rect x="40" y="62" width="490" height="40" fill="${c}" opacity="0.95"/>
+  </svg>`,
+
+  // ================= TRANSILIEN =================
+  "Transilien": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <rect x="60" y="5" width="400" height="115" rx="8" fill="${c}"/>
+    <rect x="80"  y="20" width="65" height="38" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="165" y="20" width="65" height="38" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="250" y="20" width="65" height="38" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="335" y="20" width="65" height="38" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="80"  y="67" width="65" height="38" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="165" y="67" width="65" height="38" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="250" y="67" width="65" height="38" rx="4" fill="#1c2029" opacity="0.7"/>
+    <rect x="335" y="67" width="65" height="38" rx="4" fill="#1c2029" opacity="0.7"/>
+  </svg>`,
+
+  // ================= OTHER =================
+  "Other": c => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160">
+    <path d="M40 40 L420 40 C505 40 565 85 575 110 C580 135 535 160 455 160 L40 160 Z"
+          fill="${c}"/>
+
+    <text x="300" y="115"
+          text-anchor="middle"
+          font-size="72"
+          font-family="Arial"
+          fill="white"
+          font-weight="bold">?</text>
+  </svg>`,
+};
+
+// ── Map style / overlay state ─────────────────────────────────────────────────
+const MAP_STYLES = {
+  dark:      "mapbox://styles/mapbox/dark-v11",
+  light:     "mapbox://styles/mapbox/light-v11",
+  outdoors:  "mapbox://styles/mapbox/outdoors-v12",
+  satellite: "mapbox://styles/mapbox/satellite-streets-v12",
+  opentopomap: {
+    version: 8,
+    sources: {
+      "otm-tiles": {
+        type: "raster",
+        tiles: [
+          "https://a.tile.opentopomap.org/{z}/{x}/{y}.png",
+          "https://b.tile.opentopomap.org/{z}/{x}/{y}.png",
+          "https://c.tile.opentopomap.org/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+        maxzoom: 17,
+        attribution: "© <a href='https://openstreetmap.org/copyright'>OpenStreetMap</a> contributors | <a href='https://opentopomap.org'>OpenTopoMap</a> (CC-BY-SA)",
+      },
+    },
+    layers: [{ id: "otm-bg", type: "raster", source: "otm-tiles" }],
+    glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.json",
+    sprite: "mapbox://sprites/mapbox/light-v11",
+  },
+};
+// ── LGV corridor geometry (static — matches OSM high-speed rail network) ─────
+// Coordinates sourced from OSM / IGN data for the main French LGV corridors.
+const LGV_GEOJSON = { type: "FeatureCollection", features: [
+  // LGV Nord: Paris → Lille → Belgian border / Channel Tunnel
+  { type:"Feature", properties:{name:"LGV Nord"}, geometry:{ type:"LineString", coordinates:[
+    [2.3556,48.8809],[2.420,48.990],[2.490,49.080],[2.540,49.190],[2.590,49.310],
+    [2.640,49.430],[2.710,49.560],[2.780,49.680],[2.870,49.810],[3.015,49.858],
+    [3.080,49.980],[3.073,50.180],[3.073,50.380],[3.074,50.540],[3.074,50.639]
+  ]}},
+  // LGV Nord: Lille → Belgian border (Tourcoing)
+  { type:"Feature", properties:{name:"LGV Nord (Belgium)"}, geometry:{ type:"LineString", coordinates:[
+    [3.074,50.639],[3.120,50.680],[3.175,50.720],[3.210,50.760]
+  ]}},
+  // LGV Nord: Lille → Channel Tunnel (Calais-Fréthun)
+  { type:"Feature", properties:{name:"LGV Nord (Tunnel)"}, geometry:{ type:"LineString", coordinates:[
+    [3.074,50.639],[2.900,50.700],[2.650,50.780],[2.400,50.840],[2.150,50.880],[1.954,50.930],[1.854,50.908]
+  ]}},
+  // LGV Est: Paris → Strasbourg
+  { type:"Feature", properties:{name:"LGV Est"}, geometry:{ type:"LineString", coordinates:[
+    [2.3590,48.8771],[2.560,48.880],[2.760,48.920],[2.980,48.980],[3.200,49.020],
+    [3.480,49.060],[3.770,49.120],[4.020,49.220],[4.270,49.280],[4.530,49.270],
+    [4.830,49.220],[5.120,49.190],[5.400,49.180],[5.650,49.120],[5.900,49.050],
+    [6.160,48.960],[6.380,48.820],[6.580,48.720],[6.810,48.650],[7.100,48.600],
+    [7.380,48.580],[7.580,48.578],[7.735,48.578]
+  ]}},
+  // LGV Atlantique: Paris → branch point (near Courtalain)
+  { type:"Feature", properties:{name:"LGV Atlantique (tronc commun)"}, geometry:{ type:"LineString", coordinates:[
+    [2.3213,48.8401],[2.220,48.790],[2.100,48.740],[1.960,48.670],[1.800,48.580],
+    [1.620,48.480],[1.450,48.370],[1.300,48.220],[1.210,48.110]
+  ]}},
+  // LGV Atlantique branch: → Tours → Bordeaux (LGV SEA)
+  { type:"Feature", properties:{name:"LGV SEA (Tours-Bordeaux)"}, geometry:{ type:"LineString", coordinates:[
+    [1.210,48.110],[1.100,47.980],[0.970,47.830],[0.870,47.700],[0.780,47.570],
+    [0.730,47.450],[0.692,47.383],
+    [0.530,47.180],[0.360,46.980],[0.200,46.760],[0.060,46.550],[-0.060,46.340],
+    [-0.050,46.180],[0.090,45.960],[0.153,45.650],[0.080,45.430],[-0.060,45.220],
+    [-0.200,45.030],[-0.360,44.920],[-0.556,44.826]
+  ]}},
+  // LGV Bretagne: branch point → Le Mans → Rennes
+  { type:"Feature", properties:{name:"LGV Bretagne"}, geometry:{ type:"LineString", coordinates:[
+    [1.210,48.110],[0.980,48.100],[0.800,48.060],[0.580,48.030],[0.380,48.010],[0.191,48.004],
+    [0.020,47.980],[-0.170,47.960],[-0.420,47.940],[-0.680,47.940],
+    [-0.900,47.980],[-1.120,48.010],[-1.350,48.040],[-1.550,48.070],[-1.672,48.104]
+  ]}},
+  // LGV Sud-Est: Paris → Lyon
+  { type:"Feature", properties:{name:"LGV Sud-Est"}, geometry:{ type:"LineString", coordinates:[
+    [2.3735,48.8448],[2.480,48.760],[2.620,48.650],[2.780,48.520],[2.960,48.370],
+    [3.140,48.210],[3.320,48.040],[3.500,47.870],[3.680,47.700],[3.820,47.530],
+    [3.950,47.360],[4.080,47.180],[4.200,47.000],[4.330,46.820],[4.450,46.640],
+    [4.570,46.440],[4.680,46.230],[4.780,46.010],[4.840,45.850],[4.860,45.760]
+  ]}},
+  // LGV Méditerranée: Lyon → Marseille
+  { type:"Feature", properties:{name:"LGV Méditerranée"}, geometry:{ type:"LineString", coordinates:[
+    [4.860,45.760],[4.890,45.600],[4.870,45.420],[4.840,45.230],[4.810,45.050],
+    [4.800,44.870],[4.800,44.690],[4.810,44.510],[4.806,44.300],[4.820,44.100],
+    [4.890,43.950],[5.020,43.820],[5.150,43.700],[5.270,43.570],[5.380,43.430],[5.380,43.303]
+  ]}},
+  // LGV Méditerranée branch: Nîmes
+  { type:"Feature", properties:{name:"LGV Nîmes branch"}, geometry:{ type:"LineString", coordinates:[
+    [4.806,44.300],[4.700,44.200],[4.570,44.070],[4.430,43.960],[4.300,43.890],[4.360,43.835]
+  ]}},
+  // LGV Rhin-Rhône: Dijon → Mulhouse
+  { type:"Feature", properties:{name:"LGV Rhin-Rhône"}, geometry:{ type:"LineString", coordinates:[
+    [5.041,47.323],[5.150,47.280],[5.320,47.250],[5.530,47.270],[5.730,47.330],
+    [5.981,47.437],[6.180,47.500],[6.400,47.540],[6.580,47.580],[6.792,47.628],
+    [6.960,47.670],[7.150,47.700],[7.339,47.750]
+  ]}},
+  // LGV Interconnexion Est (bypass east of Paris, links Nord/Est/SEA)
+  { type:"Feature", properties:{name:"LGV Interconnexion Est"}, geometry:{ type:"LineString", coordinates:[
+    [2.540,49.190],[2.620,49.080],[2.680,48.980],[2.700,48.870],[2.680,48.760],
+    [2.640,48.660],[2.600,48.560],[2.560,48.450],[2.480,48.370]
+  ]}},
+  // Contournement Lyon (bypass, LGV SEA connection south of Lyon)
+  { type:"Feature", properties:{name:"Contournement Lyon"}, geometry:{ type:"LineString", coordinates:[
+    [4.860,45.760],[4.920,45.680],[4.980,45.600],[4.980,45.500],[4.940,45.400],[4.890,45.300]
+  ]}}
+]};
+
+async function getLgvGeoJSON() {
+  try {
+    const res = await fetch(`${API_URL}/lgv-lines`);
+    if (!res.ok) throw new Error(res.status);
+    const { url } = await res.json();
+    const r2 = await fetch(url);
+    if (!r2.ok) throw new Error(r2.status);
+    const data = await r2.json();
+    data.features = data.features.filter(f => f.properties?.country !== "DE");
+    return data;
+  } catch (e) {
+    console.warn("Could not load LGV lines from S3, using static fallback:", e);
+    return LGV_GEOJSON;
+  }
+}
+
+let currentStyleId        = "dark";
+let railLinesEnabled      = false;
+let lgvLinesEnabled       = true;
+let contoursEnabled       = false;
+let contourLinesEnabled   = false;
+
+// ── Train type helpers ────────────────────────────────────────────────────────
+// OGO brand code = OUIGO (server sometimes misclassifies these)
+function normalizeFeature(f) {
+  const brand = (f.properties.trip_id || '').split(':')[1];
+  const BRAND_MAP = {
+    'OGO': 'OUIGO',
+    'IC':  'Intercités',
+    'TER': 'TER',
+    'LYR': 'TGV INOUI',    // Lyria = TGV to Switzerland, no separate icon
+    'ICN': 'Night train',   // Intercités de Nuit
+    'CTE': 'Rep. Bus',
+  };
+  
+  const mapped = BRAND_MAP[brand];
+  if (mapped && f.properties.train_type !== mapped)
+    return { ...f, properties: { ...f.properties, train_type: mapped } };
+  return f;
+}
+
+// Extract the SNCF train number from the first segment of the trip_id.
+// Format: <letters><digits><rest>, e.g. "OCESN860584F1187_F" → "860584"
+function extractTrainNumber(tripId) {
+  if (!tripId) return null;
+  const first = tripId.split(':')[0];
+  const match = first.match(/[A-Za-z]+(\d+)/);
+  if (match) return match[1];
+  const numMatch = first.match(/^(\d+)/);
+  return numMatch ? numMatch[1] : null;
+}
+
+// Today's service-day date in France (day rolls at 04:00 Paris time).
+function todayParisISO() {
+  const paris = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  if (paris.getHours() < 4) paris.setDate(paris.getDate() - 1);
+  const y = paris.getFullYear();
+  const m = String(paris.getMonth() + 1).padStart(2, '0');
+  const d = String(paris.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+// ── Train filters (type + delay) ──────────────────────────────────────────────
+const enabledTypes  = new Set(Object.keys(TYPE_COLOR));
+const enabledDelays = new Set(["ok", "warn", "late"]);
+let enabledLiveFilter  = "both"; // "both" | "live" | "not-live"
+let enabledShapeFilter = "both"; // "both" | "shaped" | "no-shape"
+
+function applyFilters() {
+  const types = [...enabledTypes];
+  const typeExpr = types.length === Object.keys(TYPE_COLOR).length
+    ? null
+    : ["in", ["get", "train_type"], ["literal", types]];
+
+  const delayParts = [];
+  if (enabledDelays.has("ok"))   delayParts.push(["<=", ["get", "delay_min"], 0]);
+  if (enabledDelays.has("warn")) delayParts.push(["all", [">", ["get", "delay_min"], 0], ["<=", ["get", "delay_min"], 5]]);
+  if (enabledDelays.has("late")) delayParts.push([">", ["get", "delay_min"], 5]);
+  const delayExpr = delayParts.length === 3 ? null
+    : delayParts.length ? ["any", ...delayParts]
+    : ["literal", false];
+
+  const liveExpr = enabledLiveFilter === "live"     ? ["!=", ["get", "is_estimate"], true]
+                 : enabledLiveFilter === "not-live"  ? ["==", ["get", "is_estimate"], true]
+                 : null;
+
+  const shapeExpr = enabledShapeFilter === "shaped"   ? ["==", ["get", "has_shape"], true]
+                  : enabledShapeFilter === "no-shape" ? ["!=", ["get", "has_shape"], true]
+                  : null;
+
+  const parts = [typeExpr, delayExpr, liveExpr, shapeExpr].filter(Boolean);
+  const expr = parts.length === 0 ? null : parts.length === 1 ? parts[0] : ["all", ...parts];
+
+  if (map.getLayer("trains-layer")) map.setFilter("trains-layer", expr);
+  updateHudCounts();
+}
+
+function updateHudCounts() {
+  if (!liveFeatures.length) return;
+  const visible = liveFeatures.filter(f => {
+    const p = f.properties;
+    if (!enabledTypes.has(p.train_type)) return false;
+    const d = p.delay_min || 0;
+    if (d <= 0)      { if (!enabledDelays.has("ok"))   return false; }
+    else if (d <= 5) { if (!enabledDelays.has("warn")) return false; }
+    else             { if (!enabledDelays.has("late")) return false; }
+    const est = p.is_estimate === true || p.is_estimate === "true";
+    if (enabledLiveFilter === "live"     && est)  return false;
+    if (enabledLiveFilter === "not-live" && !est) return false;
+    const shaped = p.has_shape === true || p.has_shape === "true";
+    if (enabledShapeFilter === "shaped"   && !shaped) return false;
+    if (enabledShapeFilter === "no-shape" && shaped)  return false;
+    return true;
+  });
+  const lateCount = visible.filter(f => (f.properties.delay_min || 0) > 5).length;
+  document.getElementById("count").innerHTML = `${visible.length} <span>trains</span>`;
+  document.getElementById("late-count").textContent = lateCount > 0 ? `${lateCount} running late` : '';
+}
+
+// ── Popup builder ─────────────────────────────────────────────────────────────
+let _popupUid = 0;
+
+function fmtStopTime(stop) {
+  const sched = stop.departure_time.slice(0, 5);
+  const delay = stop.departure_delay_s || 0;
+  if (delay > 59) {
+    const actual = secsToTime(gtfsSecs(stop.departure_time) + delay);
+    return `<span class="stime-wrap"><span class="stime-orig">${sched}</span><span class="stime-new">${actual}</span></span>`;
+  }
+  return `<span class="stime-wrap">${sched}</span>`;
+}
+
+function buildPopupHTML(p, trainNum, sncfUrl, eurostarUrl, trenitUrl, route) {
+  const nowSecs   = isLive ? nowParisSecs() : +tlSlider.value;
+  const delay     = p.delay_min || 0;
+  const isEst     = p.is_estimate === true || p.is_estimate === "true";
+  const badgeCls  = isEst ? "badge-estimate"
+                  : delay > 5 ? "badge-late" : delay > 0 ? "badge-warn" : "badge-ok";
+  const badgeTxt  = isEst ? "Estimated · no real-time data"
+                  : delay > 0 ? `+${delay} min` : "On time";
+  const numHtml   = trainNum ? `<span class="popup-num">N° ${trainNum}</span>` : '';
+  const lineHtml  = p.line_name ? `<div class="popup-line-name">${p.line_name}</div>` : '';
+  const linkHtml  = eurostarUrl
+    ? `<a class="popup-sncf" href="${eurostarUrl}" target="_blank" rel="noopener">View on Eurostar ↗</a>`
+    : trenitUrl
+    ? `<a class="popup-sncf" href="${trenitUrl}" target="_blank" rel="noopener">View on Trenitalia ↗</a>`
+    : sncfUrl
+    ? `<a class="popup-sncf" href="${sncfUrl}" target="_blank" rel="noopener">View on SNCF ↗</a>`
+    : '';
+
+  let routeHtml = '<div class="popup-loading">Loading route…</div>';
+  if (route && route.stops.length > 0) {
+    const stops  = route.stops;
+    const origin = stops[0];
+    const dest   = stops[stops.length - 1];
+
+    // Find next stop from intermediate stops only (skip origin and dest)
+    let nextStop = null;
+    let nextStopIdx = -1;
+    for (let i = 1; i < stops.length - 1; i++) {
+      const s = stops[i];
+      const actSecs = gtfsSecs(s.departure_time) + (s.departure_delay_s || 0);
+      if (actSecs >= nowSecs) { nextStop = s; nextStopIdx = i; break; }
+    }
+
+    const trainDelayS = delay * 60; // overall train delay in seconds, used as fallback
+
+    function stopTimeHtml(s, useArrival, fallbackDelayS = 0) {
+      const time    = useArrival ? s.arrival_time   : s.departure_time;
+      const ownDelay = useArrival ? (s.arrival_delay_s || 0) : (s.departure_delay_s || 0);
+      // Use per-stop delay if the feed gave one, otherwise fall back to the train's overall delay
+      const delayS  = ownDelay > 0 ? ownDelay : fallbackDelayS;
+      if (!time) return '';
+      const sched = time.slice(0, 5);
+      if (delayS > 59) {
+        const actual = secsToTime(gtfsSecs(time) + delayS);
+        return `<span class="stime-wrap"><span class="stime-orig">${sched}</span><span class="stime-new">${actual}</span></span>`;
+      }
+      return `<span class="stime-wrap">${sched}</span>`;
+    }
+
+    function stopRow(s, dotCls, rowCls, useArrival, fallbackDelayS = 0) {
+      return `<div class="${rowCls}"><span class="${dotCls}"></span><span class="rs-name">${s.name}</span>${stopTimeHtml(s, useArrival, fallbackDelayS)}</div>`;
+    }
+
+    const dotsRow = '<div class="route-vdots">⋮</div>';
+    const originPast = gtfsSecs(origin.departure_time) + (origin.departure_delay_s || 0) < nowSecs;
+
+    // Collapsed view: origin, next stop, destination
+    let collapsedHtml = stopRow(origin, 'rdot', `route-stop${originPast ? ' rs-past' : ''}`, false, trainDelayS);
+    if (nextStop) {
+      collapsedHtml += dotsRow;
+      collapsedHtml += stopRow(nextStop, 'rdot rdot-next', 'route-stop rs-next', false, trainDelayS);
+    }
+    if (stops.length > 1) {
+      collapsedHtml += dotsRow;
+      collapsedHtml += stopRow(dest, 'rdot rdot-dest', 'route-stop', true, trainDelayS);
+    }
+
+    // Show expand button only if there are hidden stops
+    const collapsedIdxs = new Set([0, stops.length - 1]);
+    if (nextStopIdx >= 0) collapsedIdxs.add(nextStopIdx);
+    let expandHtml = '';
+    if (stops.length > collapsedIdxs.size) {
+      const uid = ++_popupUid;
+      let allStopsHtml = '';
+      for (let i = 0; i < stops.length; i++) {
+        const s = stops[i];
+        const isDest = i === stops.length - 1;
+        const isNext = i === nextStopIdx;
+        const isPast = gtfsSecs(isDest ? (s.arrival_time || s.departure_time) : s.departure_time)
+                       + ((isDest ? s.arrival_delay_s : s.departure_delay_s) || 0) < nowSecs;
+        const dotCls = isNext ? 'rdot rdot-next' : isDest ? 'rdot rdot-dest' : 'rdot';
+        const rowCls = `route-stop${isPast ? ' rs-past' : ''}${isNext ? ' rs-next' : ''}`;
+        allStopsHtml += stopRow(s, dotCls, rowCls, isDest, trainDelayS);
+      }
+      const btnLabel = `Show all ${stops.length} stops ▾`;
+      collapsedHtml = `<div id="collapsed-stops-${uid}">${collapsedHtml}</div>`;
+      expandHtml = `<button id="expand-btn-${uid}" class="popup-expand-btn" data-collapsed="${btnLabel}" data-uid="${uid}" onclick="toggleAllStops(${uid})">${btnLabel}</button><div id="all-stops-${uid}" class="popup-route-scroll" style="display:none">${allStopsHtml}</div>`;
+    }
+
+    routeHtml = `<div class="popup-route">${collapsedHtml}${expandHtml}</div>`;
+  }
+
+  return `<div class="popup-header">
+    <span class="popup-type">${p.train_type}</span>
+    ${numHtml}
+    <span class="popup-badge ${badgeCls}">${badgeTxt}</span>
+    <div class="popup-actions">
+      <button class="popup-action-btn" onclick="minimizePopup()" title="Minimize">−</button>
+      <button class="popup-action-btn" onclick="closePopup()" title="Close">✕</button>
+    </div>
+  </div>
+  ${lineHtml}
+  ${routeHtml}
+  ${linkHtml}
+  <div class="popup-id">${p.trip_id}</div>`;
+}
+
+function toggleAllStops(uid) {
+  const el       = document.getElementById('all-stops-' + uid);
+  const btn      = document.getElementById('expand-btn-' + uid);
+  const summary  = document.getElementById('collapsed-stops-' + uid);
+  if (!el || !btn) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display      = isOpen ? 'none' : 'block';
+  if (summary) summary.style.display = isOpen ? '' : 'none';
+  btn.textContent       = isOpen ? btn.dataset.collapsed : 'Show less ▴';
+}
+
+// ── Legend (SVG previews) ─────────────────────────────────────────────────────
+const legend = document.getElementById("legend");
+const legendHeader = document.getElementById("legend-header");
+const legendFilterName = document.getElementById("legend-filter-name");
+const legendSelectAll = document.getElementById("legend-select-all");
+const legendRows = {};
+
+for (const [type, color] of Object.entries(TYPE_COLOR)) {
+  const row = document.createElement("div");
+  row.className = "leg";
+  row.dataset.type = type;
+  const iconSrc = "data:image/svg+xml;charset=utf-8," +
+    encodeURIComponent(TRAIN_ICONS[type](color));
+  row.innerHTML = `<img class="leg-icon" src="${iconSrc}"/>${type}`;
+  legend.appendChild(row);
+  legendRows[type] = row;
+
+  row.addEventListener("click", () => toggleTypeFilter(type));
+}
+
+function syncLegendState() {
+  const allOn = enabledTypes.size === Object.keys(TYPE_COLOR).length;
+  if (allOn || enabledTypes.size === 0) {
+    legendHeader.style.display = "none";
+  } else if (enabledTypes.size === 1) {
+    legendHeader.style.display = "block";
+    legendFilterName.textContent = [...enabledTypes][0];
+  } else {
+    legendHeader.style.display = "block";
+    legendFilterName.textContent = `${enabledTypes.size} types`;
+  }
+  for (const [t, row] of Object.entries(legendRows)) {
+    row.classList.toggle("leg-dimmed", !enabledTypes.has(t));
+  }
+}
+
+function syncTypeButtons() {
+  document.querySelectorAll("#type-filters .type-btn").forEach(b => {
+    b.classList.toggle("on", enabledTypes.has(b.dataset.type));
+  });
+}
+
+function legendSelectAllTypes() {
+  Object.keys(TYPE_COLOR).forEach(t => enabledTypes.add(t));
+  syncLegendState();
+  syncTypeButtons();
+  applyFilters();
+}
+
+function toggleTypeFilter(type) {
+  const allOn = enabledTypes.size === Object.keys(TYPE_COLOR).length;
+  if (allOn) {
+    Object.keys(TYPE_COLOR).forEach(t => enabledTypes.delete(t));
+    enabledTypes.add(type);
+  } else if (enabledTypes.size === 1 && enabledTypes.has(type)) {
+    Object.keys(TYPE_COLOR).forEach(t => enabledTypes.add(t));
+  } else {
+    if (enabledTypes.has(type)) enabledTypes.delete(type);
+    else enabledTypes.add(type);
+    if (enabledTypes.size === 0) Object.keys(TYPE_COLOR).forEach(t => enabledTypes.add(t));
+  }
+  syncTypeButtons();
+  syncLegendState();
+  applyFilters();
+}
+
+legendSelectAll.addEventListener("click", legendSelectAllTypes);
+
+function loadSVGImage(svg) {
+  return new Promise(resolve => {
+    const img = new Image(56, 22);
+    img.onload = () => resolve(img);
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  });
+}
+
+// Same as loadSVGImage but flips the bitmap horizontally so the nose is on the left.
+// Used for westward-heading trains so the icon is never rendered upside-down.
+function loadSVGImageMirrored(svg) {
+  return new Promise(resolve => {
+    const img = new Image(56, 22);
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width  = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.translate(img.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(img, 0, 0);
+      resolve(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  });
+}
+
+// ── Time helpers ──────────────────────────────────────────────────────────────
+function nowParisSecs() {
+  const paris = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Paris"}));
+  let s = paris.getHours() * 3600 + paris.getMinutes() * 60 + paris.getSeconds()
+        + (Date.now() % 1000) / 1000; // sub-second resolution for smooth interpolation
+  if (paris.getHours() < 4) s += 86400;
+  return s;
+}
+function gtfsSecs(t) {
+  const [h, m, s] = t.split(":").map(Number);
+  return h * 3600 + m * 60 + s;
+}
+function secsToTime(s) {
+  const h = Math.floor(s / 3600) % 24;
+  const m = Math.floor((s % 3600) / 60);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+// ── Route cache & animation state ────────────────────────────────────────────
+const routeCache      = new Map(); // tripId → { stops, shape, shapeStopIndices, cachedAt }
+const routePending    = new Set();
+const ROUTE_CACHE_TTL = 24 * 60 * 60 * 1000;
+
+const knownTrains = new Map(); // tripId → feature, accumulates all trains seen (persisted to localStorage)
+
+const LS_TRAINS_KEY = "sncf_known_trains";
+const LS_DATE_KEY   = "sncf_known_trains_date";
+
+// Returns the SNCF service-day date string (day rolls at 04:00, not midnight).
+// Trains running between 00:00–03:59 belong to the previous calendar day's service.
+function serviceDayKey() {
+  const paris = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  if (paris.getHours() < 4) paris.setDate(paris.getDate() - 1);
+  return paris.toLocaleDateString("fr-FR");
+}
+
+function saveKnownTrains() {
+  try {
+    localStorage.setItem(LS_DATE_KEY,   serviceDayKey());
+    localStorage.setItem(LS_TRAINS_KEY, JSON.stringify([...knownTrains.entries()]));
+  } catch { /* storage full */ }
+}
+
+function loadKnownTrains() {
+  try {
+    if (localStorage.getItem(LS_DATE_KEY) !== serviceDayKey()) {
+      localStorage.removeItem(LS_TRAINS_KEY);
+      localStorage.removeItem(LS_DATE_KEY);
+      return;
+    }
+    const raw = localStorage.getItem(LS_TRAINS_KEY);
+    if (!raw) return;
+    for (const [id, f] of JSON.parse(raw)) knownTrains.set(id, f);
+  } catch { /* corrupt data — start fresh */ }
+}
+
+const LS_ROUTES_KEY  = "sncf_route_cache";
+const LS_ROUTES_DATE = "sncf_route_cache_date";
+let   _saveRouteTimer = null;
+
+function saveRouteCache() {
+  try {
+    localStorage.setItem(LS_ROUTES_DATE, serviceDayKey());
+    localStorage.setItem(LS_ROUTES_KEY,  JSON.stringify([...routeCache.entries()]));
+  } catch { /* storage full — shape data is large, silently skip */ }
+}
+
+// Debounced: waits 2 s after the last route fetch before writing, so we don't
+// thrash localStorage while 200 routes load in parallel on startup.
+function scheduleRouteCacheSave() {
+  clearTimeout(_saveRouteTimer);
+  _saveRouteTimer = setTimeout(saveRouteCache, 2000);
+}
+
+function loadRouteCache() {
+  try {
+    if (localStorage.getItem(LS_ROUTES_DATE) !== serviceDayKey()) {
+      localStorage.removeItem(LS_ROUTES_KEY);
+      localStorage.removeItem(LS_ROUTES_DATE);
+      return;
+    }
+    const raw = localStorage.getItem(LS_ROUTES_KEY);
+    if (!raw) return;
+    for (const [id, r] of JSON.parse(raw)) routeCache.set(id, r);
+  } catch { /* corrupt — start fresh */ }
+}
+
+let liveFeatures     = [];
+let animationFrameId = null;
+let lastFrameMs      = null;
+let isLive           = true;
+let isPlaying      = false;
+let playStep       = 60; // seconds advanced per 500 ms tick; x1=60, x2=120, x4=240
+
+// Interpolate a point along a polyline at fraction [0, 1]
+function interpolateAlongLine(coords, fraction) {
+  if (fraction <= 0) return coords[0];
+  if (fraction >= 1) return coords[coords.length - 1];
+
+  let totalLen = 0;
+  const lens = [];
+  for (let i = 0; i < coords.length - 1; i++) {
+    const dx = coords[i+1][0] - coords[i][0];
+    const dy = coords[i+1][1] - coords[i][1];
+    const l  = Math.sqrt(dx*dx + dy*dy);
+    lens.push(l);
+    totalLen += l;
+  }
+
+  let target = fraction * totalLen;
+  for (let i = 0; i < lens.length; i++) {
+    if (target <= lens[i] || i === lens.length - 1) {
+      const t = lens[i] > 0 ? Math.min(target / lens[i], 1) : 0;
+      return [
+        coords[i][0] + t * (coords[i+1][0] - coords[i][0]),
+        coords[i][1] + t * (coords[i+1][1] - coords[i][1]),
+      ];
+    }
+    target -= lens[i];
+  }
+  return coords[coords.length - 1];
+}
+
+// Returns the train's current phase at nowSecs:
+//   { phase: 'before' | 'after' }
+//   { phase: 'dwell', idx }          — dwelling at stop idx
+//   { phase: 'move',  si, frac }     — moving from stop si toward si+1
+function findTrainSegment(stops, nowSecs) {
+  const firstArr = gtfsSecs(stops[0].arrival_time || stops[0].departure_time)
+                 + (stops[0].arrival_delay_s || 0);
+  if (nowSecs < firstArr) return { phase: 'before' };
+
+  for (let i = 0; i < stops.length; i++) {
+    const arr = gtfsSecs(stops[i].arrival_time || stops[i].departure_time)
+              + (stops[i].arrival_delay_s || 0);
+    const dep = gtfsSecs(stops[i].departure_time) + (stops[i].departure_delay_s || 0);
+    if (nowSecs >= arr && nowSecs < dep) return { phase: 'dwell', idx: i };
+  }
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    const dep = gtfsSecs(stops[i].departure_time) + (stops[i].departure_delay_s || 0);
+    const arr = gtfsSecs(stops[i+1].arrival_time || stops[i+1].departure_time)
+              + (stops[i+1].arrival_delay_s || 0);
+    if (nowSecs >= dep && nowSecs < arr) {
+      const frac = arr > dep ? (nowSecs - dep) / (arr - dep) : 0;
+      return { phase: 'move', si: i, frac };
+    }
+  }
+
+  return { phase: 'after' };
+}
+
+// Calculate interpolated train [lng, lat] at nowSecs from cached route data
+function interpolatePosition(route, nowSecs) {
+  const { stops, shape, shapeStopIndices } = route;
+  const seg = findTrainSegment(stops, nowSecs);
+
+  if (seg.phase === 'before') return [stops[0].lon, stops[0].lat];
+  if (seg.phase === 'after')  return [stops[stops.length - 1].lon, stops[stops.length - 1].lat];
+  if (seg.phase === 'dwell')  return [stops[seg.idx].lon, stops[seg.idx].lat];
+
+  const { si, frac } = seg;
+  if (!shape || !shapeStopIndices || shapeStopIndices[si] >= shapeStopIndices[si + 1]) {
+    return [
+      stops[si].lon + frac * (stops[si+1].lon - stops[si].lon),
+      stops[si].lat + frac * (stops[si+1].lat - stops[si].lat),
+    ];
+  }
+  const segment = shape.slice(shapeStopIndices[si], shapeStopIndices[si + 1] + 1);
+  return segment.length >= 2
+    ? interpolateAlongLine(segment, frac)
+    : [stops[si].lon, stops[si].lat];
+}
+
+// Compass bearing (degrees clockwise from north) between two [lng, lat] points
+function calcBearing(from, to) {
+  const dLng = (to[0] - from[0]) * Math.PI / 180;
+  const lat1  = from[1] * Math.PI / 180;
+  const lat2  = to[1]   * Math.PI / 180;
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+// Direction of travel at nowSecs along a cached route
+function getTrainBearing(route, nowSecs) {
+  const { stops, shape, shapeStopIndices } = route;
+  const n = stops.length;
+  if (n < 2) return 0;
+
+  const seg = findTrainSegment(stops, nowSecs);
+
+  if (seg.phase === 'before') return calcBearing([stops[0].lon, stops[0].lat], [stops[1].lon, stops[1].lat]);
+  if (seg.phase === 'after')  return calcBearing([stops[n-2].lon, stops[n-2].lat], [stops[n-1].lon, stops[n-1].lat]);
+
+  // For dwell, point toward the upcoming segment; for move, use current frac on segment
+  const si   = seg.phase === 'dwell' ? Math.min(seg.idx, n - 2) : seg.si;
+  const frac = seg.phase === 'dwell' ? 0 : seg.frac;
+
+  if (shape && shapeStopIndices && shapeStopIndices[si] < shapeStopIndices[si + 1]) {
+    const segCoords = shape.slice(shapeStopIndices[si], shapeStopIndices[si + 1] + 1);
+    if (segCoords.length >= 2) {
+      const eps  = 0.005;
+      const pos1 = interpolateAlongLine(segCoords, Math.max(0, frac - eps));
+      const pos2 = interpolateAlongLine(segCoords, Math.min(1, frac + eps));
+      return calcBearing(pos1, pos2);
+    }
+  }
+  return calcBearing([stops[si].lon, stops[si].lat], [stops[si+1].lon, stops[si+1].lat]);
+}
+
+// ── Route pre-fetch ───────────────────────────────────────────────────────────
+const MAX_ROUTE_CONCURRENCY = 40;
+let   activeRouteFetches    = 0;
+const routeFetchQueue       = [];
+
+async function fetchRouteData(tripId) {
+  routePending.add(tripId);
+  activeRouteFetches++;
+  try {
+    const res  = await fetch(`${API_URL}/trains/${encodeURIComponent(tripId)}/route`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.stops && data.stops.length >= 2) {
+      const shapeStopIndices = data.shape
+        ? assignShapeIndicesMonotonic(data.shape, data.stops)
+        : null;
+      routeCache.set(tripId, {
+        stops: data.stops, shape: data.shape || null,
+        shapeStopIndices, cachedAt: Date.now(),
+      });
+      scheduleRouteCacheSave();
+    }
+  } catch { /* silent — train falls back to API-reported position */ }
+  finally {
+    routePending.delete(tripId);
+    activeRouteFetches--;
+    const next = routeFetchQueue.shift();
+    if (next) fetchRouteData(next);
+  }
+}
+
+const TGV_ROUTE_TYPES = new Set(["TGV INOUI", "OUIGO", "Lyria"]);
+
+function prefetchRoutes(features) {
+  const now = Date.now();
+
+  const toFetch = features.filter(f => {
+    const id     = f.properties.trip_id;
+    if (routePending.has(id)) return false;
+    const cached = routeCache.get(id);
+    return !(cached && now - cached.cachedAt < ROUTE_CACHE_TTL);
+  });
+
+  // TGV/OUIGO first so they snap to actual track geometry before other types
+  toFetch.sort((a, b) =>
+    (TGV_ROUTE_TYPES.has(b.properties.train_type) ? 1 : 0) -
+    (TGV_ROUTE_TYPES.has(a.properties.train_type) ? 1 : 0)
+  );
+
+  for (const f of toFetch) {
+    const id    = f.properties.trip_id;
+    const isTgv = TGV_ROUTE_TYPES.has(f.properties.train_type);
+    if (activeRouteFetches < MAX_ROUTE_CONCURRENCY) {
+      fetchRouteData(id);
+    } else {
+      const qi = routeFetchQueue.indexOf(id);
+      if (qi === -1) {
+        // TGV goes to front of queue so it beats non-TGV already waiting
+        if (isTgv) routeFetchQueue.unshift(id);
+        else        routeFetchQueue.push(id);
+      } else if (isTgv && qi > 0) {
+        // Promote a TGV that was already queued behind non-TGV trains
+        routeFetchQueue.splice(qi, 1);
+        routeFetchQueue.unshift(id);
+      }
+    }
+  }
+}
+
+// ── Animation loop ────────────────────────────────────────────────────────────
+function animateFrame(timestamp) {
+  // Schedule next frame immediately so early returns never kill the loop.
+  animationFrameId = requestAnimationFrame(animateFrame);
+
+  const elapsed = lastFrameMs !== null ? timestamp - lastFrameMs : 0;
+  lastFrameMs   = timestamp;
+
+  // Advance playhead proportional to real elapsed time so speed is frame-rate independent
+  if (isPlaying && !isLive) {
+    const next = +tlSlider.value + playStep * (elapsed / 500);
+    if (next >= +tlSlider.max - 60) {
+      stopPlay();
+      setLive();
+    } else {
+      tlSlider.value = next;
+    }
+  }
+
+  // Right label always shows the actual live Paris time
+  const nowInt = Math.floor(nowParisSecs());
+  tlT1.textContent = secsToTime(nowInt);
+
+  if (isLive) {
+    tlSlider.max   = nowInt;
+    tlSlider.value = nowInt;
+  }
+
+  updateThumbTip();
+
+  const nowSecs = isLive ? nowInt : +tlSlider.value;
+
+  // Exclude is_estimate trains from liveIds so they are routed through the
+  // supplemented path below, which validates them against actual route delays
+  // before showing them. Without this they appear unconditionally (even if the
+  // train has already finished), then vanish on the next 30-second refresh —
+  // causing the "many trains appear then disappear" effect on initial load.
+  const liveIds = new Set(
+    liveFeatures.filter(f => !f.properties.is_estimate).map(f => f.properties.trip_id)
+  );
+
+  let base;
+  if (!isLive) {
+    base = [...knownTrains.values()];
+  } else if (!liveFeatures.length) {
+    base = [...knownTrains.values()];
+  } else {
+    // Supplement the live API response with any route-cached trains that dropped
+    // out of the RT feed but whose schedule says they are still running.
+    // This keeps trains visible when the RT feed loses coverage mid-journey
+    // (e.g. Eurostar while in the Channel Tunnel). Supplemented trains are
+    // flagged is_estimate so the icon renders at reduced opacity.
+    // is_estimate trains from liveFeatures are intentionally excluded here;
+    // they appear below via the supplemented path once their routes are loaded.
+    base = liveFeatures.filter(f => !f.properties.is_estimate);
+    for (const f of knownTrains.values()) {
+      if (liveIds.has(f.properties.trip_id)) continue;
+      const route = routeCache.get(f.properties.trip_id);
+      if (!route) continue;
+      const first = gtfsSecs(route.stops[0].departure_time)
+                  + (route.stops[0].departure_delay_s || 0);
+      const maxDly = route.stops.reduce((mx, s) => Math.max(mx, s.departure_delay_s || 0), 0);
+      const last  = gtfsSecs(route.stops[route.stops.length - 1].departure_time) + maxDly;
+      // Always keep the actively-viewed train visible even if its time window has
+      // just expired — prevents the "snap to rail then disappear" effect where
+      // a train near the end of its route vanishes seconds after being clicked.
+      const isActive = activeRouteData && f.properties.trip_id === activeRouteData.tripId;
+      if (isActive || (nowSecs >= first - 60 && nowSecs <= last + 60))
+        base.push({ ...f, properties: { ...f.properties, is_estimate: true } });
+    }
+  }
+
+  const features = isLive ? base : base.filter(f => {
+    const route = routeCache.get(f.properties.trip_id);
+    if (!route) {
+      // Route not cached yet — still show if the train is currently live
+      // (it will render at its last known position until the route loads).
+      return liveIds.has(f.properties.trip_id);
+    }
+    const first = gtfsSecs(route.stops[0].departure_time)
+                + (route.stops[0].departure_delay_s || 0);
+    const maxDly = route.stops.reduce((mx, s) => Math.max(mx, s.departure_delay_s || 0), 0);
+    const last  = gtfsSecs(route.stops[route.stops.length - 1].departure_time) + maxDly;
+    return nowSecs >= first - 60 && nowSecs <= last + 60;
+  });
+
+  if (!features.length) return;
+
+  let activeTrainPos = null;
+  const animated = features.flatMap(f => {
+    const route = routeCache.get(f.properties.trip_id);
+    if (!route) {
+      // Trains with shape data (precise rail geometry) are held back until their
+      // route loads so they appear already on the rail rather than snapping from
+      // an approximate API position. Trains without shape appear immediately.
+      if (f.properties.has_shape) return [];
+      return [f];
+    }
+    const coords  = interpolatePosition(route, nowSecs);
+    const heading = getTrainBearing(route, nowSecs);
+    if (activeRouteData && f.properties.trip_id === activeRouteData.tripId) {
+      activeTrainPos = coords;
+    }
+    return [{
+      ...f,
+      geometry:   { type: "Point", coordinates: coords },
+      properties: { ...f.properties, bearing: heading },
+    }];
+  });
+  map.getSource("trains")?.setData({ type: "FeatureCollection", features: animated });
+
+  if (activeRouteData) updateRouteGeometry(activeTrainPos, nowSecs);
+}
+
+function startAnimation() {
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  lastFrameMs      = null;
+  animationFrameId = requestAnimationFrame(animateFrame);
+}
+
+// ── Mapbox ────────────────────────────────────────────────────────────────────
+mapboxgl.accessToken = MAPBOX_KEY;
+
+const map = new mapboxgl.Map({
+  container: "map",
+  style: "mapbox://styles/mapbox/dark-v11",
+  center: [2.35, 46.85],
+  zoom: 5.5,
+});
+
+map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+let popup           = null;
+let activeRouteData = null; // { tripId, trainType, stops, shape } — set when a train is clicked
+let lastPopupData   = null; // { p, trainNum, sncfUrl, lngLat } — kept so dock can restore popup
+const emptyFC = { type: "FeatureCollection", features: [] };
+
+const trainDock = document.getElementById("train-dock");
+
+function minimizePopup() {
+  if (!lastPopupData || !popup) return;
+  popup.remove();
+  popup = null;
+  const { p, trainNum } = lastPopupData;
+  const route = routeCache.get(p.trip_id);
+  const origin = route ? route.stops[0].name : '—';
+  const dest   = route ? route.stops[route.stops.length - 1].name : '—';
+  document.getElementById("dock-type").textContent  = p.train_type;
+  document.getElementById("dock-title").textContent =
+    `${origin} → ${dest}${trainNum ? ' — N° ' + trainNum : ''}`;
+  trainDock.style.display = "flex";
+}
+
+function restorePopup() {
+  if (!lastPopupData) return;
+  trainDock.style.display = "none";
+  const { p, trainNum, sncfUrl, eurostarUrl, trenitUrl, lngLat } = lastPopupData;
+  if (popup) popup.remove();
+  popup = new mapboxgl.Popup({ offset: 12, maxWidth: "300px", closeButton: false })
+    .setLngLat(lngLat)
+    .setHTML(buildPopupHTML(p, trainNum, sncfUrl, eurostarUrl, trenitUrl, routeCache.get(p.trip_id) || null))
+    .addTo(map);
+}
+
+function closePopup() {
+  if (popup) { popup.remove(); popup = null; }
+  lastPopupData = null;
+  clearRoute();
+}
+
+function closeDock() {
+  trainDock.style.display = "none";
+  lastPopupData = null;
+  clearRoute();
+}
+
+async function openTrainDetail(p, lngLat) {
+  const trainNum   = extractTrainNumber(p.trip_id);
+  const isEurostar = p.train_type === 'Eurostar';
+  const isSncfOnly = !isEurostar
+                   && p.train_type !== 'Trenitalia'
+                   && p.train_type !== 'Transilien';
+  const sncfUrl = trainNum && isSncfOnly
+    ? `https://www.sncf-voyageurs.com/en/travel-with-us/booking-and-itinerary/search-by-train-number/train-detail/?dateCirculation=${todayParisISO()}&numeroCirculation=${trainNum}`
+    : null;
+  const eurostarUrl = trainNum && isEurostar
+    ? `https://www.eurostar.com/rw-en/travel-info/timetable/${trainNum}?date=${todayParisISO()}`
+    : null;
+  const trenitUrl = trainNum && p.train_type === 'Trenitalia' ? `` : null;
+
+  trainDock.style.display = "none";
+  lastPopupData = { p, trainNum, sncfUrl, eurostarUrl, trenitUrl, lngLat };
+
+  if (popup) popup.remove();
+  popup = new mapboxgl.Popup({ offset: 12, maxWidth: "300px", closeButton: false })
+    .setLngLat(lngLat)
+    .setHTML(buildPopupHTML(p, trainNum, sncfUrl, eurostarUrl, trenitUrl, null))
+    .addTo(map);
+
+  await drawRoute(p.trip_id, p.train_type);
+
+  if (popup.isOpen()) {
+    popup.setHTML(buildPopupHTML(p, trainNum, sncfUrl, eurostarUrl, trenitUrl, routeCache.get(p.trip_id) || null));
+  }
+}
+
+async function focusTrain(tripId, trainType) {
+  let feature = knownTrains.get(tripId);
+  let lngLat;
+
+  if (feature) {
+    lngLat = feature.geometry.coordinates;
+  } else {
+    await fetchRouteData(tripId);
+    const route = routeCache.get(tripId);
+    if (!route || !route.stops || route.stops.length === 0) return;
+    const first = route.stops[0];
+    lngLat = [+first.lon, +first.lat];
+    feature = {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: lngLat },
+      properties: {
+        trip_id:    tripId,
+        train_type: trainType || "Other",
+        delay_min:  0,
+        from_stop:  first.name,
+        to_stop:    route.stops[route.stops.length - 1].name,
+        status:     "SCHEDULED",
+      }
+    };
+  }
+
+  // Only fly to the train if it's not already visible in the current viewport.
+  // Zooming in when the user can already see the train causes all other trains
+  // outside the new viewport to appear to "disappear."
+  const [lng, lat] = lngLat;
+  if (!map.getBounds().contains([lng, lat])) {
+    map.flyTo({ center: lngLat, zoom: Math.max(map.getZoom(), 9), duration: 900 });
+  }
+  await openTrainDetail(feature.properties, lngLat);
+}
+
+// ── Custom layer setup (called on initial load and after every style switch) ──
+async function setupCustomLayers() {
+  for (const [type, svgFn] of Object.entries(TRAIN_ICONS)) {
+    const color = TYPE_COLOR[type];
+    const svg   = svgFn(color);
+    const [img, mirroredImg] = await Promise.all([loadSVGImage(svg), loadSVGImageMirrored(svg)]);
+    map.addImage("train-"        + type, img);
+    map.addImage("train-mirror-" + type, mirroredImg);
+  }
+
+  map.addSource("route-line",          { type: "geojson", data: emptyFC, lineMetrics: true });
+  map.addSource("route-upcoming-line", { type: "geojson", data: emptyFC });
+  map.addSource("route-stops",         { type: "geojson", data: emptyFC });
+
+  map.addLayer({
+    id: "route-completed", type: "line", source: "route-line",
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      "line-gradient": buildGradientExpr(ROUTE_GRADIENT["TGV INOUI"]),
+      "line-width": 3, "line-opacity": 0.9,
+    },
+  });
+  map.addLayer({
+    id: "route-upcoming", type: "line", source: "route-upcoming-line",
+    layout: { "line-cap": "butt", "line-join": "round" },
+    paint: { "line-color": "#ffffff", "line-width": 2, "line-opacity": 0.35, "line-dasharray": [2, 3] },
+  });
+  map.addLayer({
+    id: "route-stop-dots", type: "circle", source: "route-stops",
+    paint: {
+      "circle-radius": 6,
+      "circle-color": ["get", "color"], "circle-opacity": ["get", "opacity"],
+      "circle-stroke-width": 1.5, "circle-stroke-color": "#ffffff", "circle-stroke-opacity": ["get", "opacity"],
+    },
+  });
+  map.addLayer({
+    id: "route-stop-labels", type: "symbol", source: "route-stops", minzoom: 7,
+    layout: {
+      "text-field": ["case", ["get", "past"],
+        ["concat", "✓ ", ["get", "name"], "\n", ["get", "time"]],
+        ["concat", ["get", "name"], "\n", ["get", "time"]],
+      ],
+      "text-size": 11,
+      "text-offset": [0, 1.2], "text-anchor": "top", "text-allow-overlap": false,
+    },
+    paint: {
+      "text-color": "#e6edf3", "text-halo-color": "#0e1117",
+      "text-halo-width": 1.5, "text-opacity": ["get", "opacity"],
+    },
+  });
+
+  map.addSource("trains", { type: "geojson", data: emptyFC });
+
+  map.addLayer({
+    id: "trains-layer", type: "symbol", source: "trains",
+    layout: {
+      // bearing > 180 → westward half: use horizontally-mirrored icon so it's never upside-down
+      "icon-image": [
+        "case",
+        ["all", ["has", "bearing"], [">", ["get", "bearing"], 180]],
+        ["concat", "train-mirror-", ["get", "train_type"]],
+        ["concat", "train-",        ["get", "train_type"]],
+      ],
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 4, 0.4, 7, 0.7, 10, 1.05],
+      "icon-allow-overlap": true, "icon-ignore-placement": true, "icon-anchor": "center",
+      // Normal icon: nose right (east=90°) → bearing-90
+      // Mirrored icon: nose left (west=270°) → bearing-270
+      "icon-rotate": [
+        "case",
+        ["all", ["has", "bearing"], [">", ["get", "bearing"], 180]],
+        ["-", ["get", "bearing"], 270],
+        ["-", ["coalesce", ["get", "bearing"], 90], 90],
+      ],
+      "icon-rotation-alignment": "map",
+    },
+    paint: {
+      "icon-opacity": 1,
+    },
+  });
+
+  if (lgvLinesEnabled) await addLgvLayer();
+  if (contoursEnabled)      addContourLayer();
+  if (contourLinesEnabled)  addContourLinesLayer();
+  if (railLinesEnabled)     addRailLayer();
+
+  applyFilters();
+
+  // Re-render active route overlay if one was open before the style switch
+  if (activeRouteData) drawRoute(activeRouteData.tripId, activeRouteData.trainType);
+}
+
+// ── Overlay layers ────────────────────────────────────────────────────────────
+async function addLgvLayer() {
+  const geojson = await getLgvGeoJSON();
+  lgvGeoJSONData = geojson;
+  if (!map.getSource("lgv-src")) {
+    map.addSource("lgv-src", { type: "geojson", data: geojson });
+  } else {
+    map.getSource("lgv-src").setData(geojson);
+  }
+  if (!map.getLayer("lgv-lines")) {
+    map.addLayer({
+      id: "lgv-lines", type: "line", source: "lgv-src",
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#60A5FA",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 4, 1.5, 8, 3, 12, 5],
+        "line-opacity": 0.6,
+      },
+    }, "route-completed");
+  }
+}
+
+function removeLgvLayer() {
+  if (map.getLayer("lgv-lines")) map.removeLayer("lgv-lines");
+  if (map.getSource("lgv-src"))  map.removeSource("lgv-src");
+}
+
+function addRailLayer() {
+  if (!map.getSource("rail-source")) {
+    map.addSource("rail-source", {
+      type: "raster",
+      tiles: [
+        "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+        "https://b.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+        "https://c.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+      ],
+      tileSize: 256,
+      attribution: "© <a href='https://www.openrailwaymap.org/'>OpenRailwayMap</a>",
+    });
+  }
+  if (!map.getLayer("rail-layer")) {
+    map.addLayer({ id: "rail-layer", type: "raster", source: "rail-source",
+      paint: { "raster-opacity": 0.75 } }, "route-completed");
+  }
+}
+
+function removeRailLayer() {
+  if (map.getLayer("rail-layer"))   map.removeLayer("rail-layer");
+  if (map.getSource("rail-source")) map.removeSource("rail-source");
+}
+
+function addContourLayer() {
+  if (!map.getSource("terrain-src")) {
+    map.addSource("terrain-src", {
+      type: "raster-dem",
+      url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+      tileSize: 512,
+      maxzoom: 14,
+    });
+  }
+  if (!map.getLayer("hillshade")) {
+    map.addLayer({
+      id: "hillshade", type: "hillshade", source: "terrain-src",
+      paint: {
+        "hillshade-illumination-direction": 315,
+        "hillshade-illumination-anchor": "map",
+        "hillshade-exaggeration": 0.45,
+        "hillshade-shadow-color": "#4a3c2a",
+        "hillshade-highlight-color": "#ffffff",
+        "hillshade-accent-color": "#b5956a",
+      },
+    }, "route-completed");
+  }
+}
+
+function removeContourLayer() {
+  if (map.getLayer("hillshade"))    map.removeLayer("hillshade");
+  if (map.getSource("terrain-src")) map.removeSource("terrain-src");
+}
+
+function addContourLinesLayer() {
+  if (!map.getSource("contour-src")) {
+    map.addSource("contour-src", {
+      type: "vector",
+      url: "mapbox://mapbox.mapbox-terrain-v2",
+    });
+  }
+  if (!map.getLayer("contour-lines")) {
+    map.addLayer({
+      id: "contour-lines", type: "line",
+      source: "contour-src", "source-layer": "contour",
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: {
+        "line-color": "#b07540",
+        "line-width": ["match", ["get", "index"], [5, 10], 1.5, 0.5],
+        "line-opacity": 0.75,
+      },
+    }, "route-completed");
+  }
+  if (!map.getLayer("contour-labels")) {
+    map.addLayer({
+      id: "contour-labels", type: "symbol",
+      source: "contour-src", "source-layer": "contour",
+      filter: [">", ["get", "index"], 0],
+      layout: {
+        "symbol-placement": "line",
+        "text-field": ["concat", ["to-string", ["get", "ele"]], "m"],
+        "text-size": 10,
+        "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Regular"],
+        "text-allow-overlap": false,
+      },
+      paint: {
+        "text-color": "#b07540",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1.5,
+      },
+    }, "route-completed");
+  }
+}
+
+function removeContourLinesLayer() {
+  if (map.getLayer("contour-labels")) map.removeLayer("contour-labels");
+  if (map.getLayer("contour-lines"))  map.removeLayer("contour-lines");
+  if (map.getSource("contour-src"))   map.removeSource("contour-src");
+}
+
+function switchMapStyle(styleId) {
+  currentStyleId = styleId;
+  map.setStyle(MAP_STYLES[styleId]);
+  map.once("style.load", setupCustomLayers);
+  document.querySelectorAll(".style-btn").forEach(b =>
+    b.classList.toggle("active", b.dataset.style === styleId));
+}
+
+map.on("load", async () => {
+  await setupCustomLayers();
+
+  // ── Click: train ───────────────────────────────────────────────────────────
+  map.on("click", "trains-layer", async e => {
+    if (pickerActive || trackActive) return;
+    const p      = e.features[0].properties;
+    const lngLat = e.features[0].geometry.coordinates;
+    await openTrainDetail(p, lngLat);
+  });
+
+  map.on("click", e => {
+    if (trackActive) {
+      trackPoints.push([e.lngLat.lng, e.lngLat.lat]);
+      updateTrackDisplay();
+      const n = trackPoints.length;
+      document.getElementById("track-status").textContent =
+        n === 1 ? "Click to add more points"
+                : `${n} points — keep clicking or Save`;
+      return;
+    }
+    if (pickerActive) {
+      const snap = snapToLine(e.lngLat);
+      if (!snap) return;
+      if (snap.snapKm > 2) {
+        document.getElementById("picker-status").textContent =
+          `⚠ Nearest track is ${snap.snapKm.toFixed(1)} km away — this line may not be in the data`;
+        return;
+      }
+      addPickerWaypoint(snap);
+      return;
+    }
+    const hits = map.queryRenderedFeatures(e.point, { layers: ["trains-layer"] });
+    if (!hits.length) clearRoute();
+  });
+
+  map.on("mouseenter", "trains-layer", () => map.getCanvas().style.cursor = "pointer");
+  map.on("mouseleave", "trains-layer", () => map.getCanvas().style.cursor = "");
+
+  loadKnownTrains();
+  loadRouteCache();
+  tlSync();
+
+  // Fetch all trips scheduled for today in parallel with the live fetch.
+  // This populates knownTrains with trains that have already finished their
+  // journey so the full-day timeline works even on a fresh page load.
+  const [, allData] = await Promise.all([
+    fetchAndUpdate(),
+    fetch(`${API_URL}/trains/all`).then(r => r.json()).catch(() => null),
+  ]);
+  if (allData?.features) {
+    for (const raw of allData.features) {
+      const f = normalizeFeature(raw);
+      if (!knownTrains.has(f.properties.trip_id)) knownTrains.set(f.properties.trip_id, f);
+    }
+    saveKnownTrains();
+  }
+
+  // Dismiss the initial loading overlay now that trains are in the network
+  const loadingOverlay = document.getElementById("loading-overlay");
+  loadingOverlay.classList.add("hidden");
+  setTimeout(() => loadingOverlay.remove(), 550);
+
+  // Prefetch live trains first (highest priority), then queue the rest.
+  prefetchRoutes(liveFeatures);
+  prefetchRoutes([...knownTrains.values()]);
+  startAnimation();
+  setInterval(fetchAndUpdate, REFRESH_MS);
+});
+
+// ── Route drawing ─────────────────────────────────────────────────────────────
+
+function clearRoute() {
+  activeRouteData = null;
+  map.getSource("route-line").setData(emptyFC);
+  map.getSource("route-upcoming-line").setData(emptyFC);
+  map.getSource("route-stops").setData(emptyFC);
+}
+
+// Map each stop to the nearest shape point, enforcing that indices are strictly
+// non-decreasing. Without this constraint two adjacent stops can snap to the
+// same (or an earlier) shape point and the segment falls back to a straight line.
+function assignShapeIndicesMonotonic(shape, stops) {
+  const indices = [];
+  let startIdx = 0;
+  for (const s of stops) {
+    let best = startIdx, bestDist = Infinity;
+    for (let i = startIdx; i < shape.length; i++) {
+      const dx = shape[i][0] - s.lon;
+      const dy = shape[i][1] - s.lat;
+      const d  = dx * dx + dy * dy;
+      if (d < bestDist) { bestDist = d; best = i; }
+    }
+    indices.push(best);
+    startIdx = best;
+  }
+  return indices;
+}
+
+function updateRouteGeometry(trainPos, nowSecs) {
+  if (!activeRouteData) return;
+  const route = routeCache.get(activeRouteData.tripId);
+  if (!route) return;
+  if (!map.getSource("route-line")) return;
+
+  const { stops, shape, shapeStopIndices } = route;
+  const seg = findTrainSegment(stops, nowSecs);
+
+  let pastCoords, upcomingCoords;
+
+  if (seg.phase === 'before' || (seg.phase === 'dwell' && seg.idx === 0)) {
+    pastCoords     = [];
+    upcomingCoords = shape || stops.map(s => [s.lon, s.lat]);
+  } else if (seg.phase === 'after') {
+    pastCoords     = shape || stops.map(s => [s.lon, s.lat]);
+    upcomingCoords = [];
+  } else if (seg.phase === 'dwell') {
+    // Route line completed up to the stop the train is currently at
+    const j = seg.idx;
+    if (shape && shapeStopIndices) {
+      pastCoords     = shape.slice(0, shapeStopIndices[j] + 1);
+      upcomingCoords = shape.slice(shapeStopIndices[j]);
+    } else {
+      pastCoords     = stops.slice(0, j + 1).map(s => [s.lon, s.lat]);
+      upcomingCoords = stops.slice(j).map(s => [s.lon, s.lat]);
+    }
+  } else {
+    // Moving between stops — split shape at the train's current position
+    const { si, frac } = seg;
+    if (shape && shapeStopIndices && shapeStopIndices[si] < shapeStopIndices[si + 1]) {
+      const segCoords = shape.slice(shapeStopIndices[si], shapeStopIndices[si + 1] + 1);
+      const endpoint  = trainPos || interpolateAlongLine(segCoords, frac);
+
+      let totalLen = 0;
+      for (let k = 0; k < segCoords.length - 1; k++)
+        totalLen += Math.hypot(segCoords[k+1][0]-segCoords[k][0], segCoords[k+1][1]-segCoords[k][1]);
+      const targetLen = frac * totalLen;
+      let cum = 0, subIdx = 0;
+      for (let k = 0; k < segCoords.length - 1; k++) {
+        const d = Math.hypot(segCoords[k+1][0]-segCoords[k][0], segCoords[k+1][1]-segCoords[k][1]);
+        if (cum + d >= targetLen) { subIdx = k; break; }
+        cum += d;
+        subIdx = k + 1;
+      }
+      const splitIdx = shapeStopIndices[si] + subIdx + 1;
+      pastCoords     = [...shape.slice(0, splitIdx), endpoint];
+      upcomingCoords = [endpoint, ...shape.slice(splitIdx)];
+    } else {
+      const endpoint = trainPos || [
+        stops[si].lon + frac * (stops[si+1].lon - stops[si].lon),
+        stops[si].lat + frac * (stops[si+1].lat - stops[si].lat),
+      ];
+      pastCoords     = [...stops.slice(0, si + 1).map(s => [s.lon, s.lat]), endpoint];
+      upcomingCoords = [endpoint, ...stops.slice(si + 1).map(s => [s.lon, s.lat])];
+    }
+  }
+
+  const toFC = coords => ({
+    type: "FeatureCollection",
+    features: coords.length >= 2
+      ? [{ type: "Feature", geometry: { type: "LineString", coordinates: coords }, properties: {} }]
+      : [],
+  });
+  map.getSource("route-line").setData(toFC(pastCoords));
+  map.getSource("route-upcoming-line").setData(toFC(upcomingCoords));
+}
+
+async function drawRoute(tripId, trainType) {
+  clearRoute();
+
+  // Ensure route is in cache (may already be there from background prefetch)
+  if (!routeCache.has(tripId)) {
+    try {
+      await fetchRouteData(tripId);
+    } catch { return; }
+  }
+  const route = routeCache.get(tripId);
+  if (!route || route.stops.length < 2) return;
+
+  map.setPaintProperty("route-completed", "line-gradient",
+    buildGradientExpr(ROUTE_GRADIENT[trainType] || ROUTE_GRADIENT["Other"]));
+
+  activeRouteData = { tripId, trainType };
+
+  const dotColor = TYPE_COLOR[trainType] || "#6b7280";
+  const nowSecs  = nowParisSecs();
+  const stopFeats = route.stops.map(s => {
+    const dep  = gtfsSecs(s.departure_time) + (s.departure_delay_s || 0);
+    const past = dep < nowSecs;
+    return {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [s.lon, s.lat] },
+      properties: {
+        name: s.name,
+        color: past ? dotColor : "#ffffff",
+        opacity: past ? 0.85 : 0.3,
+        past,
+        time: secsToTime(dep),
+      },
+    };
+  });
+  map.getSource("route-stops").setData({ type: "FeatureCollection", features: stopFeats });
+
+  updateRouteGeometry(null, nowSecs);
+}
+
+// ── Live fetch ────────────────────────────────────────────────────────────────
+let lastFetchTime = null;
+let countdownInterval = null;
+
+function startUpdateCountdown() {
+  const elNext = document.getElementById("updated-next");
+  const elNote = document.getElementById("updated-note");
+  elNote.textContent = "Positions between updates are estimations";
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    const secsLeft = Math.max(0, Math.round((lastFetchTime + REFRESH_MS - Date.now()) / 1000));
+    elNext.textContent = secsLeft > 0 ? `Next update in ${secsLeft}s` : "Updating…";
+    if (secsLeft === 0) { clearInterval(countdownInterval); countdownInterval = null; }
+  }, 1000);
+}
+
+async function fetchAndUpdate() {
+  try {
+    const res  = await fetch(`${API_URL}/trains`);
+    const data = await res.json();
+    liveFeatures = data.features.map(normalizeFeature);
+    updateHudCounts();
+    lastFetchTime = Date.now();
+    document.getElementById("updated").textContent =
+      "Last updated " + new Date().toLocaleTimeString("fr-FR");
+    document.getElementById("updated-next").textContent =
+      `Next update in ${Math.round(REFRESH_MS / 1000)}s`;
+    startUpdateCountdown();
+    for (const f of liveFeatures) knownTrains.set(f.properties.trip_id, f);
+    saveKnownTrains();
+    tlSync();
+    prefetchRoutes(liveFeatures);
+  } catch (err) {
+    console.error(err);
+    document.getElementById("updated").textContent = "Connection error";
+    document.getElementById("updated-next").textContent = "";
+    document.getElementById("updated-note").textContent = "";
+    tlSync();
+  }
+}
+
+// ── Timeline wiring ───────────────────────────────────────────────────────────
+const tlSlider   = document.getElementById("tl-slider");
+const tlLiveBtn  = document.getElementById("tl-live");
+const tlPlayBtn  = document.getElementById("tl-play");
+const tlT0       = document.getElementById("tl-t0");
+const tlT1       = document.getElementById("tl-t1");
+const tlThumbTip = document.getElementById("tl-thumb-tip");
+
+function updateThumbTip() {
+  const min = +tlSlider.min;
+  const max = +tlSlider.max;
+  if (max <= min) return;
+  const pct   = (+tlSlider.value - min) / (max - min);
+  const thumbR = 7;
+  const left   = thumbR + pct * (tlSlider.offsetWidth - 2 * thumbR);
+  tlThumbTip.style.left    = left + "px";
+  tlThumbTip.textContent   = secsToTime(Math.round(+tlSlider.value));
+}
+
+function startPlay() {
+  isPlaying = true;
+  tlPlayBtn.textContent = "⏸";
+}
+function stopPlay() {
+  isPlaying = false;
+  tlPlayBtn.textContent = "▶";
+}
+
+document.querySelectorAll(".tl-spd").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tl-spd").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    playStep = +btn.dataset.step;
+  });
+});
+
+tlPlayBtn.addEventListener("click", () => {
+  if (isPlaying) { stopPlay(); return; }
+  // If at (or near) live, rewind to start of day before playing
+  if (isLive || +tlSlider.value >= +tlSlider.max - 60) {
+    isLive = false;
+    tlLiveBtn.classList.remove("is-live");
+    tlSlider.value = DAY_START;
+  }
+  startPlay();
+});
+
+// Slider covers 04:00 → current Paris time, 1-second steps
+const DAY_START = 4 * 3600; // 04:00 in seconds
+
+function tlSync() {
+  const now = nowParisSecs();
+  tlSlider.disabled = false;
+  tlSlider.min = DAY_START;
+  tlSlider.max = now;
+  tlSlider.step = 1;
+  if (isLive) tlSlider.value = now;
+  tlT0.textContent = "04:00";
+}
+
+tlSlider.addEventListener("input", e => {
+  const val = +e.target.value;
+  if (val >= +tlSlider.max - 60) {
+    setLive();
+  } else {
+    isLive = false;
+    tlLiveBtn.classList.remove("is-live");
+  }
+});
+
+tlLiveBtn.addEventListener("click", setLive);
+
+// ── Autocomplete helper ────────────────────────────────────────────────────────
+function makeAutocomplete(inputId, dropId, onSelect) {
+  const input  = document.getElementById(inputId);
+  const drop   = document.getElementById(dropId);
+  let timer    = null;
+  let focusIdx = -1;
+  let items    = [];  // [{name, lat, lon}]
+
+  function close() {
+    drop.classList.remove("open");
+    focusIdx = -1;
+  }
+
+  function select(stop) {
+    input.value = stop.name;
+    close();
+    if (onSelect) onSelect(stop);
+  }
+
+  function renderItems(stops) {
+    items = stops;
+    focusIdx = -1;
+    if (!stops.length) {
+      drop.innerHTML = `<div class="ac-empty">No matches</div>`;
+      drop.classList.add("open");
+      return;
+    }
+    drop.innerHTML = stops
+      .map((s, i) => `<div class="ac-item" data-i="${i}">${s.name}</div>`)
+      .join("");
+    drop.classList.add("open");
+    drop.querySelectorAll(".ac-item").forEach(el => {
+      el.addEventListener("mousedown", e => {
+        e.preventDefault();
+        select(items[+el.dataset.i]);
+      });
+    });
+  }
+
+  function setFocus(idx) {
+    drop.querySelectorAll(".ac-item").forEach((el, i) => {
+      el.classList.toggle("focused", i === idx);
+      if (i === idx) el.scrollIntoView({ block: "nearest" });
+    });
+    focusIdx = idx;
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2) { close(); return; }
+    timer = setTimeout(async () => {
+      try {
+        const r = await fetch(`${API_URL}/stops/search?q=${encodeURIComponent(q)}`);
+        const d = await r.json();
+        renderItems(d.stops || []);
+      } catch { close(); }
+    }, 200);
+  });
+
+  input.addEventListener("keydown", e => {
+    if (!drop.classList.contains("open")) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setFocus(Math.min(focusIdx + 1, items.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setFocus(Math.max(focusIdx - 1, 0));
+    } else if (e.key === "Enter" && focusIdx >= 0) {
+      e.preventDefault();
+      select(items[focusIdx]);
+    } else if (e.key === "Escape") {
+      close();
+    }
+  });
+
+  input.addEventListener("blur", () => setTimeout(close, 150));
+}
+
+// ── Segment Picker ─────────────────────────────────────────────────────────────
+let pickerActive      = false;
+let lgvGeoJSONData    = null;
+let pickerWaypoints   = [];  // [{lineIdx, ptIdx, coord:[lon,lat]}]
+let pickerSegments    = [];  // [[coord,…]] one per consecutive waypoint pair
+let pickerOriginMark  = null;
+let pickerDestMark    = null;
+
+function setStopMarker(which, stop) {
+  const isOrigin = which === "origin";
+  const existing = isOrigin ? pickerOriginMark : pickerDestMark;
+  if (existing) existing.remove();
+
+  const el = document.createElement("div");
+  el.style.cssText = [
+    "width:14px", "height:14px", "border-radius:50%",
+    `background:${isOrigin ? "#22c55e" : "#ef4444"}`,
+    "border:2.5px solid #fff",
+    "box-shadow:0 1px 4px rgba(0,0,0,.5)",
+    "cursor:default",
+  ].join(";");
+
+  const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
+    .setLngLat([stop.lon, stop.lat])
+    .setPopup(new mapboxgl.Popup({ offset: 10, closeButton: false })
+      .setHTML(`<span style="font-size:11px;font-weight:600">${stop.name}</span>`))
+    .addTo(map);
+
+  if (isOrigin) pickerOriginMark = marker;
+  else          pickerDestMark   = marker;
+}
+
+function clearStopMarkers() {
+  if (pickerOriginMark) { pickerOriginMark.remove(); pickerOriginMark = null; }
+  if (pickerDestMark)   { pickerDestMark.remove();   pickerDestMark   = null; }
+}
+
+let pickerSnapFeatures = [];
+
+function rebuildSnapFeatures() {
+  // Start with our pre-fetched LGV GeoJSON (full France coverage)
+  pickerSnapFeatures = lgvGeoJSONData
+    ? lgvGeoJSONData.features.filter(f => f.geometry.type === "LineString")
+    : [];
+
+  // Merge in rail lines from the map's own vector tiles (covers any line
+  // visible in the current viewport — catches lines missing from our S3 data)
+  try {
+    const tileFeatures = map.querySourceFeatures("composite", { sourceLayer: "transit" });
+    for (const f of tileFeatures) {
+      if (!f.geometry || f.geometry.type !== "LineString") continue;
+      if (f.geometry.coordinates.length < 2) continue;
+      if ((f.properties || {}).class === "ferry") continue;
+      pickerSnapFeatures.push(f);
+    }
+  } catch (_) {}
+}
+
+function snapToLine(lngLat) {
+  rebuildSnapFeatures();
+  if (!pickerSnapFeatures.length) return null;
+  const px = lngLat.lng, py = lngLat.lat;
+  let bestD = Infinity, bestLi = -1, bestPi = -1;
+  pickerSnapFeatures.forEach((f, li) => {
+    f.geometry.coordinates.forEach(([cx, cy], pi) => {
+      const d = (cx - px) ** 2 + (cy - py) ** 2;
+      if (d < bestD) { bestD = d; bestLi = li; bestPi = pi; }
+    });
+  });
+  if (bestLi < 0) return null;
+  const snapKm = Math.sqrt(bestD) * 111;
+  return { lineIdx: bestLi, ptIdx: bestPi, snapKm,
+           coord: pickerSnapFeatures[bestLi].geometry.coordinates[bestPi] };
+}
+
+function extractSegment(from, to) {
+  if (from.lineIdx === to.lineIdx) {
+    const coords = pickerSnapFeatures[from.lineIdx].geometry.coordinates;
+    const [i1, i2] = [from.ptIdx, to.ptIdx];
+    return i1 <= i2 ? coords.slice(i1, i2 + 1)
+                    : [...coords.slice(i2, i1 + 1)].reverse();
+  }
+  return [from.coord, to.coord];
+}
+
+function pickerFlatCoords() {
+  if (!pickerWaypoints.length) return [...pickerPreloadedCoords];
+  const out = [pickerWaypoints[0].coord];
+  for (const seg of pickerSegments) out.push(...seg.slice(1));
+  return out;
+}
+
+function updatePickerDisplay() {
+  const coords   = pickerFlatCoords();
+  const wpCoords = pickerWaypoints.map(w => w.coord);
+
+  const pathSrc = map.getSource("picker-path-src");
+  if (pathSrc) pathSrc.setData({
+    type: "FeatureCollection",
+    features: coords.length >= 2 ? [{
+      type: "Feature",
+      geometry: { type: "LineString", coordinates: coords }
+    }] : []
+  });
+
+  const wpSrc = map.getSource("picker-wp-src");
+  if (wpSrc) wpSrc.setData({
+    type: "FeatureCollection",
+    features: wpCoords.map(c => ({
+      type: "Feature", geometry: { type: "Point", coordinates: c }
+    }))
+  });
+
+  const n = pickerWaypoints.length;
+  document.getElementById("picker-stats").textContent =
+    n ? `${n} waypoint${n !== 1 ? "s" : ""} · ${coords.length} pts` : "";
+  document.getElementById("picker-save").disabled = coords.length < 2;
+}
+
+function addPickerWaypoint(snap) {
+  if (pickerPreloadedCoords.length) {
+    // First click after loading a saved route: switch to fresh-draw mode
+    pickerPreloadedCoords = [];
+    document.querySelectorAll(".saved-route-item.active").forEach(e => e.classList.remove("active"));
+  }
+  if (pickerWaypoints.length > 0) {
+    pickerSegments.push(extractSegment(pickerWaypoints[pickerWaypoints.length - 1], snap));
+  }
+  pickerWaypoints.push(snap);
+  updatePickerDisplay();
+  const n = pickerWaypoints.length;
+  document.getElementById("picker-status").textContent =
+    n === 1 ? "Click a second point to extend the segment"
+            : `${n} waypoints — keep extending or click Save`;
+}
+
+function undoLastWaypoint() {
+  if (!pickerWaypoints.length) return;
+  pickerWaypoints.pop();
+  if (pickerSegments.length) pickerSegments.pop();
+  updatePickerDisplay();
+  const n = pickerWaypoints.length;
+  document.getElementById("picker-status").textContent =
+    n === 0 ? "Click on a rail line to place your first waypoint"
+  : n === 1 ? "Click a second point to extend the segment"
+            : `${n} waypoints — keep extending or click Save`;
+}
+
+function clearPicker() {
+  pickerWaypoints        = [];
+  pickerSegments         = [];
+  pickerPreloadedCoords  = [];
+  pickerEditingShapeId   = null;
+  updatePickerDisplay();
+  clearStopMarkers();
+  document.getElementById("picker-status").textContent =
+    "Click on a rail line to place your first waypoint";
+  document.getElementById("picker-origin").value = "";
+  document.getElementById("picker-dest").value   = "";
+  document.getElementById("picker-stats").textContent = "";
+  document.getElementById("picker-edit-bar").style.display = "none";
+  document.getElementById("picker-save").textContent = "Save";
+  document.querySelectorAll(".saved-route-item.active").forEach(e => e.classList.remove("active"));
+}
+
+async function savePicker() {
+  const origin = document.getElementById("picker-origin").value.trim();
+  const dest   = document.getElementById("picker-dest").value.trim();
+  const coords = pickerFlatCoords();
+  if (!origin || !dest) {
+    document.getElementById("picker-status").textContent =
+      "Enter both origin and destination station names first";
+    return;
+  }
+  const btn = document.getElementById("picker-save");
+  btn.textContent = "Saving…";
+  btn.disabled = true;
+  try {
+    const res  = await fetch(`${API_URL}/shapes/manual`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ origin, destination: dest, coords }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.status);
+    document.getElementById("picker-status").textContent =
+      data.updated > 0
+        ? `Saved — ${data.updated} trip${data.updated !== 1 ? "s" : ""} updated (${data.points} pts)`
+        : data.message || "No matching trips found.";
+    if (data.updated > 0) {
+      // Add shape to live snap network so it's immediately usable for future routes
+      if (lgvGeoJSONData && data.coords && data.shape_id) {
+        lgvGeoJSONData.features = lgvGeoJSONData.features.filter(
+          f => (f.properties || {}).manual_shape_id !== data.shape_id
+        );
+        lgvGeoJSONData.features.push({
+          type: "Feature",
+          geometry: { type: "LineString", coordinates: data.coords },
+          properties: { highspeed: false, manual: true, manual_shape_id: data.shape_id },
+        });
+      }
+      // Evict cached routes that have no shape — they may have just received one.
+      // They will re-fetch on the next prefetchRoutes call and render with the new geometry.
+      for (const [id, r] of routeCache.entries()) {
+        if (!r.shape) routeCache.delete(id);
+      }
+      scheduleRouteCacheSave();
+      clearPicker();
+      loadManualShapes();
+    }
+  } catch (err) {
+    document.getElementById("picker-status").textContent = `Error: ${err.message}`;
+  } finally {
+    btn.textContent = "Save";
+    btn.disabled = false;
+  }
+}
+
+function togglePicker() {
+  pickerActive = !pickerActive;
+  document.getElementById("picker-btn").classList.toggle("active", pickerActive);
+  document.getElementById("picker-panel").classList.toggle("open", pickerActive);
+  map.getCanvas().style.cursor = pickerActive ? "crosshair" : "";
+
+  if (pickerActive) {
+    loadManualShapes();
+    // Add picker map layers if they don't exist yet
+    if (!map.getSource("picker-path-src")) {
+      map.addSource("picker-path-src", { type: "geojson",
+        data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "picker-path", type: "line", source: "picker-path-src",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#f97316", "line-width": 3.5, "line-opacity": 0.95 } });
+      map.addSource("picker-wp-src", { type: "geojson",
+        data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "picker-waypoints", type: "circle", source: "picker-wp-src",
+        paint: { "circle-radius": 5, "circle-color": "#f97316",
+                 "circle-stroke-width": 2, "circle-stroke-color": "#fff" } });
+    }
+    // Close settings panel if open
+    document.getElementById("settings-panel").classList.remove("open");
+    document.getElementById("settings-btn").classList.remove("open");
+    document.getElementById("search-panel").classList.remove("open");
+    document.getElementById("search-btn").classList.remove("open");
+  } else {
+    clearPicker();
+  }
+}
+
+let pickerPreloadedCoords  = [];
+let pickerEditingShapeId   = null;
+let pickerSavedShapes      = [];
+let pickerSavedOpen      = true;
+let pickerSavedExpanded  = false;
+
+const LS_BIDIR_KEY = "sncf_route_bidir";
+function getBidirectional(shapeId) {
+  try {
+    const m = JSON.parse(localStorage.getItem(LS_BIDIR_KEY) || "{}");
+    return shapeId in m ? m[shapeId] : true;
+  } catch { return true; }
+}
+function setBidirectional(shapeId, val) {
+  try {
+    const m = JSON.parse(localStorage.getItem(LS_BIDIR_KEY) || "{}");
+    m[shapeId] = val;
+    localStorage.setItem(LS_BIDIR_KEY, JSON.stringify(m));
+  } catch {}
+}
+
+let showAllRoutesOnMap = false;
+
+function syncAllRoutesLayer() {
+  if (!showAllRoutesOnMap || !pickerSavedShapes.length) {
+    if (map.getLayer("manual-routes-layer")) map.removeLayer("manual-routes-layer");
+    if (map.getSource("manual-routes-src"))  map.removeSource("manual-routes-src");
+    return;
+  }
+  const features = pickerSavedShapes
+    .filter(s => s.coords && s.coords.length >= 2)
+    .map(s => ({
+      type: "Feature",
+      geometry: { type: "LineString", coordinates: s.coords },
+      properties: { origin: s.origin, destination: s.destination, shape_id: s.shape_id },
+    }));
+  const fc = { type: "FeatureCollection", features };
+  if (!map.getSource("manual-routes-src")) {
+    map.addSource("manual-routes-src", { type: "geojson", data: fc });
+    map.addLayer({
+      id: "manual-routes-layer", type: "line", source: "manual-routes-src",
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#f97316",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 4, 2, 8, 3.5, 12, 5],
+        "line-opacity": 0.85,
+        "line-dasharray": [3, 2],
+      },
+    }, "route-completed");
+  } else {
+    map.getSource("manual-routes-src").setData(fc);
+  }
+}
+
+function toggleShowAllOnMap() {
+  showAllRoutesOnMap = !showAllRoutesOnMap;
+  document.getElementById("picker-show-all-map").classList.toggle("active", showAllRoutesOnMap);
+  document.getElementById("picker-show-all-map").textContent =
+    showAllRoutesOnMap ? "⊙ Hide all from map" : "⊙ Show all on map";
+  syncAllRoutesLayer();
+}
+
+async function loadManualShapes() {
+  try {
+    const res  = await fetch(`${API_URL}/shapes/manual`);
+    const data = await res.json();
+    pickerSavedShapes = data.shapes || [];
+    renderManualShapes();
+    syncAllRoutesLayer();
+  } catch (e) {
+    document.getElementById("picker-saved-list").innerHTML =
+      '<div id="picker-saved-empty">Could not load saved routes</div>';
+  }
+}
+
+function renderManualShapes() {
+  const list = document.getElementById("picker-saved-list");
+  if (!pickerSavedShapes.length) {
+    list.innerHTML = '<div id="picker-saved-empty">No saved routes yet</div>';
+    return;
+  }
+
+  const sorted = [...pickerSavedShapes].sort((a, b) => {
+    const ao = (a.origin || "").toLowerCase(), bo = (b.origin || "").toLowerCase();
+    if (ao !== bo) return ao < bo ? -1 : 1;
+    const ad = (a.destination || "").toLowerCase(), bd = (b.destination || "").toLowerCase();
+    return ad < bd ? -1 : ad > bd ? 1 : 0;
+  });
+
+  list.innerHTML = sorted.map(s => {
+    const bidir = getBidirectional(s.shape_id);
+    return `<div class="saved-route-item" data-shape-id="${s.shape_id}"
+         title="${s.origin} → ${s.destination} (${s.trip_count} trip${s.trip_count !== 1 ? "s" : ""})">
+      <span class="sri-label">
+        <span class="sri-origin">${s.origin || "?"}</span>
+        <span class="sri-arrow"> → </span>
+        <span class="sri-dest">${s.destination || "?"}</span>
+      </span>
+      <span class="sri-trips">${s.trip_count}t</span>
+      <label class="sri-bidir${bidir ? " on" : ""}" title="Valid for both directions" onclick="event.stopPropagation()">
+        <input type="checkbox" class="bidir-cb" data-shape-id="${s.shape_id}"${bidir ? " checked" : ""}> ⇄
+      </label>
+      <span class="sti-del" title="Delete route" data-del-id="${s.shape_id}" onclick="event.stopPropagation()">✕</span>
+    </div>`;
+  }).join("");
+
+  list.querySelectorAll(".saved-route-item").forEach(el => {
+    el.addEventListener("click", () => {
+      list.querySelectorAll(".saved-route-item").forEach(e => e.classList.remove("active"));
+      el.classList.add("active");
+      const shape = pickerSavedShapes.find(s => s.shape_id === el.dataset.shapeId);
+      if (shape) loadManualShape(shape);
+    });
+  });
+
+  list.querySelectorAll(".bidir-cb").forEach(cb => {
+    cb.addEventListener("change", () => {
+      setBidirectional(cb.dataset.shapeId, cb.checked);
+      const lbl = cb.closest(".sri-bidir");
+      if (lbl) lbl.classList.toggle("on", cb.checked);
+    });
+  });
+
+  list.querySelectorAll(".sti-del[data-del-id]").forEach(btn => {
+    btn.addEventListener("click", () => deleteManualShape(btn.dataset.delId));
+  });
+}
+
+async function deleteManualShape(shape_id) {
+  if (!confirm("Delete this saved route? Trips using it will revert to their default shape.")) return;
+  try {
+    const res  = await fetch(`${API_URL}/shapes/manual`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ shape_id }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.status);
+    if (lgvGeoJSONData) {
+      lgvGeoJSONData.features = lgvGeoJSONData.features.filter(
+        f => (f.properties || {}).manual_shape_id !== shape_id
+      );
+      const lgvSrc = map.getSource("lgv-src");
+      if (lgvSrc) lgvSrc.setData(lgvGeoJSONData);
+    }
+    if (pickerEditingShapeId === shape_id) clearPicker();
+    await loadManualShapes();
+  } catch (err) {
+    alert(`Delete failed: ${err.message}`);
+  }
+}
+
+function loadManualShape(shape) {
+  document.getElementById("picker-origin").value = shape.origin || "";
+  document.getElementById("picker-dest").value   = shape.destination || "";
+  pickerPreloadedCoords = shape.coords || [];
+  pickerEditingShapeId  = shape.shape_id;
+  pickerWaypoints = [];
+  pickerSegments  = [];
+  updatePickerDisplay();
+  document.getElementById("picker-edit-bar").style.display = "";
+  document.getElementById("picker-save").textContent = "Update";
+  document.getElementById("picker-status").textContent =
+    `Route loaded — click "Redraw" to draw a new path, or Update to re-save as-is`;
+  if (shape.coords && shape.coords.length >= 2) {
+    const lngs = shape.coords.map(c => c[0]);
+    const lats  = shape.coords.map(c => c[1]);
+    map.fitBounds(
+      [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+      { padding: 60, duration: 600 }
+    );
+  }
+}
+
+document.getElementById("picker-saved-header").addEventListener("click", () => {
+  pickerSavedOpen = !pickerSavedOpen;
+  document.getElementById("picker-saved-list").style.display = pickerSavedOpen ? "" : "none";
+  document.getElementById("picker-saved-toggle").textContent = pickerSavedOpen ? "▾" : "▸";
+});
+
+document.getElementById("picker-redraw-btn").addEventListener("click", () => {
+  // Keep origin/destination and editing context, but clear the preloaded route
+  // so the user can draw a fresh path from scratch
+  pickerPreloadedCoords = [];
+  pickerWaypoints       = [];
+  pickerSegments        = [];
+  updatePickerDisplay();
+  document.getElementById("picker-status").textContent =
+    "Click on a rail line to place your first waypoint";
+  document.getElementById("picker-save").textContent = "Update";
+});
+
+document.getElementById("picker-viewall").addEventListener("click", e => {
+  e.stopPropagation();
+  pickerSavedExpanded = !pickerSavedExpanded;
+  document.getElementById("picker-saved-list").classList.toggle("expanded", pickerSavedExpanded);
+  e.target.textContent = pickerSavedExpanded ? "Show less" : "View all";
+});
+
+document.getElementById("picker-show-all-map").addEventListener("click", toggleShowAllOnMap);
+
+document.getElementById("picker-btn").addEventListener("click", togglePicker);
+document.getElementById("picker-undo").addEventListener("click", undoLastWaypoint);
+document.getElementById("picker-clear").addEventListener("click", clearPicker);
+document.getElementById("picker-save").addEventListener("click", savePicker);
+makeAutocomplete("picker-origin", "ac-origin-drop", s => setStopMarker("origin", s));
+makeAutocomplete("picker-dest",   "ac-dest-drop",   s => setStopMarker("dest",   s));
+
+// ── Train number search ───────────────────────────────────────────────────────
+function formatGtfsTime(t) {
+  if (!t) return '—';
+  const parts = t.split(':');
+  if (parts.length < 2) return t;
+  const h = parseInt(parts[0]) % 24;
+  return `${String(h).padStart(2, '0')}:${parts[1]}`;
+}
+
+(function initTrainSearch() {
+  const input  = document.getElementById("train-search-input");
+  const drop   = document.getElementById("train-search-drop");
+  let timer    = null;
+  let results  = [];
+  let focusIdx = -1;
+
+  function close() { drop.classList.remove("open"); focusIdx = -1; }
+
+  function setFocus(idx) {
+    drop.querySelectorAll(".ac-item").forEach((el, i) => {
+      el.classList.toggle("focused", i === idx);
+      if (i === idx) el.scrollIntoView({ block: "nearest" });
+    });
+    focusIdx = idx;
+  }
+
+  function render(data) {
+    results  = data;
+    focusIdx = -1;
+    if (!data.length) {
+      drop.innerHTML = `<div class="ac-empty">No trains found</div>`;
+      drop.classList.add("open");
+      return;
+    }
+    drop.innerHTML = data.map((r, i) => {
+      const color    = TYPE_COLOR[r.train_type] || "#8b949e";
+      const trainNum = extractTrainNumber(r.trip_id);
+      const label    = r.route_name || (trainNum ? `N° ${trainNum}` : r.trip_id);
+      const od       = r.origin && r.destination ? `${r.origin} → ${r.destination}` : '';
+      const liveTag  = r.in_rt ? `<span style="font-size:9px;color:#22c55e;margin-left:auto">● LIVE</span>` : '';
+      return `<div class="ac-item" data-i="${i}" style="flex-direction:column;align-items:flex-start;gap:2px;padding:6px 10px">
+        <div style="display:flex;align-items:center;gap:5px;width:100%">
+          <span class="ts-badge" style="color:${color}">${r.train_type}</span>
+          <span class="ts-label">${label}</span>${liveTag}
+        </div>
+        ${od ? `<div class="ts-od">${od}</div>` : ''}
+      </div>`;
+    }).join('');
+    drop.classList.add("open");
+    drop.querySelectorAll(".ac-item").forEach(el => {
+      el.addEventListener("mousedown", ev => {
+        ev.preventDefault();
+        const r = results[+el.dataset.i];
+        input.value = '';
+        close();
+        focusTrain(r.trip_id, r.train_type);
+      });
+    });
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2) { close(); return; }
+    timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_URL}/trains/search?number=${encodeURIComponent(q)}`);
+        const d   = await res.json();
+        const filtered = (d.results || []).filter(r => {
+          const num = extractTrainNumber(r.trip_id);
+          return num && num.includes(q);
+        });
+        filtered.sort((a, b) => {
+          const aExact = extractTrainNumber(a.trip_id) === q;
+          const bExact = extractTrainNumber(b.trip_id) === q;
+          if (aExact && !bExact) return -1;
+          if (!aExact && bExact) return 1;
+          return 0;
+        });
+        render(filtered);
+      } catch { close(); }
+    }, 250);
+  });
+
+  input.addEventListener("keydown", e => {
+    if (!drop.classList.contains("open")) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); setFocus(Math.min(focusIdx + 1, results.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setFocus(Math.max(focusIdx - 1, 0)); }
+    else if (e.key === "Enter" && focusIdx >= 0) {
+      e.preventDefault();
+      const r = results[focusIdx];
+      input.value = '';
+      close();
+      focusTrain(r.trip_id, r.train_type);
+    } else if (e.key === "Escape") { close(); }
+  });
+
+  document.addEventListener("click", ev => {
+    if (!input.contains(ev.target) && !drop.contains(ev.target)) close();
+  });
+})();
+
+// ── Schedule between stops ─────────────────────────────────────────────────────
+let schedFrom = null;
+let schedTo   = null;
+
+function updateSchedBtn() {
+  document.getElementById("sched-search-btn").disabled = !schedFrom || !schedTo;
+}
+
+makeAutocomplete("sched-from", "ac-sched-from-drop", s => { schedFrom = s; updateSchedBtn(); });
+makeAutocomplete("sched-to",   "ac-sched-to-drop",   s => { schedTo   = s; updateSchedBtn(); });
+
+document.getElementById("sched-from").addEventListener("input", () => { schedFrom = null; updateSchedBtn(); });
+document.getElementById("sched-to").addEventListener("input",   () => { schedTo   = null; updateSchedBtn(); });
+
+document.getElementById("sched-search-btn").addEventListener("click", async () => {
+  if (!schedFrom || !schedTo) return;
+  const btn = document.getElementById("sched-search-btn");
+  const div = document.getElementById("sched-results");
+  btn.disabled = true;
+  div.innerHTML = `<div style="font-size:11px;color:#6b7280;padding:6px 0">Searching…</div>`;
+  try {
+    const url = `${API_URL}/schedule?from=${encodeURIComponent(schedFrom.name)}&to=${encodeURIComponent(schedTo.name)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    renderSchedResults(data, div);
+  } catch {
+    div.innerHTML = `<div style="font-size:11px;color:#f97316;padding:6px 0">Failed to load schedule</div>`;
+  } finally {
+    updateSchedBtn();
+  }
+});
+
+function renderSchedResults(data, div) {
+  if (!data.results || data.results.length === 0) {
+    div.innerHTML = `<div style="font-size:11px;color:#6b7280;padding:6px 0">No trains found for today between these stops</div>`;
+    return;
+  }
+  div.innerHTML = data.results.map(r => {
+    const color    = TYPE_COLOR[r.train_type] || "#8b949e";
+    const delayMin = r.delay_s ? Math.round(r.delay_s / 60) : 0;
+    const delayStr = delayMin >= 1 ? `+${delayMin}m` : '';
+    const trainNum = extractTrainNumber(r.trip_id);
+    const label    = r.route_name || (trainNum ? `N° ${trainNum}` : '');
+    return `<div class="sched-item" onclick="focusTrain(${JSON.stringify(r.trip_id)}, ${JSON.stringify(r.train_type)})">
+      <span class="sched-time">${formatGtfsTime(r.dep_time)}</span>
+      <span class="sched-arrow">→</span>
+      <span class="sched-arr">${formatGtfsTime(r.arr_time)}</span>
+      <span class="sched-badge" style="color:${color}">${r.train_type}</span>
+      <span class="sched-name">${label}</span>
+      ${delayStr ? `<span class="sched-delay">${delayStr}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── Track Editor ──────────────────────────────────────────────────────────────
+let trackActive      = false;
+let trackPoints      = [];   // [[lon, lat], ...]
+let editingTrackId   = null; // non-null when editing an existing saved track
+let trackSavedOpen   = true;
+
+function updateTrackDisplay() {
+  const src = map.getSource("track-draw-src");
+  if (src) src.setData({
+    type: "FeatureCollection",
+    features: trackPoints.length >= 2 ? [{
+      type: "Feature",
+      geometry: { type: "LineString", coordinates: trackPoints }
+    }] : []
+  });
+  const ptSrc = map.getSource("track-pt-src");
+  if (ptSrc) ptSrc.setData({
+    type: "FeatureCollection",
+    features: trackPoints.map(c => ({ type: "Feature", geometry: { type: "Point", coordinates: c } }))
+  });
+  const n = trackPoints.length;
+  document.getElementById("track-stats").textContent =
+    n ? `${n} point${n !== 1 ? "s" : ""}${editingTrackId ? " — editing" : ""}` : "";
+  document.getElementById("track-save").disabled = trackPoints.length < 2;
+}
+
+function clearTrack() {
+  trackPoints    = [];
+  editingTrackId = null;
+  updateTrackDisplay();
+  document.getElementById("track-status").textContent = "Click anywhere on the map to place track points";
+  document.getElementById("track-stats").textContent  = "";
+  document.querySelectorAll(".saved-track-item.active").forEach(el => el.classList.remove("active"));
+}
+
+function undoTrackPoint() {
+  if (!trackPoints.length) return;
+  trackPoints.pop();
+  updateTrackDisplay();
+  const n = trackPoints.length;
+  document.getElementById("track-status").textContent =
+    n === 0 ? "Click anywhere on the map to place track points"
+            : `${n} point${n !== 1 ? "s" : ""} — keep clicking or Save`;
+}
+
+async function saveTrack() {
+  const name   = document.getElementById("track-name").value.trim();
+  const coords = [...trackPoints];
+  if (coords.length < 2) return;
+  const btn = document.getElementById("track-save");
+  btn.textContent = "Saving…"; btn.disabled = true;
+  try {
+    const body = { name, coords };
+    if (editingTrackId) body.track_id = editingTrackId;
+    const res  = await fetch(`${API_URL}/tracks/custom`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.status);
+    // Update live snap network + visual layer
+    if (lgvGeoJSONData && data.coords) {
+      lgvGeoJSONData.features = lgvGeoJSONData.features.filter(
+        f => (f.properties || {}).custom_track_id !== data.track_id
+      );
+      lgvGeoJSONData.features.push({
+        type: "Feature",
+        geometry: { type: "LineString", coordinates: data.coords },
+        properties: { highspeed: false, custom_track: true,
+                      custom_track_id: data.track_id, name: data.name },
+      });
+      const lgvSrc = map.getSource("lgv-src");
+      if (lgvSrc) lgvSrc.setData(lgvGeoJSONData);
+    }
+    document.getElementById("track-status").textContent =
+      `Saved — ${data.points} pts`;
+    const wasEditing = editingTrackId;
+    clearTrack();
+    document.getElementById("track-name").value = "";
+    await loadCustomTracks();
+    if (wasEditing) {
+      document.getElementById("track-status").textContent = "Track updated";
+    }
+  } catch (err) {
+    document.getElementById("track-status").textContent = `Error: ${err.message}`;
+  } finally {
+    btn.textContent = "Save"; btn.disabled = trackPoints.length < 2;
+  }
+}
+
+async function loadCustomTracks() {
+  try {
+    const res    = await fetch(`${API_URL}/tracks/custom`);
+    const data   = await res.json();
+    const tracks = data.tracks || [];
+    renderCustomTracks(tracks);
+  } catch (_) {}
+}
+
+function renderCustomTracks(tracks) {
+  const list  = document.getElementById("track-saved-list");
+  const empty = document.getElementById("track-saved-empty");
+  // Remove old items (keep #track-saved-empty)
+  list.querySelectorAll(".saved-track-item").forEach(el => el.remove());
+  if (!tracks.length) {
+    empty.style.display = "";
+    return;
+  }
+  empty.style.display = "none";
+  tracks.forEach(t => {
+    const row = document.createElement("div");
+    row.className = "saved-track-item";
+    row.dataset.trackId = t.track_id;
+    if (t.track_id === editingTrackId) row.classList.add("active");
+    row.innerHTML =
+      `<span class="sti-name" title="${t.name}">${t.name || "Unnamed track"}</span>` +
+      `<span class="sti-pts">${t.points} pts</span>` +
+      `<span class="sti-del" title="Delete">✕</span>`;
+    row.querySelector(".sti-name").addEventListener("click", () => loadCustomTrack(t, row));
+    row.querySelector(".sti-del").addEventListener("click", e => {
+      e.stopPropagation();
+      deleteCustomTrack(t.track_id, row);
+    });
+    list.appendChild(row);
+  });
+}
+
+function loadCustomTrack(track, rowEl) {
+  // Populate editor with saved track
+  trackPoints    = track.coords.map(c => [...c]);
+  editingTrackId = track.track_id;
+  document.getElementById("track-name").value = track.name || "";
+  document.getElementById("track-status").textContent = "Edit points or Save to update";
+  updateTrackDisplay();
+  document.querySelectorAll(".saved-track-item.active").forEach(el => el.classList.remove("active"));
+  if (rowEl) rowEl.classList.add("active");
+  // Fit map to the track
+  if (trackPoints.length) {
+    const lons = trackPoints.map(c => c[0]);
+    const lats = trackPoints.map(c => c[1]);
+    map.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
+                  { padding: 60, maxZoom: 14 });
+  }
+}
+
+async function deleteCustomTrack(track_id, rowEl) {
+  if (!confirm("Delete this track?")) return;
+  try {
+    const res  = await fetch(`${API_URL}/tracks/custom`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ track_id }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.status);
+    // Remove from visual layer + snap network
+    if (lgvGeoJSONData) {
+      lgvGeoJSONData.features = lgvGeoJSONData.features.filter(
+        f => (f.properties || {}).custom_track_id !== track_id
+      );
+      const lgvSrc = map.getSource("lgv-src");
+      if (lgvSrc) lgvSrc.setData(lgvGeoJSONData);
+    }
+    if (editingTrackId === track_id) clearTrack();
+    rowEl.remove();
+    const list = document.getElementById("track-saved-list");
+    if (!list.querySelectorAll(".saved-track-item").length) {
+      document.getElementById("track-saved-empty").style.display = "";
+    }
+  } catch (err) {
+    alert(`Delete failed: ${err.message}`);
+  }
+}
+
+function toggleTrack() {
+  trackActive = !trackActive;
+  document.getElementById("track-btn").classList.toggle("active", trackActive);
+  document.getElementById("track-panel").classList.toggle("open", trackActive);
+  map.getCanvas().style.cursor = trackActive ? "crosshair" : (pickerActive ? "crosshair" : "");
+
+  if (trackActive) {
+    // Add drawing layers on first use
+    if (!map.getSource("track-draw-src")) {
+      map.addSource("track-draw-src", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "track-draw", type: "line", source: "track-draw-src",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#06b6d4", "line-width": 3, "line-dasharray": [2, 1.5], "line-opacity": 0.9 } });
+      map.addSource("track-pt-src", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "track-pts", type: "circle", source: "track-pt-src",
+        paint: { "circle-radius": 4, "circle-color": "#06b6d4",
+                 "circle-stroke-width": 2, "circle-stroke-color": "#fff" } });
+    }
+    // Close other panels
+    if (pickerActive) togglePicker();
+    document.getElementById("settings-panel").classList.remove("open");
+    document.getElementById("settings-btn").classList.remove("open");
+    document.getElementById("search-panel").classList.remove("open");
+    document.getElementById("search-btn").classList.remove("open");
+    loadCustomTracks();
+  } else {
+    clearTrack();
+    if (!pickerActive) map.getCanvas().style.cursor = "";
+  }
+}
+
+document.getElementById("track-saved-header").addEventListener("click", () => {
+  trackSavedOpen = !trackSavedOpen;
+  document.getElementById("track-saved-list").style.display  = trackSavedOpen ? "" : "none";
+  document.getElementById("track-saved-toggle").textContent  = trackSavedOpen ? "▾" : "▸";
+});
+
+document.getElementById("track-btn").addEventListener("click", toggleTrack);
+document.getElementById("track-undo").addEventListener("click", undoTrackPoint);
+document.getElementById("track-clear").addEventListener("click", clearTrack);
+document.getElementById("track-save").addEventListener("click", saveTrack);
+
+// ── Search panel ──────────────────────────────────────────────────────────────
+const searchBtn   = document.getElementById("search-btn");
+const searchPanel = document.getElementById("search-panel");
+
+searchBtn.addEventListener("click", e => {
+  e.stopPropagation();
+  searchPanel.classList.toggle("open");
+  searchBtn.classList.toggle("open");
+  settingsPanel.classList.remove("open");
+  settingsBtn.classList.remove("open");
+  if (pickerActive) togglePicker();
+});
+
+// ── Map settings panel ────────────────────────────────────────────────────────
+const settingsBtn   = document.getElementById("settings-btn");
+const settingsPanel = document.getElementById("settings-panel");
+
+settingsBtn.addEventListener("click", e => {
+  e.stopPropagation();
+  settingsPanel.classList.toggle("open");
+  settingsBtn.classList.toggle("open");
+  searchPanel.classList.remove("open");
+  searchBtn.classList.remove("open");
+  if (pickerActive) togglePicker();  // close picker when opening layers panel
+});
+
+document.querySelectorAll(".style-btn").forEach(btn =>
+  btn.addEventListener("click", () => switchMapStyle(btn.dataset.style)));
+
+document.getElementById("tog-lgv").addEventListener("click", async function() {
+  lgvLinesEnabled = !lgvLinesEnabled;
+  this.classList.toggle("on", lgvLinesEnabled);
+  if (lgvLinesEnabled) await addLgvLayer(); else removeLgvLayer();
+});
+
+document.getElementById("tog-rail").addEventListener("click", function() {
+  railLinesEnabled = !railLinesEnabled;
+  this.classList.toggle("on", railLinesEnabled);
+  if (railLinesEnabled) addRailLayer(); else removeRailLayer();
+});
+
+document.getElementById("tog-contour").addEventListener("click", function() {
+  contoursEnabled = !contoursEnabled;
+  this.classList.toggle("on", contoursEnabled);
+  if (contoursEnabled) addContourLayer(); else removeContourLayer();
+});
+
+document.getElementById("tog-contour-lines").addEventListener("click", function() {
+  contourLinesEnabled = !contourLinesEnabled;
+  this.classList.toggle("on", contourLinesEnabled);
+  if (contourLinesEnabled) addContourLinesLayer(); else removeContourLinesLayer();
+});
+
+document.querySelectorAll("#type-filters .type-btn").forEach(btn => {
+  const type = btn.dataset.type;
+  if (TRAIN_ICONS[type] && TYPE_COLOR[type]) {
+    const img = document.createElement("img");
+    img.className = "type-icon";
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(TRAIN_ICONS[type](TYPE_COLOR[type]));
+    img.alt = "";
+    btn.prepend(img);
+  }
+  btn.addEventListener("click", () => toggleTypeFilter(btn.dataset.type));
+});
+
+document.getElementById("select-all-btn").addEventListener("click", () => {
+  const allOn = enabledTypes.size === Object.keys(TYPE_COLOR).length;
+  if (allOn) {
+    enabledTypes.clear();
+    document.querySelectorAll("#type-filters .type-btn").forEach(b => b.classList.remove("on"));
+  } else {
+    Object.keys(TYPE_COLOR).forEach(t => enabledTypes.add(t));
+    document.querySelectorAll("#type-filters .type-btn").forEach(b => b.classList.add("on"));
+  }
+  syncLegendState();
+  applyFilters();
+});
+
+document.querySelectorAll("#delay-filters .type-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const d = btn.dataset.delay;
+    if (enabledDelays.has(d)) enabledDelays.delete(d);
+    else                      enabledDelays.add(d);
+    btn.classList.toggle("on", enabledDelays.has(d));
+    applyFilters();
+  });
+});
+
+const advToggle = document.getElementById("adv-toggle");
+const advPanel  = document.getElementById("adv-panel");
+advToggle.addEventListener("click", () => {
+  const isOpen = advPanel.style.display !== "none";
+  advPanel.style.display = isOpen ? "none" : "block";
+  advToggle.textContent = isOpen ? "Advanced Options ▾" : "Advanced Options ▴";
+});
+
+document.querySelectorAll("#live-filters .type-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    enabledLiveFilter = btn.dataset.live;
+    document.querySelectorAll("#live-filters .type-btn").forEach(b =>
+      b.classList.toggle("on", b.dataset.live === enabledLiveFilter));
+    applyFilters();
+  });
+});
+
+document.querySelectorAll("#shape-filters .type-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    enabledShapeFilter = btn.dataset.shape;
+    document.querySelectorAll("#shape-filters .type-btn").forEach(b =>
+      b.classList.toggle("on", b.dataset.shape === enabledShapeFilter));
+    applyFilters();
+  });
+});
+
+document.addEventListener("click", e => {
+  if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+    settingsPanel.classList.remove("open");
+    settingsBtn.classList.remove("open");
+  }
+});
+
+function setLive() {
+  stopPlay();
+  isLive         = true;
+  tlSlider.value = tlSlider.max;
+  tlLiveBtn.classList.add("is-live");
+}
+</script>
+</body>
+</html>
