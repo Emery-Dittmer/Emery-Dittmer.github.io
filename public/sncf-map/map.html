@@ -324,14 +324,7 @@
     }
     #search-panel.open { display: block; }
     /* ── Track Editor ───────────────────────────────────────────────── */
-    #track-btn {
-      position: absolute; top: 200px; right: 10px; z-index: 10;
-      width: 36px; height: 36px; border-radius: 8px;
-      background: rgba(14,17,23,0.92); backdrop-filter: blur(6px);
-      border: 1px solid #2a2f3a; color: #8b949e; font-size: 18px;
-      cursor: pointer; transition: color .15s, border-color .15s, background .15s;
-      display: flex; align-items: center; justify-content: center;
-    }
+  
     #track-btn:hover { background: #2a2f3a; color: #e6edf3; }
     #track-btn.active { background: #0e1e26; border-color: #06b6d4; color: #06b6d4; }
     #track-panel {
@@ -806,7 +799,7 @@
 
 <script>
 const API_URL    = "https://gpvwn1lb29.execute-api.eu-west-3.amazonaws.com";
-const MAPBOX_KEY = (typeof SNCF_CONFIG !== 'undefined' && SNCF_CONFIG.mapboxKey) || "";
+const MAPBOX_KEY = (typeof SNCF_CONFIG !== 'undefined' && SNCF_CONFIG.mapboxKey) || "pk.eyJ1IjoiZWNkaXR0bWVyIiwiYSI6ImNtcDM3NTB6azBjMXgycnF0NWdnZzFub2UifQ.LAm09N2k56RVYOqxtGEVxw";
 const REFRESH_MS = 30_000;
 
 const TYPE_COLOR = {
