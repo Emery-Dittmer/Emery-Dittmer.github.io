@@ -13,7 +13,8 @@
     #picker-btn, #picker-panel, #track-btn, #track-panel { display: none !important; }
   </style>
   <script>
-    if (['localhost', '127.0.0.1', '::1', '0.0.0.0'].includes(window.location.hostname)) {
+    const IS_LOCAL = ['localhost', '127.0.0.1', '::1', '0.0.0.0'].includes(window.location.hostname);
+    if (IS_LOCAL) {
       document.getElementById('editing-tools-gate').remove();
     }
   </script>
@@ -436,6 +437,87 @@
       from { left: -1300px; }
       to   { left: 110vw;   }
     }
+
+    /* ── Mobile layout (≤ 540px) ─────────────────────────────────────────── */
+    @media (max-width: 540px) {
+
+      /* HUD: collapse to top-left badge — hide timestamps, keep count */
+      #hud {
+        padding: 8px 12px;
+        min-width: 0;
+      }
+      #hud h1 { margin-bottom: 4px; }
+      #sncf-logo { height: 18px; }
+      #count { font-size: 22px; }
+      #updated, #updated-next, #updated-note, #late-count { display: none; }
+
+      /* Legend: collapse to bottom-left, toggle-able via the existing header */
+      #legend {
+        bottom: 70px;
+        left: 8px;
+        padding: 8px 10px;
+        max-width: calc(100vw - 80px);
+      }
+      .leg { font-size: 11px; }
+
+      /* Sidebar buttons: shift down so they don't overlap Mapbox controls */
+      #sidebar {
+        top: auto;
+        bottom: 130px;
+        right: 8px;
+      }
+
+      /* Right-side panels → full-width bottom sheet */
+      #settings-panel,
+      #search-panel,
+      #picker-panel,
+      #track-panel {
+        top: auto;
+        bottom: 70px;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-height: 55vh;
+        overflow-y: auto;
+        border-radius: 14px 14px 0 0;
+        border-bottom: none;
+        padding: 14px 16px 20px;
+        box-sizing: border-box;
+      }
+
+      /* Popup: let it be slightly narrower and ensure it fits */
+      .mapboxgl-popup-content {
+        min-width: 0;
+        width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
+        font-size: 12px;
+      }
+
+      /* Timeline: tighten up controls for narrow screens */
+      #timeline {
+        padding: 8px 10px 10px;
+        gap: 8px;
+      }
+      #tl-live { padding: 5px 8px; font-size: 11px; }
+      #tl-play { padding: 5px 10px; }
+      /* Hide x2/x4 speed buttons — x1 is enough on mobile */
+      .tl-spd:not([data-step="60"]) { display: none; }
+      .tl-spd[data-step="60"] { padding: 5px 8px; font-size: 10px; }
+      #tl-times { font-size: 10px; }
+
+      /* Train dock: make it thinner */
+      #train-dock {
+        bottom: 62px;
+        max-width: calc(100vw - 24px);
+        min-width: 0;
+        padding: 6px 10px;
+      }
+      .dock-title { font-size: 11px; }
+
+      /* Loading card: don't push it too high */
+      #loading-card { padding: 22px 28px; margin-bottom: 8vh; }
+      #loading-card h2 { font-size: 15px; }
+    }
   </style>
 </head>
 <body>
@@ -656,7 +738,7 @@
       <polyline points="1.5,9.5 8,13 14.5,9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
-  <button id="picker-btn" class="sb-btn" title="Segment picker — draw a route by clicking on rail lines">✏</button>
+  <button id="picker-btn" class="sb-btn" title="Segment picker — draw a route by clicking on rail lines" style="flex-direction:column;font-size:11px;gap:1px">✏️<span>🚆</span></button>
   <button id="track-btn" class="sb-btn" title="Add missing track — click points on the map to draw a new rail line">+</button>
 </div>
 <div id="search-panel">
@@ -685,11 +767,13 @@
     <input class="ac-input" id="picker-origin" type="text" placeholder="Search station…" autocomplete="off">
     <div class="ac-drop" id="ac-origin-drop"></div>
   </div>
+  <div id="picker-origin-id" style="display:none;font-size:9px;color:#6e7681;margin-top:2px;font-family:monospace"></div>
   <div class="sp-label" style="margin-top:8px">Destination station</div>
   <div class="ac-wrap" id="ac-dest-wrap">
     <input class="ac-input" id="picker-dest" type="text" placeholder="Search station…" autocomplete="off">
     <div class="ac-drop" id="ac-dest-drop"></div>
   </div>
+  <div id="picker-dest-id" style="display:none;font-size:9px;color:#6e7681;margin-top:2px;font-family:monospace"></div>
   <div id="picker-stats"></div>
   <div id="picker-edit-bar" style="display:none; margin-bottom:6px;">
     <span id="picker-edit-label" style="font-size:10px;color:#f97316;">Editing saved route —</span>
@@ -1258,7 +1342,8 @@ function buildPopupHTML(p, trainNum, sncfUrl, eurostarUrl, trenitUrl, route) {
     }
 
     function stopRow(s, dotCls, rowCls, useArrival, fallbackDelayS = 0) {
-      return `<div class="${rowCls}"><span class="${dotCls}"></span><span class="rs-name">${s.name}</span>${stopTimeHtml(s, useArrival, fallbackDelayS)}</div>`;
+      const idTag = IS_LOCAL && s.stop_id ? `<span style="font-size:9px;color:#6e7681;font-family:monospace;margin-left:4px;flex-shrink:0">${s.stop_id}</span>` : '';
+      return `<div class="${rowCls}"><span class="${dotCls}"></span><span class="rs-name">${s.name}</span>${idTag}${stopTimeHtml(s, useArrival, fallbackDelayS)}</div>`;
     }
 
     const dotsRow = '<div class="route-vdots">⋮</div>';
@@ -1459,8 +1544,11 @@ function serviceDayKey() {
 
 function saveKnownTrains() {
   try {
+    // Only persist trains seen in the last 2 hours to keep the payload small.
+    const cutoff  = Date.now() - 2 * 60 * 60 * 1000;
+    const entries = [...knownTrains.entries()].filter(([, f]) => (f._seenAt || 0) >= cutoff);
     localStorage.setItem(LS_DATE_KEY,   serviceDayKey());
-    localStorage.setItem(LS_TRAINS_KEY, JSON.stringify([...knownTrains.entries()]));
+    localStorage.setItem(LS_TRAINS_KEY, JSON.stringify(entries));
   } catch { /* storage full */ }
 }
 
@@ -1511,6 +1599,7 @@ function loadRouteCache() {
 let liveFeatures     = [];
 let animationFrameId = null;
 let lastFrameMs      = null;
+let lastDataMs       = 0; // throttle position updates to ~12 fps
 let isLive           = true;
 let isPlaying      = false;
 let playStep       = 60; // seconds advanced per 500 ms tick; x1=60, x2=120, x4=240
@@ -1663,7 +1752,9 @@ async function fetchRouteData(tripId) {
   }
 }
 
-const TGV_ROUTE_TYPES = new Set(["TGV INOUI", "OUIGO", "Lyria"]);
+// Types whose GTFS shapes are fetched first so they appear on the rail before
+// the map fills with position-interpolated (straight-line) icons.
+const HIGH_PRIORITY_ROUTE_TYPES = new Set(["TGV INOUI", "OUIGO", "Lyria", "TER", "Intercités"]);
 
 function prefetchRoutes(features) {
   const now = Date.now();
@@ -1675,25 +1766,24 @@ function prefetchRoutes(features) {
     return !(cached && now - cached.cachedAt < ROUTE_CACHE_TTL);
   });
 
-  // TGV/OUIGO first so they snap to actual track geometry before other types
+  // High-priority types first so they snap to actual track geometry before others
   toFetch.sort((a, b) =>
-    (TGV_ROUTE_TYPES.has(b.properties.train_type) ? 1 : 0) -
-    (TGV_ROUTE_TYPES.has(a.properties.train_type) ? 1 : 0)
+    (HIGH_PRIORITY_ROUTE_TYPES.has(b.properties.train_type) ? 1 : 0) -
+    (HIGH_PRIORITY_ROUTE_TYPES.has(a.properties.train_type) ? 1 : 0)
   );
 
   for (const f of toFetch) {
-    const id    = f.properties.trip_id;
-    const isTgv = TGV_ROUTE_TYPES.has(f.properties.train_type);
+    const id        = f.properties.trip_id;
+    const isHighPri = HIGH_PRIORITY_ROUTE_TYPES.has(f.properties.train_type);
     if (activeRouteFetches < MAX_ROUTE_CONCURRENCY) {
       fetchRouteData(id);
     } else {
       const qi = routeFetchQueue.indexOf(id);
       if (qi === -1) {
-        // TGV goes to front of queue so it beats non-TGV already waiting
-        if (isTgv) routeFetchQueue.unshift(id);
-        else        routeFetchQueue.push(id);
-      } else if (isTgv && qi > 0) {
-        // Promote a TGV that was already queued behind non-TGV trains
+        if (isHighPri) routeFetchQueue.unshift(id);
+        else           routeFetchQueue.push(id);
+      } else if (isHighPri && qi > 0) {
+        // Promote a high-priority train already queued behind lower-priority ones
         routeFetchQueue.splice(qi, 1);
         routeFetchQueue.unshift(id);
       }
@@ -1708,6 +1798,8 @@ function animateFrame(timestamp) {
 
   const elapsed = lastFrameMs !== null ? timestamp - lastFrameMs : 0;
   lastFrameMs   = timestamp;
+
+  if (document.hidden) return; // browser throttles rAF anyway; skip all computation
 
   // Advance playhead proportional to real elapsed time so speed is frame-rate independent
   if (isPlaying && !isLive) {
@@ -1730,6 +1822,11 @@ function animateFrame(timestamp) {
   }
 
   updateThumbTip();
+
+  // Throttle the expensive position-interpolation + setData calls to ~12 fps.
+  // Trains move slowly enough that sub-100ms updates are imperceptible.
+  if (timestamp - lastDataMs < 80) return;
+  lastDataMs = timestamp;
 
   const nowSecs = isLive ? nowInt : +tlSlider.value;
 
@@ -2407,7 +2504,15 @@ async function fetchAndUpdate() {
     document.getElementById("updated-next").textContent =
       `Next update in ${Math.round(REFRESH_MS / 1000)}s`;
     startUpdateCountdown();
-    for (const f of liveFeatures) knownTrains.set(f.properties.trip_id, f);
+    const fetchedAt = Date.now();
+    const pruneCutoff = fetchedAt - 60 * 60 * 1000; // 1 hour
+    for (const f of liveFeatures) knownTrains.set(f.properties.trip_id, { ...f, _seenAt: fetchedAt });
+    for (const [id, f] of knownTrains) if ((f._seenAt || 0) < pruneCutoff) knownTrains.delete(id);
+    for (const id of routeCache.keys()) {
+      const isActive = activeRouteData && id === activeRouteData.tripId;
+      if (!isActive && !knownTrains.has(id)) routeCache.delete(id);
+    }
+    scheduleRouteCacheSave();
     saveKnownTrains();
     tlSync();
     prefetchRoutes(liveFeatures);
@@ -2520,7 +2625,7 @@ function makeAutocomplete(inputId, dropId, onSelect) {
       return;
     }
     drop.innerHTML = stops
-      .map((s, i) => `<div class="ac-item" data-i="${i}">${s.name}</div>`)
+      .map((s, i) => `<div class="ac-item" data-i="${i}">${s.name}${IS_LOCAL && s.id ? `<span style="font-size:9px;color:#6e7681;margin-left:6px;font-family:monospace">${s.id}</span>` : ''}</div>`)
       .join("");
     drop.classList.add("open");
     drop.querySelectorAll(".ac-item").forEach(el => {
@@ -2601,11 +2706,24 @@ function setStopMarker(which, stop) {
 
   if (isOrigin) pickerOriginMark = marker;
   else          pickerDestMark   = marker;
+
+  if (IS_LOCAL && stop.id) {
+    const idEl = document.getElementById(isOrigin ? "picker-origin-id" : "picker-dest-id");
+    idEl.textContent = stop.id;
+    idEl.style.display = "block";
+  }
 }
 
 function clearStopMarkers() {
   if (pickerOriginMark) { pickerOriginMark.remove(); pickerOriginMark = null; }
   if (pickerDestMark)   { pickerDestMark.remove();   pickerDestMark   = null; }
+  if (IS_LOCAL) {
+    ["picker-origin-id", "picker-dest-id"].forEach(id => {
+      const el = document.getElementById(id);
+      el.textContent = "";
+      el.style.display = "none";
+    });
+  }
 }
 
 let pickerSnapFeatures = [];
@@ -2926,27 +3044,30 @@ function renderManualShapes() {
     </div>`;
   }).join("");
 
-  list.querySelectorAll(".saved-route-item").forEach(el => {
-    el.addEventListener("click", () => {
-      list.querySelectorAll(".saved-route-item").forEach(e => e.classList.remove("active"));
-      el.classList.add("active");
-      const shape = pickerSavedShapes.find(s => s.shape_id === el.dataset.shapeId);
-      if (shape) loadManualShape(shape);
-    });
-  });
-
-  list.querySelectorAll(".bidir-cb").forEach(cb => {
-    cb.addEventListener("change", () => {
-      setBidirectional(cb.dataset.shapeId, cb.checked);
-      const lbl = cb.closest(".sri-bidir");
-      if (lbl) lbl.classList.toggle("on", cb.checked);
-    });
-  });
-
-  list.querySelectorAll(".sti-del[data-del-id]").forEach(btn => {
-    btn.addEventListener("click", () => deleteManualShape(btn.dataset.delId));
-  });
 }
+
+// Delegated listeners on the saved-routes list — wired once, survive innerHTML replacement.
+(function wireManualShapeListeners() {
+  const list = document.getElementById("picker-saved-list");
+  list.addEventListener("click", ev => {
+    const delBtn = ev.target.closest(".sti-del[data-del-id]");
+    if (delBtn) { ev.stopPropagation(); deleteManualShape(delBtn.dataset.delId); return; }
+    const item = ev.target.closest(".saved-route-item");
+    if (item) {
+      list.querySelectorAll(".saved-route-item").forEach(e => e.classList.remove("active"));
+      item.classList.add("active");
+      const shape = pickerSavedShapes.find(s => s.shape_id === item.dataset.shapeId);
+      if (shape) loadManualShape(shape);
+    }
+  });
+  list.addEventListener("change", ev => {
+    const cb = ev.target.closest(".bidir-cb");
+    if (!cb) return;
+    setBidirectional(cb.dataset.shapeId, cb.checked);
+    const lbl = cb.closest(".sri-bidir");
+    if (lbl) lbl.classList.toggle("on", cb.checked);
+  });
+})()
 
 async function deleteManualShape(shape_id) {
   if (!confirm("Delete this saved route? Trips using it will revert to their default shape.")) return;
@@ -3077,16 +3198,18 @@ function formatGtfsTime(t) {
       </div>`;
     }).join('');
     drop.classList.add("open");
-    drop.querySelectorAll(".ac-item").forEach(el => {
-      el.addEventListener("mousedown", ev => {
-        ev.preventDefault();
-        const r = results[+el.dataset.i];
-        input.value = '';
-        close();
-        focusTrain(r.trip_id, r.train_type);
-      });
-    });
   }
+
+  drop.addEventListener("mousedown", ev => {
+    const item = ev.target.closest(".ac-item");
+    if (!item) return;
+    ev.preventDefault();
+    const r = results[+item.dataset.i];
+    if (!r) return;
+    input.value = '';
+    close();
+    focusTrain(r.trip_id, r.train_type);
+  });
 
   input.addEventListener("input", () => {
     clearTimeout(timer);
