@@ -33,7 +33,7 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
 
   return (
     <section className="relative overflow-hidden">
-      <WindCanvas particleCount={26} speed={1.1} maxOpacity={0.3} lifeSeconds={10} />
+      <WindCanvas particleCount={26} speed={1.1} maxOpacity={0.12} lifeSeconds={10} />
       <div className="max-w-6xl mx-auto pb-16 px-4 md:pb-16 relative wrapper">
         {/* Wrap the entire content in a div with a class */}
         <div className="flex flex-col md:flex-row items-center justify-center mt-16">
