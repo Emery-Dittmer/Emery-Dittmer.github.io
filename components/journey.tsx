@@ -1,4 +1,4 @@
-import Image from 'next/image'
+﻿import Image from 'next/image'
 
 import FeatImage01 from '@/public/images/SF.jpeg'
 import FeatImage02 from '@/public/images/Montreal.jpg'
@@ -8,12 +8,35 @@ import FeatImage05 from '@/public/images/features-03-image-01.png'
 import FeatImage06 from '@/public/images/Paris Stock.jpg'
 import { Locale } from '@/lib/i18n'
 
+function MilestoneMarker({ year, label }: { year: string; label: string }) {
+  return (
+    <div className="flex items-center gap-4 my-2" data-aos="fade-up">
+      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-purple-500/40" />
+      <div className="flex items-center gap-2.5 border border-purple-500/40 bg-gray-900/60 rounded-full px-4 py-2 text-sm whitespace-nowrap">
+        <svg className="w-2.5 h-2.5 fill-current text-purple-400 shrink-0" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 0 L10 5 L5 10 L0 5 Z" />
+        </svg>
+        <span className="text-purple-300 font-semibold">{year}</span>
+        <span className="text-gray-400">{label}</span>
+      </div>
+      <div className="flex-1 h-px bg-gradient-to-l from-transparent via-purple-500/20 to-purple-500/40" />
+    </div>
+  )
+}
+
 export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
   const copy = {
     en: {
       pill: 'Reach goals that matter',
       title: "Emery's Journey",
       intro: 'My journey from california to data science is not a conventional one',
+      milestones: [
+        { year: '2012', label: 'First solo cross-country road trip' },
+        { year: '2018', label: 'Built first predictive analytics model' },
+        { year: '2021', label: 'Led data reporting across 3 business units' },
+        { year: '2023', label: 'Capstone project selected for industry showcase' },
+        { year: '2025', label: 'Ran 10k in under 40 minutes' },
+      ],
       items: [
         {
           tag: 'Early Growth',
@@ -74,7 +97,7 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
           ],
         },
         {
-          tag: 'New Chapter',
+          tag: 'Emery in Paris',
           title: '2026 - Paris, Present',
           body:
             'In 2026 I made the exciting move to Paris, bringing my data expertise to a new continent and embracing a new chapter of personal and professional growth.',
@@ -89,37 +112,44 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
     },
     fr: {
       pill: "Atteindre des objectifs qui comptent",
-      title: "Le parcours d’Emery",
-      intro: "Mon parcours de la Californie à la science des données n’est pas conventionnel.",
+      title: "Le parcours d'Emery",
+      intro: "Mon parcours de la Californie à la science des données n'est pas conventionnel.",
+      milestones: [
+        { year: '2012', label: 'Premier road trip en solo à travers le pays' },
+        { year: '2018', label: 'Premier modèle de prédiction construit' },
+        { year: '2021', label: 'Pilotage des données pour 3 unités commerciales' },
+        { year: '2023', label: 'Projet de capstone sélectionné pour la vitrine industrie' },
+        { year: '2025', label: '10 km courus en moins de 40 minutes' },
+      ],
       items: [
         {
           tag: "Premiers pas",
           title: "1995 - Débuts en Californie",
-          body: "J’ai grandi en Californie, à surfer, travailler et apprendre le français.",
+          body: "J'ai grandi en Californie, à surfer, travailler et apprendre le français.",
           bullets: [
-            "Atteindre l’âge adulte",
+            "Atteindre l'âge adulte",
             "Apprendre la détermination, la patience et un esprit analytique",
             "Découvrir une passion pour le surf",
             "Devenir serveur et apprendre",
-            "Obtenir un diplôme de fin d’études secondaires en français et en anglais",
+            "Obtenir un diplôme de fin d'études secondaires en français et en anglais",
           ],
         },
         {
           tag: "Découvrir",
           title: "2015 - Montréal et McGill",
-          body: "Après plusieurs séries de candidatures, j’ai choisi l’Université McGill à Montréal pour un diplôme en chimie bio-organique.",
+          body: "Après plusieurs séries de candidatures, j'ai choisi l'Université McGill à Montréal pour un diplôme en chimie bio-organique.",
           bullets: [
             "Découvrir un nouveau pays",
-            "Découvrir une passion pour la data et l’analytique",
+            "Découvrir une passion pour la data et l'analytique",
             "Tomber amoureux",
           ],
         },
         {
           tag: "Épanouissement professionnel",
           title: "2019 - Déménagement à Ottawa",
-          body: "J’ai déménagé à Ottawa pour commencer une nouvelle vie au Canada. La chimie n’était pas ma vocation, mais de nombreuses opportunités existaient en optimisation et analytique.",
+          body: "J'ai déménagé à Ottawa pour commencer une nouvelle vie au Canada. La chimie n'était pas ma vocation, mais de nombreuses opportunités existaient en optimisation et analytique.",
           bullets: [
-            "Devenir responsable de la chaîne d’approvisionnement",
+            "Devenir responsable de la chaîne d'approvisionnement",
             "Traverser la pandémie mondiale",
             "Devenir consultant data chez PwC",
           ],
@@ -127,33 +157,33 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
         {
           tag: "Nouvelles compétences",
           title: "2022 - Montréal et McGill (à nouveau)",
-          body: "Après avoir travaillé, j’ai décidé d’élargir mes compétences pour apprendre et évoluer en data et analytique.",
+          body: "Après avoir travaillé, j'ai décidé d'élargir mes compétences pour apprendre et évoluer en data et analytique.",
           bullets: [
             "Obtenir un Master en Management Analytics",
-            "Réaliser un projet de fin d’études professionnel",
+            "Réaliser un projet de fin d'études professionnel",
             "Réorienter ma carrière",
           ],
         },
         {
           tag: "Impact professionnel",
           title: "2023 - Compass Data & McGill",
-          body: "J’ai rejoint Compass Data en tant qu’analyste senior, pilotant des initiatives en ingénierie et analytique des données, tout en continuant à mentorer les étudiants de McGill.",
+          body: "J'ai rejoint Compass Data en tant qu'analyste senior, pilotant des initiatives en ingénierie et analytique des données, tout en continuant à mentorer les étudiants de McGill.",
           bullets: [
-            "Construire des pipelines ELT et définir les KPI de l’entreprise",
+            "Construire des pipelines ELT et définir les KPI de l'entreprise",
             "Piloter la gouvernance des données et la surveillance des modèles en production",
             "Encadrer les étudiants du MMA de McGill sur des projets de capstone",
             "Faire le lien entre la recherche académique et la pratique terrain",
           ],
         },
         {
-          tag: "Nouveau chapitre",
-          title: "2026 - Paris, aujourd’hui",
-          body: "En 2026, j’ai fait le grand saut vers Paris, apportant mon expertise en données sur un nouveau continent et embrassant un nouveau chapitre de croissance personnelle et professionnelle.",
+          tag: "Emery en Paris",
+          title: "2026 - Paris, aujourd'hui",
+          body: "En 2026, j'ai fait le grand saut vers Paris, apportant mon expertise en données sur un nouveau continent et embrassant un nouveau chapitre de croissance personnelle et professionnelle.",
           bullets: [
-            "S’installer à Paris, en France",
+            "S'installer à Paris, en France",
             "Continuer à travailler en data & analytique sur des projets internationaux",
-            "S’immerger dans une nouvelle culture et un nouvel environnement professionnel",
-            "Développer un réseau dans l’écosystème tech et data européen",
+            "S'immerger dans une nouvelle culture et un nouvel environnement professionnel",
+            "Développer un réseau dans l'écosystème tech et data européen",
           ],
         },
       ],
@@ -312,6 +342,8 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
               </div>
             </div>
 
+            <MilestoneMarker year={t.milestones[0].year} label={t.milestones[0].label} />
+
             {/* 2nd item */}
             <div className="md:grid md:grid-cols-12 md:gap-6 items-center">
               {/* Image */}
@@ -347,6 +379,8 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
                 </div>
               </div>
             </div>
+
+            <MilestoneMarker year={t.milestones[1].year} label={t.milestones[1].label} />
 
             {/* 3rd item */}
             <div className="md:grid md:grid-cols-12 md:gap-6 items-center">
@@ -384,6 +418,7 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
               </div>
             </div>
 
+            <MilestoneMarker year={t.milestones[2].year} label={t.milestones[2].label} />
 
             {/* 4th item */}
             <div className="md:grid md:grid-cols-12 md:gap-6 items-center">
@@ -421,6 +456,8 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
               </div>
             </div>
 
+            <MilestoneMarker year={t.milestones[3].year} label={t.milestones[3].label} />
+
             {/* 5th item — Compass Data & McGill */}
             <div className="md:grid md:grid-cols-12 md:gap-6 items-center">
               {/* Image */}
@@ -446,6 +483,8 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
                 </div>
               </div>
             </div>
+
+            <MilestoneMarker year={t.milestones[4].year} label={t.milestones[4].label} />
 
             {/* 6th item — Paris */}
             <div className="md:grid md:grid-cols-12 md:gap-6 items-center">

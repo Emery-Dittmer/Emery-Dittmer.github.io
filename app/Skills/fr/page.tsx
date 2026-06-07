@@ -6,22 +6,18 @@ export const metadata = {
     colorScheme: 'dark'
   }
   
-  import Hero from '@/components/hero'
-  import Cards from '@/components/cards'
-  import Features from '@/components/features'
-  import Newsletter from '@/components/newsletter'
-  import Zigzag from '@/components/journey'
-  import Testimonials from '@/components/testimonials'
-  import Certifications from '@/components/certifications'
   import Companies from '@/components/companies'
   import Skills from '@/components/skills'
   import Feature_Full from '@/components/features_full'
+  import Newsletter from '@/components/newsletter'
+  import SkillsHero from '@/components/skills-hero'
 
-  
+
   export default function Home() {
     const locale = 'fr'
     return (
       <>
+        <SkillsHero locale={locale} />
         <Skills locale={locale} />
         <Companies locale={locale} />
         <Feature_Full locale={locale} />

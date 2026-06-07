@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image, { StaticImageData } from 'next/image'
 import rbcLogo      from '@/assets/companies/rbc_logo.png'
 import pwcLogo      from '@/assets/companies/pwc_logo.png'
@@ -12,7 +12,7 @@ import wivoologo  from '@/assets/companies/wivoo_logo.jpeg'
 
 
 type View     = 'timeline' | 'industry'
-type Industry = 'Technology' | 'Consulting' | 'Financial Services' | 'Education'
+type Industry = 'Technology' | 'Consulting' | 'Financial Services' | 'Education' | 'Manufacturing'
 
 interface Role {
   company:  string
@@ -29,6 +29,17 @@ const _now = new Date()
 const NOW: [number, number] = [_now.getFullYear(), _now.getMonth() + 1]
 
 const roles: Role[] = [
+  {
+    company: 'Iridian Spectral Technologies',
+    role: 'Supply Chain Manager',
+    start: [2019, 8], end: [2020, 2],
+    industry: 'Manufacturing', color: '#0891b2',
+    bullets: [
+      'Managed supply chain operations for optical filter manufacturing',
+      'Coordinated procurement, inventory, and supplier relationships',
+      'Streamlined logistics and vendor processes',
+    ],
+  },
   {
     company: 'RBC',
     role: 'Strategic Planning Analyst',
@@ -107,8 +118,9 @@ const industryMeta: Record<Industry, { color: string }> = {
   'Consulting':         { color: '#8b5cf6' },
   'Financial Services': { color: '#10b981' },
   'Education':          { color: '#f59e0b' },
+  'Manufacturing':      { color: '#0891b2' },
 }
-const industryOrder: Industry[] = ['Technology', 'Consulting', 'Financial Services', 'Education']
+const industryOrder: Industry[] = ['Technology', 'Consulting', 'Financial Services', 'Education', 'Manufacturing']
 
 // ── SVG layout ────────────────────────────────────────────────────────────────
 const SVG_W    = 1000
@@ -116,8 +128,8 @@ const PAD_L    = 80
 const PAD_R    = 70
 const USABLE   = SVG_W - PAD_L - PAD_R   // 850 px
 const AXIS_Y   = 195
-const T0_YEAR  = 2020
-const T_MONTHS = 78                       // Jan 2020 → Jun 2026
+const T0_YEAR  = 2019
+const T_MONTHS = 90                       // Sep 2019 → Jun 2026
 const PX       = USABLE / T_MONTHS        // px per month
 
 function toX([year, month]: [number, number]): number {
@@ -228,14 +240,20 @@ export default function ExperienceSection() {
 // ── Timeline view ─────────────────────────────────────────────────────────────
 function TimelineView({ roles }: { roles: Role[] }) {
   const nowX        = toX(NOW)
-  const yearTicks   = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
+  const yearTicks   = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
   const ARROW       = 10
   const assignments = computeTrackAssignments(roles)
   const maxTrack    = roles.length ? Math.max(...Array.from(assignments.values())) : 0
   const svgH        = Math.max(460, trackToY(maxTrack) + 115)
 
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el && el.scrollWidth > el.clientWidth) el.scrollLeft = el.scrollWidth
+  }, [roles])
+
   return (
-    <div className="w-full overflow-x-auto">
+    <div ref={scrollRef} className="w-full overflow-x-auto">
       <svg viewBox={`0 0 ${SVG_W} ${svgH}`} className="w-full min-w-[680px]" style={{ height: svgH }}>
 
         {/* Axis */}

@@ -15,7 +15,7 @@ export default function Footer() {
       bio: 'I build predictive models, lead data-driven teams, and turn complex data into decisions that move the needle.',
       nav: [
         {
-          heading: 'Work',
+          heading: 'Professional',
           links: [
             { label: 'Projects',       href: `/Projects/${locale}` },
             { label: 'Skills',         href: `/Skills/${locale}` },
@@ -23,19 +23,19 @@ export default function Footer() {
           ],
         },
         {
-          heading: 'Creative',
+          heading: 'Featured Projects',
           links: [
-            { label: 'Articles',        href: `/Articles/${locale}` },
-            { label: 'Visualizations',  href: `/Visualizations/${locale}` },
-            { label: 'SNCF Live Map',   href: `/SNCFMap/${locale}` },
+            { label: 'SNCF Live Map',     href: `/SNCFMap/${locale}` },
+            { label: 'Transit Catchment', href: `/TransitReach/${locale}` },
+            { label: 'FX Rates',          href: `/FXRates/${locale}` },
           ],
         },
         {
-          heading: 'More',
+          heading: 'The Human Side',
           links: [
-            { label: 'Cool Stuff',        href: `/CoolStuff/${locale}` },
-            { label: 'FX Rates',          href: `/FXRates/${locale}` },
-            { label: 'Transit Catchment', href: `/TransitReach/${locale}` },
+            { label: 'Journey',   href: `/Journey/${locale}` },
+            { label: 'Articles',  href: `/Articles/${locale}` },
+            { label: 'Cool Stuff', href: `/CoolStuff/${locale}` },
           ],
         },
       ],
@@ -48,7 +48,7 @@ export default function Footer() {
       bio: 'Je construis des modèles prédictifs, dirige des équipes data et transforme des données complexes en décisions à fort impact.',
       nav: [
         {
-          heading: 'Travail',
+          heading: 'Professionnel',
           links: [
             { label: 'Projets',         href: `/Projects/${locale}` },
             { label: 'Compétences',     href: `/Skills/${locale}` },
@@ -56,19 +56,19 @@ export default function Footer() {
           ],
         },
         {
-          heading: 'Créatif',
+          heading: 'Projets phares',
           links: [
-            { label: 'Articles',        href: `/Articles/${locale}` },
-            { label: 'Visualisations',  href: `/Visualizations/${locale}` },
-            { label: 'Carte SNCF',      href: `/SNCFMap/${locale}` },
+            { label: 'Carte SNCF en direct', href: `/SNCFMap/${locale}` },
+            { label: 'Rayon transport',       href: `/TransitReach/${locale}` },
+            { label: 'Taux de change',        href: `/FXRates/${locale}` },
           ],
         },
         {
-          heading: 'Plus',
+          heading: 'Le côté humain',
           links: [
-            { label: 'Loisirs',          href: `/CoolStuff/${locale}` },
-            { label: 'Taux de change',   href: `/FXRates/${locale}` },
-            { label: 'Rayon transport',  href: `/TransitReach/${locale}` },
+            { label: 'Parcours',  href: `/Journey/${locale}` },
+            { label: 'Articles',  href: `/Articles/${locale}` },
+            { label: 'Loisirs',   href: `/CoolStuff/${locale}` },
           ],
         },
       ],

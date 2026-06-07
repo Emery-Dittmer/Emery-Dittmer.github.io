@@ -1,19 +1,39 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Image from 'next/image';
-{/* import EmeryHeadshot from '@/assets/images/emery_dittmer alt.jpg';
-import EmeryHeadshot from '@/assets/images/emery_dittmer_headshot_full.jpg';
-import EmeryHeadshot from '@/assets/images/MMAGraduationDinner-65.jpg';
-import EmeryHeadshot from '@/assets/images/Emery_dittmer_headshot.jpg'; */}
 import EmeryHeadshot from '@/assets/images/emery_headshot_2026.jpg';
 import { Github, Project, Resume, Linkedin } from '@/assets/icons/';
 import { Locale } from '@/lib/i18n';
 import WindCanvas from '@/components/wind-canvas';
 
+const ROLES = {
+  en: ['Product Owner', 'Project Manager', 'Data Scientist', 'Technical Lead', 'Delivery Driver'],
+  fr: ['Product Owner', 'Chef de projet', 'Data Scientist', 'Lead technique', 'Pilote de livraison'],
+}
+
 export default function Hero({ locale = 'en' }: { locale?: Locale }) {
+  const roles = ROLES[locale]
+  const [roleIdx, setRoleIdx] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    const cycle = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setRoleIdx(i => (i + 1) % roles.length)
+        setVisible(true)
+      }, 350)
+    }, 2600)
+    return () => clearInterval(cycle)
+  }, [roles.length])
+
   const copy = {
     en: {
       heading: "Hello, I'm Emery",
+      intro: "I'm a",
       body:
-        'A Data Scientist and Project Manager. I build predictive models, lead data-driven teams, and turn complex data into decisions that move the needle.',
+        'Equal parts Data Scientist and Project Manager — I build predictive models, lead data-driven teams, and turn complex data into decisions that actually ship.',
       projects: 'Projects',
       resume: 'Resume',
       github: 'GitHub',
@@ -21,8 +41,9 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
     },
     fr: {
       heading: 'Bonjour, je suis Emery',
+      intro: 'Je suis',
       body:
-        'Data Scientist et chef de projet. Je construis des modèles prédictifs, dirige des équipes data et transforme des données complexes en décisions à fort impact.',
+        'Data Scientist et chef de projet à parts égales — je construis des modèles prédictifs, dirige des équipes data et transforme des données complexes en décisions qui se concrétisent.',
       projects: 'Projets',
       resume: 'CV',
       github: 'GitHub',
@@ -44,16 +65,25 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
                 src={EmeryHeadshot}
                 alt="Headshot of Emery"
                 fill
-                className="object-cover object-[center_20%]"
+                className="object-cover object-[center_20%] scale-125"
               />
             </div>
           </div>
 
           {/* Text */}
           <div className="max-w-md md:w-1/2 text-center md:text-left">
-            <h1 className="h1 mb-4" data-aos="fade-up">
+            <h1 className="h1 mb-2" data-aos="fade-up">
               {t.heading}
             </h1>
+            <div className="flex items-center justify-center md:justify-start gap-3 mb-6 text-base text-gray-400" data-aos="fade-up" data-aos-delay="100">
+              <span>{t.intro}</span>
+              <span
+                className="inline-block min-w-[160px] font-semibold text-purple-400 transition-opacity duration-300"
+                style={{ opacity: visible ? 1 : 0 }}
+              >
+                {roles[roleIdx]}
+              </span>
+            </div>
             <p className="text-xl text-gray-400 mb-8" data-aos="fade-up" data-aos-delay="200">
               {t.body}
             </p>

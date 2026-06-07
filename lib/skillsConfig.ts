@@ -50,13 +50,13 @@ export const CUSTOM_STATE_KEY = 'skills-customise-state'
 
 export const defaultCustomState: CustomState = {
   laneOrder: [
+    'project-management',
     'data-science',
     'data-engineering',
     'data-analytics',
     'business-intelligence',
     'data-governance',
     'ml-ai-engineering',
-    'project-management',
   ],
   hiddenLanes: [],
   hiddenSkills: {},

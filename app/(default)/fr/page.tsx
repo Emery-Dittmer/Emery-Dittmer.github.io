@@ -13,6 +13,7 @@ import ProjectCarousel from '@/components/project-carousel'
 import HumanSide from '@/components/human-side'
 import Testimonials from '@/components/testimonials'
 import Newsletter from '@/components/newsletter'
+import CollapsibleSection from '@/components/collapsible-section'
 
 export default function Home() {
   const locale = 'fr'
@@ -20,9 +21,15 @@ export default function Home() {
     <>
       <Hero locale={locale} />
       <Features locale={locale} />
-      <Abilities locale={locale} />
-      <ProjectCarousel locale={locale} />
-      <HumanSide locale={locale} />
+      <CollapsibleSection title="Ce que j'apporte">
+        <Abilities locale={locale} />
+      </CollapsibleSection>
+      <CollapsibleSection title="Projets récents">
+        <ProjectCarousel locale={locale} />
+      </CollapsibleSection>
+      <CollapsibleSection title="Le côté humain">
+        <HumanSide locale={locale} />
+      </CollapsibleSection>
       <Testimonials locale={locale} />
       <Newsletter locale={locale} />
     </>

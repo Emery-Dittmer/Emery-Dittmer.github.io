@@ -10,7 +10,7 @@ import { Locale } from '@/lib/i18n'
 const FEATURED_IDS = [
   'transit-catchment',
   'stadium-visualization-product',
-  'fx-rates',
+  'sncf-gtfs-collector',
 ]
 const AUTO_ADVANCE_MS = 5500
 

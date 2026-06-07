@@ -78,6 +78,9 @@ import reversal_finder  from '@/assets/projects/journalentry.png'
 import workshop         from '@/assets/projects/workshopicon.png'
 import inventory_drain  from '@/assets/projects/supplyforecast.png'
 import demand_supply    from '@/assets/projects/demandinvtory.png'
+import tgv_valley      from '@/assets/projects/tgv-valley.jpg'
+import stadium_aerial  from '@/assets/projects/stadium-aerial.jpg'
+import city_lights     from '@/assets/projects/city-lights-aerial.jpg'
 
 export const projectsConfig: Project[] = [
 
@@ -633,7 +636,7 @@ export const projectsConfig: Project[] = [
       fr: 'Produit de visualisation de stade',
     },
     company: { en: 'Professional Project · Optimal Ticketing', fr: 'Projet professionnel · Optimal Ticketing' },
-    mediaSrc: movie,
+    mediaSrc: stadium_aerial,
     year: 2025,
     projectType: 'professional',
     industry: 'Technology & Entertainment',
@@ -717,7 +720,7 @@ export const projectsConfig: Project[] = [
       fr: 'Zone de desserte transit – Explorateur de quartier pour la recherche immobilière',
     },
     company: { en: 'Personal Project', fr: 'Projet personnel' },
-    mediaSrc: network,
+    mediaSrc: city_lights,
     year: 2026,
     projectType: 'personal',
     industry: 'Technology & Urban Planning',
@@ -761,7 +764,7 @@ export const projectsConfig: Project[] = [
       fr: 'Collecteur GTFS SNCF & carte ferroviaire en direct',
     },
     company: { en: 'Personal Project', fr: 'Projet personnel' },
-    mediaSrc: network,
+    mediaSrc: tgv_valley,
     year: 2026,
     projectType: 'personal',
     industry: 'Technology & Transportation',
