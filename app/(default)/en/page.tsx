@@ -7,12 +7,12 @@ export const metadata = {
 }
 
 import Hero from '@/components/hero'
-import Cards from '@/components/cards'
 import Features from '@/components/features'
-import Newsletter from '@/components/newsletter'
-import Zigzag from '@/components/journey'
+import Abilities from '@/components/abilities'
+import ProjectCarousel from '@/components/project-carousel'
+import HumanSide from '@/components/human-side'
 import Testimonials from '@/components/testimonials'
-import Certifications from '@/components/certifications'
+import Newsletter from '@/components/newsletter'
 
 export default function Home() {
   const locale = 'en'
@@ -20,7 +20,9 @@ export default function Home() {
     <>
       <Hero locale={locale} />
       <Features locale={locale} />
-      <Certifications locale={locale} />
+      <Abilities locale={locale} />
+      <ProjectCarousel locale={locale} />
+      <HumanSide locale={locale} />
       <Testimonials locale={locale} />
       <Newsletter locale={locale} />
     </>

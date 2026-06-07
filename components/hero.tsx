@@ -4,8 +4,9 @@ import EmeryHeadshot from '@/assets/images/emery_dittmer_headshot_full.jpg';
 import EmeryHeadshot from '@/assets/images/MMAGraduationDinner-65.jpg';
 import EmeryHeadshot from '@/assets/images/Emery_dittmer_headshot.jpg'; */}
 import EmeryHeadshot from '@/assets/images/emery_headshot_2026.jpg';
-import { Github, Twitter, Project, Resume, Linkedin } from '@/assets/icons/';
+import { Github, Project, Resume, Linkedin } from '@/assets/icons/';
 import { Locale } from '@/lib/i18n';
+import WindCanvas from '@/components/wind-canvas';
 
 export default function Hero({ locale = 'en' }: { locale?: Locale }) {
   const copy = {
@@ -31,20 +32,21 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
 
   return (
-    <section>
+    <section className="relative overflow-hidden">
+      <WindCanvas particleCount={26} speed={1.1} maxOpacity={0.3} lifeSeconds={10} />
       <div className="max-w-6xl mx-auto pb-16 px-4 md:pb-16 relative wrapper">
         {/* Wrap the entire content in a div with a class */}
         <div className="flex flex-col md:flex-row items-center justify-center mt-16">
           {/* Headshot of Emery */}
-          <div className="flex items-center justify-center max-w-[40%] md:max-w-md md:h-auto md:mr-8">
-            <Image
-              src={EmeryHeadshot}
-              alt="Headshot of Emery"
-              width={400}
-              height={400}
-              className="w-full h-auto max-h-80 rounded-full overflow-hidden"
-              data-aos="fade-up"
-            />
+          <div className="flex items-center justify-center md:mr-8 mb-8 md:mb-0" data-aos="fade-up">
+            <div className="relative w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden flex-shrink-0">
+              <Image
+                src={EmeryHeadshot}
+                alt="Headshot of Emery"
+                fill
+                className="object-cover object-[center_20%]"
+              />
+            </div>
           </div>
 
           {/* Text */}
