@@ -3,7 +3,7 @@ import Image from 'next/image';
 import EmeryHeadshot from '@/assets/images/emery_dittmer_headshot_full.jpg';
 import EmeryHeadshot from '@/assets/images/MMAGraduationDinner-65.jpg';
 import EmeryHeadshot from '@/assets/images/Emery_dittmer_headshot.jpg'; */}
-import EmeryHeadshot from '@/assets/images/emery_dittmer alt.jpg';
+import EmeryHeadshot from '@/assets/images/emery_headshot_2026.jpg';
 import { Github, Twitter, Project, Resume, Linkedin } from '@/assets/icons/';
 import { Locale } from '@/lib/i18n';
 
