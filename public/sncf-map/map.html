@@ -1311,8 +1311,8 @@ function buildPopupHTML(p, trainNum, sncfUrl, eurostarUrl, trenitUrl, route) {
     : '';
 
   let routeHtml = '<div class="popup-loading">Loading route…</div>';
-  if (route && route.stops.length > 0) {
-    const stops  = route.stops;
+  if (route && (route.allStops || route.stops).length > 0) {
+    const stops  = route.allStops || route.stops;
     const origin = stops[0];
     const dest   = stops[stops.length - 1];
 
@@ -1592,7 +1592,11 @@ function loadRouteCache() {
     }
     const raw = localStorage.getItem(LS_ROUTES_KEY);
     if (!raw) return;
-    for (const [id, r] of JSON.parse(raw)) routeCache.set(id, r);
+    for (const [id, r] of JSON.parse(raw)) {
+      if (!r.stops || r.stops.length < 2) continue; // skip broken entries
+      if (!r.allStops) r.allStops = r.stops;
+      routeCache.set(id, r);
+    }
   } catch { /* corrupt — start fresh */ }
 }
 
@@ -1734,14 +1738,18 @@ async function fetchRouteData(tripId) {
     if (!res.ok) return;
     const data = await res.json();
     if (data.stops && data.stops.length >= 2) {
-      const shapeStopIndices = data.shape
-        ? assignShapeIndicesMonotonic(data.shape, data.stops)
-        : null;
-      routeCache.set(tripId, {
-        stops: data.stops, shape: data.shape || null,
-        shapeStopIndices, cachedAt: Date.now(),
-      });
-      scheduleRouteCacheSave();
+      const posStops = data.stops.filter(s => s.lat != null && s.lon != null);
+      if (posStops.length >= 2) {
+        const shapeStopIndices = data.shape
+          ? assignShapeIndicesMonotonic(data.shape, posStops)
+          : null;
+        routeCache.set(tripId, {
+          stops: posStops, allStops: data.stops,
+          shape: data.shape || null,
+          shapeStopIndices, cachedAt: Date.now(),
+        });
+        scheduleRouteCacheSave();
+      }
     }
   } catch { /* silent — train falls back to API-reported position */ }
   finally {
@@ -1943,8 +1951,9 @@ function minimizePopup() {
   popup = null;
   const { p, trainNum } = lastPopupData;
   const route = routeCache.get(p.trip_id);
-  const origin = route ? route.stops[0].name : '—';
-  const dest   = route ? route.stops[route.stops.length - 1].name : '—';
+  const dStops = route ? (route.allStops || route.stops) : null;
+  const origin = dStops ? dStops[0].name : '—';
+  const dest   = dStops ? dStops[dStops.length - 1].name : '—';
   document.getElementById("dock-type").textContent  = p.train_type;
   document.getElementById("dock-title").textContent =
     `${origin} → ${dest}${trainNum ? ' — N° ' + trainNum : ''}`;
@@ -2689,23 +2698,25 @@ function setStopMarker(which, stop) {
   const existing = isOrigin ? pickerOriginMark : pickerDestMark;
   if (existing) existing.remove();
 
-  const el = document.createElement("div");
-  el.style.cssText = [
-    "width:14px", "height:14px", "border-radius:50%",
-    `background:${isOrigin ? "#22c55e" : "#ef4444"}`,
-    "border:2.5px solid #fff",
-    "box-shadow:0 1px 4px rgba(0,0,0,.5)",
-    "cursor:default",
-  ].join(";");
+  if (stop.lat != null && stop.lon != null) {
+    const el = document.createElement("div");
+    el.style.cssText = [
+      "width:14px", "height:14px", "border-radius:50%",
+      `background:${isOrigin ? "#22c55e" : "#ef4444"}`,
+      "border:2.5px solid #fff",
+      "box-shadow:0 1px 4px rgba(0,0,0,.5)",
+      "cursor:default",
+    ].join(";");
 
-  const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
-    .setLngLat([stop.lon, stop.lat])
-    .setPopup(new mapboxgl.Popup({ offset: 10, closeButton: false })
-      .setHTML(`<span style="font-size:11px;font-weight:600">${stop.name}</span>`))
-    .addTo(map);
+    const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
+      .setLngLat([stop.lon, stop.lat])
+      .setPopup(new mapboxgl.Popup({ offset: 10, closeButton: false })
+        .setHTML(`<span style="font-size:11px;font-weight:600">${stop.name}</span>`))
+      .addTo(map);
 
-  if (isOrigin) pickerOriginMark = marker;
-  else          pickerDestMark   = marker;
+    if (isOrigin) pickerOriginMark = marker;
+    else          pickerDestMark   = marker;
+  }
 
   if (IS_LOCAL && stop.id) {
     const idEl = document.getElementById(isOrigin ? "picker-origin-id" : "picker-dest-id");

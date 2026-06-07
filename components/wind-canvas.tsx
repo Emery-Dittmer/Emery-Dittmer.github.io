@@ -97,7 +97,7 @@ export default function WindCanvas({
 
       // Fade existing pixels toward transparent (keeps page bg visible)
       ctx.globalCompositeOperation = 'destination-out'
-      ctx.fillStyle = 'rgba(0,0,0,0.04)'
+      ctx.fillStyle = 'rgba(0,0,0,0.25)'
       ctx.fillRect(0, 0, W, H)
       ctx.globalCompositeOperation = 'source-over'
 
