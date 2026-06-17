@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image';
 import EmeryHeadshot from '@/assets/images/emery_headshot_2026.jpg';
 import { Github, Project, Resume, Linkedin } from '@/assets/icons/';
@@ -12,21 +12,51 @@ const ROLES = {
   fr: ['Product Owner', 'Chef de projet', 'Data Scientist', 'Lead technique', 'Pilote de livraison'],
 }
 
+// ms between each tick: starts fast, decelerates to a stop
+const SPIN_SCHEDULE = [55, 60, 65, 75, 90, 110, 145, 185, 240, 300, 375, 460]
+
 export default function Hero({ locale = 'en' }: { locale?: Locale }) {
   const roles = ROLES[locale]
-  const [roleIdx, setRoleIdx] = useState(0)
-  const [visible, setVisible] = useState(true)
+  const [displayRole, setDisplayRole] = useState(roles[0])
+  const [spinning, setSpinning] = useState(false)
+  const [fading, setFading] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const targetRef = useRef(0)
 
   useEffect(() => {
-    const cycle = setInterval(() => {
-      setVisible(false)
-      setTimeout(() => {
-        setRoleIdx(i => (i + 1) % roles.length)
-        setVisible(true)
+    const doSlowRotate = () => {
+      setFading(true)
+      timeoutRef.current = setTimeout(() => {
+        const next = (targetRef.current + 1) % roles.length
+        targetRef.current = next
+        setDisplayRole(roles[next])
+        setFading(false)
+        timeoutRef.current = setTimeout(doSlowRotate, 2800)
       }, 350)
-    }, 2600)
-    return () => clearInterval(cycle)
-  }, [roles.length])
+    }
+
+    const doSpin = () => {
+      const nextTarget = (targetRef.current + 1) % roles.length
+      targetRef.current = nextTarget
+      setSpinning(true)
+
+      let step = 0
+      const tick = () => {
+        const isLast = step === SPIN_SCHEDULE.length
+        setDisplayRole(isLast ? roles[nextTarget] : roles[Math.floor(Math.random() * roles.length)])
+        if (isLast) {
+          setSpinning(false)
+          timeoutRef.current = setTimeout(doSlowRotate, 2800)
+        } else {
+          timeoutRef.current = setTimeout(tick, SPIN_SCHEDULE[step++])
+        }
+      }
+      tick()
+    }
+
+    timeoutRef.current = setTimeout(doSpin, 1800)
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }
+  }, [roles])
 
   const copy = {
     en: {
@@ -60,12 +90,12 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
         <div className="flex flex-col md:flex-row items-center justify-center mt-16">
           {/* Headshot of Emery */}
           <div className="flex items-center justify-center md:mr-8 mb-8 md:mb-0" data-aos="fade-up">
-            <div className="relative w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden flex-shrink-0">
+            <div className="relative w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden flex-shrink-0 isolate">
               <Image
                 src={EmeryHeadshot}
                 alt="Headshot of Emery"
                 fill
-                className="object-cover object-top scale-125 translate-y-[10%]"
+                className="object-cover object-top scale-125 translate-y-[10%] rounded-full"
               />
             </div>
           </div>
@@ -75,13 +105,12 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
             <h1 className="h1 mb-2" data-aos="fade-up">
               {t.heading}
             </h1>
-            <div className="flex items-center justify-center md:justify-start gap-3 mb-6 text-base text-gray-400" data-aos="fade-up" data-aos-delay="100">
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-6 text-xl text-gray-400" data-aos="fade-up" data-aos-delay="100">
               <span>{t.intro}</span>
               <span
-                className="inline-block min-w-[160px] font-semibold text-purple-400 transition-opacity duration-300"
-                style={{ opacity: visible ? 1 : 0 }}
+                className={`font-semibold text-purple-400 transition-opacity ${spinning ? 'duration-75 opacity-50' : fading ? 'duration-300 opacity-0' : 'duration-300 opacity-100'}`}
               >
-                {roles[roleIdx]}
+                {displayRole}
               </span>
             </div>
             <p className="text-xl text-gray-400 mb-8" data-aos="fade-up" data-aos-delay="200">
