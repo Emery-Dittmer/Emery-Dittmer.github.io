@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import LanguageSwitcher from './language-switcher'
 import { getLocaleFromPathname } from '@/lib/i18n'
+import ThemeToggle from './theme-toggle'
 
 export default function Header() {
   const pathname = usePathname() ?? '/'
@@ -45,7 +46,7 @@ export default function Header() {
   )}&attach=assets/docs/Dittmer Emery Resume.pdf`
 
   return (
-    <header className="fixed top-0 w-full z-30 bg-black shadow-md transition-all duration-300">
+    <header className="fixed top-0 w-full z-30 bg-white dark:bg-black shadow-md transition-all duration-300">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-20">
           {/* Site branding */}
@@ -66,9 +67,9 @@ export default function Header() {
             <ul className="flex grow justify-end flex-wrap items-center">
               
               <li>
-                <Link 
+                <Link
                   href={`/Projects/${locale}`}
-                  className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
+                  className="font-medium text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
                   >
                   {t.projects}
                 </Link>
@@ -77,7 +78,7 @@ export default function Header() {
               <li>
                 <Link
                   href={`/Journey/${locale}`}
-                  className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
+                  className="font-medium text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
                   >
                   {t.journey}
                 </Link>
@@ -86,34 +87,17 @@ export default function Header() {
               <li>
                 <Link
                   href={`/Skills/${locale}`}
-                  className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
+                  className="font-medium text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
                 >
                   {t.skills}
                 </Link>
               </li>
 
-              <li>
-                <Link
-                  href={`/PMDashboard/${locale}`}
-                  className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
-                >
-                  {t.pm}
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href={`/Articles/${locale}`}
-                  className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
-                >
-                  {t.articles}
-                </Link>
-              </li>
 
               <li>
                 <Link
                   href="https://www.linkedin.com/in/emery-dittmer/"
-                  className="font-medium text-purple-600 hover:text-gray-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
+                  className="font-medium text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-gray-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
                 >
                   {t.linkedin}
                 </Link>
@@ -131,6 +115,10 @@ export default function Header() {
 
               <li className="ml-4">
                 <LanguageSwitcher />
+              </li>
+
+              <li>
+                <ThemeToggle />
               </li>
             </ul>
           </nav>

@@ -1,6 +1,7 @@
 // MobileMenuItems.tsx
 import Link from 'next/link';
 import { getPathWithLocale } from '@/lib/i18n';
+import ThemeToggle from './theme-toggle';
 
 interface MobileMenuItemsProps {
   closeMobileNav: () => void;
@@ -43,29 +44,24 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav, local
   )}&attach=assets/docs/Dittmer Emery Resume.pdf`
 
   return (
-    <ul className="bg-gray-800 px-4 py-2">
+    <ul className="bg-gray-100 dark:bg-gray-800 px-4 py-2">
       <li>
-      <Link href={`/Projects/${locale}`} className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
+      <Link href={`/Projects/${locale}`} className="flex font-medium w-full text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
         {t.projects}
         </Link>
       </li>
       <li>
-        <Link href={`/Journey/${locale}`} className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
+        <Link href={`/Journey/${locale}`} className="flex font-medium w-full text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
           {t.journey}
         </Link>
       </li>
       <li>
-        <Link href={`/Skills/${locale}`} className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
+        <Link href={`/Skills/${locale}`} className="flex font-medium w-full text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
           {t.skills}
         </Link>
       </li>
       <li>
-        <Link href={`/Articles/${locale}`} className="flex font-medium w-full text-white-600 hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
-          {t.articles}
-        </Link>
-      </li>
-      <li>
-        <Link href="https://www.linkedin.com/in/emery-dittmer/" className="flex font-medium w-full text-purple-600 hover:text-gray-200 py-2 justify-center" onClick={closeMobileNav}>
+        <Link href="https://www.linkedin.com/in/emery-dittmer/" className="flex font-medium w-full text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-gray-200 py-2 justify-center" onClick={closeMobileNav}>
           {t.linkedin}
         </Link>
       </li>
@@ -82,20 +78,23 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav, local
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
           <Link
             href={getPathWithLocale(pathname, 'en')}
-            className={locale === 'en' ? 'text-purple-200' : 'text-gray-400 hover:text-purple-200'}
+            className={locale === 'en' ? 'text-purple-600 dark:text-purple-200' : 'text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-200'}
             onClick={closeMobileNav}
           >
             EN
           </Link>
-          <span className="text-gray-600">/</span>
+          <span className="text-gray-400 dark:text-gray-600">/</span>
           <Link
             href={getPathWithLocale(pathname, 'fr')}
-            className={locale === 'fr' ? 'text-purple-200' : 'text-gray-400 hover:text-purple-200'}
+            className={locale === 'fr' ? 'text-purple-600 dark:text-purple-200' : 'text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-200'}
             onClick={closeMobileNav}
           >
             FR
           </Link>
         </div>
+      </li>
+      <li className="flex justify-center py-1">
+        <ThemeToggle />
       </li>
     </ul>
   );

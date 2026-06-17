@@ -993,15 +993,16 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
   onLockIn: (val: number) => void
 }) {
   const userChar = CHARACTER_ORDER[storyIdx % CHARACTER_ORDER.length]
-  type GamePhase = 'intro-roster' | 'intro-reveal' | 'revealing' | 'user-turn' | 'knight-tokens' | 'knight-auto' | 'consensus'
+  type GamePhase = 'intro-roster' | 'intro-reveal' | 'revealing' | 'user-turn' | 'sorcerer-reveal' | 'knight-tokens' | 'knight-auto' | 'consensus'
 
   const aiChars = CHARACTER_ORDER.filter(c => c !== userChar)
   const knightIsUser = userChar === 'knight'
   const knightIsAI = aiChars.includes('knight')
+  const sorcererIsAI = aiChars.includes('sorcerer')
 
-  // Sorcerer goes last, hunter second-to-last
-  const revealRank = (c: Character) => c === 'sorcerer' ? 2 : c === 'hunter' ? 1 : 0
-  const aiRevealOrder = [...aiChars].sort((a, b) => revealRank(a) - revealRank(b))
+  // Pre-user reveals: hunter before others, sorcerer always goes last (after user)
+  const preUserRevealRank = (c: Character) => c === 'hunter' ? 1 : 0
+  const preUserAIs = [...aiChars.filter(c => c !== 'sorcerer')].sort((a, b) => preUserRevealRank(a) - preUserRevealRank(b))
 
   // Deterministic AI estimates
   const [aiEsts] = useState<Record<string, number>>(() => {
@@ -1010,23 +1011,24 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
     return Object.fromEntries(aiChars.map(c => [c, FIBONACCI[CHAR_META[c].biasIdx(ti)]]))
   })
 
-  const [phase, setPhase] = useState<GamePhase>('intro-roster')
+  const [phase, setPhase] = useState<GamePhase>(storyIdx === 0 ? 'intro-roster' : 'intro-reveal')
   const [revealed, setRevealed] = useState(0)
+  const [sorcererRevealed, setSorcererRevealed] = useState(false)
   const [dialogue, setDialogue] = useState<Record<string, string>>({})
   const [userEst, setUserEst] = useState<number | null>(null)
   const [tokens, setTokens] = useState(3)
   const [tokenMods, setTokenMods] = useState<Record<string, number>>({})
   const [introProgress, setIntroProgress] = useState(0)
 
-  // Sequential AI reveal (hunter then sorcerer last)
+  // Pre-user AI reveals (everyone except sorcerer)
   useEffect(() => {
     if (phase !== 'revealing') return
-    if (revealed >= aiRevealOrder.length) {
+    if (revealed >= preUserAIs.length) {
       const t = setTimeout(() => setPhase('user-turn'), 700)
       return () => clearTimeout(t)
     }
     const t = setTimeout(() => {
-      const char = aiRevealOrder[revealed]
+      const char = preUserAIs[revealed]
       const est = aiEsts[char]
       const line = CHAR_META[char as Character].lines[storyIdx % 3].replace('{n}', String(est))
       setDialogue(prev => ({ ...prev, [char]: line }))
@@ -1034,6 +1036,25 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
     }, 1400)
     return () => clearTimeout(t)
   }, [phase, revealed])
+
+  // Sorcerer reveals last — after user has estimated
+  useEffect(() => {
+    if (phase !== 'sorcerer-reveal') return
+    let t2: ReturnType<typeof setTimeout>
+    const t = setTimeout(() => {
+      const est = aiEsts['sorcerer']
+      const line = CHAR_META.sorcerer.lines[storyIdx % 3].replace('{n}', String(est))
+      setDialogue(prev => ({ ...prev, sorcerer: line }))
+      setSorcererRevealed(true)
+      t2 = setTimeout(() => {
+        if (knightIsUser) setPhase('knight-tokens')
+        else if (knightIsAI) setPhase('knight-auto')
+        else setPhase('consensus')
+      }, 1000)
+    }, 1400)
+    return () => { clearTimeout(t); clearTimeout(t2) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
 
   // Consensus = nearest Fibonacci to mean of all (modified) estimates
   const allVals = CHARACTER_ORDER.map(c => {
@@ -1089,7 +1110,8 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
 
   function handleUserEst(val: number) {
     setUserEst(val)
-    if (knightIsUser) setPhase('knight-tokens')
+    if (sorcererIsAI) setPhase('sorcerer-reveal')
+    else if (knightIsUser) setPhase('knight-tokens')
     else if (knightIsAI) setPhase('knight-auto')
     else setPhase('consensus')
   }
@@ -1211,9 +1233,12 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
       <div className="grid grid-cols-2 gap-2">
         {CHARACTER_ORDER.map(char => {
           const isAI = char !== userChar
-          const revealedForChar = isAI ? aiRevealOrder.indexOf(char) < revealed : userEst !== null
+          const revealedForChar = isAI
+            ? (char === 'sorcerer' && sorcererIsAI ? sorcererRevealed : preUserAIs.indexOf(char) < revealed)
+            : userEst !== null
           const est = char === userChar ? userEst : (aiEsts[char] ?? null)
-          const isActive = phase === 'revealing' && isAI && aiRevealOrder[revealed] === char
+          const isActive = (phase === 'revealing' && isAI && preUserAIs[revealed] === char)
+            || (phase === 'sorcerer-reveal' && char === 'sorcerer' && !sorcererRevealed)
           return (
             <CharacterSeat
               key={char} char={char}
@@ -1226,8 +1251,10 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
       </div>
 
       {/* Most recent dialogue */}
-      {phase === 'revealing' && revealed > 0 && (() => {
-        const lastChar = aiRevealOrder[revealed - 1]
+      {(phase === 'revealing' || phase === 'sorcerer-reveal') && (() => {
+        const lastChar = phase === 'sorcerer-reveal' && sorcererRevealed
+          ? 'sorcerer'
+          : preUserAIs[revealed - 1]
         return lastChar && dialogue[lastChar] ? (
           <div className="rounded-lg px-3 py-2 text-xs text-white/65 italic" style={{ background: 'rgba(0,0,0,0.3)' }}>
             <span className="font-semibold not-italic" style={{ color: CHAR_META[lastChar as Character].color }}>
@@ -1415,7 +1442,12 @@ export default function EstimationGame() {
     const numeric = typeof val === 'string' ? TSHIRT_POINTS[val] : val
     setLastEstimate(numeric)
     setEstimates(prev => [...prev, { storyId: story.id, value: val }])
-    setPhase('feedback')
+    if (method === 'character-role') {
+      if (isLast) { setPhase('results'); return }
+      setIdx(i => i + 1); setPhase('play')
+    } else {
+      setPhase('feedback')
+    }
   }
   function handleNext() {
     if (isLast) { setPhase('results'); return }
