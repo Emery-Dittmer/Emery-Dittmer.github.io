@@ -691,12 +691,28 @@ function GenericPlayScreen({
   const [pertVal, setPertVal] = useState({ o: 5, m: 8, p: 13 })
 
   const hasVal = method === 'three-point' ? true : method === 'tshirt' ? tshirtVal !== null : fibVal !== null
+  const lockKey = method === 'story-points' ? String(fibVal) : method === 'tshirt' ? String(tshirtVal) : `${pertVal.o}/${pertVal.m}/${pertVal.p}`
+  const [lockProgress, setLockProgress] = useState(0)
 
-  function lock() {
-    if (method === 'tshirt' && tshirtVal) { onLockIn(tshirtVal); return }
-    if (method === 'three-point') { onLockIn(pert(pertVal.o, pertVal.m, pertVal.p)); return }
-    if (fibVal !== null) onLockIn(fibVal)
-  }
+  const lockRef = useRef<() => void>(() => {})
+  useEffect(() => {
+    lockRef.current = () => {
+      if (method === 'tshirt' && tshirtVal) { onLockIn(tshirtVal); return }
+      if (method === 'three-point') { onLockIn(pert(pertVal.o, pertVal.m, pertVal.p)); return }
+      if (fibVal !== null) onLockIn(fibVal)
+    }
+  })
+
+  // Auto-lock on selection change
+  useEffect(() => {
+    if (!hasVal) { setLockProgress(0); return }
+    const DURATION = method === 'three-point' ? 1500 : 2000
+    const start = Date.now()
+    const prog = setInterval(() => setLockProgress(Math.min(100, ((Date.now() - start) / DURATION) * 100)), 40)
+    const t = setTimeout(() => { clearInterval(prog); setLockProgress(100); lockRef.current() }, DURATION)
+    return () => { clearInterval(prog); clearTimeout(t); setLockProgress(0) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockKey, hasVal])
 
   return (
     <div className="rounded-2xl overflow-hidden p-6 md:p-8 space-y-5" style={{ ...PLAY_BG[method], minHeight: '480px' }}>
@@ -732,14 +748,17 @@ function GenericPlayScreen({
       {method === 'tshirt' && <TShirtPicker value={tshirtVal} onChange={setTshirtVal} />}
       {method === 'three-point' && <PERTSliders value={pertVal} onChange={setPertVal} />}
 
-      <button
-        onClick={lock}
-        disabled={!hasVal}
-        className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-        style={{ background: hasVal ? accent : '#374151' }}
-      >
-        Lock in estimate →
-      </button>
+      {/* Auto-lock progress */}
+      {hasVal ? (
+        <div className="space-y-1.5">
+          <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+            <div className="h-full rounded-full transition-none" style={{ width: `${lockProgress}%`, background: accent }} />
+          </div>
+          <p className="text-[10px] text-center" style={{ color: accent + '80' }}>locking in automatically…</p>
+        </div>
+      ) : (
+        <div className="w-full h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+      )}
     </div>
   )
 }
@@ -1291,11 +1310,13 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
             <p className="text-4xl font-bold text-white mb-0.5">{consensus} pts</p>
             <p className="text-xs text-gray-500">nearest Fibonacci to the group average</p>
           </div>
-          <button onClick={() => onLockIn(consensus)}
-            className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
-            style={{ background: '#7c3aed' }}>
-            Lock in {consensus} pts →
-          </button>
+          <div className="space-y-1.5">
+            <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+              <div className="h-full rounded-full" style={{ width: '0%', background: '#7c3aed', transition: 'width 3s linear' }}
+              ref={el => { if (el) requestAnimationFrame(() => { el.style.width = '100%' }) }} />
+            </div>
+            <p className="text-[10px] text-purple-400/40 text-center">locking in {consensus} pts…</p>
+          </div>
         </div>
       )}
     </div>
