@@ -1035,6 +1035,20 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
     return () => clearTimeout(t)
   }, [phase, revealed])
 
+  // Consensus = nearest Fibonacci to mean of all (modified) estimates
+  const allVals = CHARACTER_ORDER.map(c => {
+    const base = c === userChar ? userEst : (aiEsts[c] ?? null)
+    if (base === null) return null
+    return base + (tokenMods[c] ?? 0)
+  }).filter((v): v is number => v !== null)
+
+  const consensus = allVals.length === 4
+    ? FIBONACCI.reduce((best, f) => {
+        const avg = allVals.reduce((s, v) => s + v, 0) / allVals.length
+        return Math.abs(f - avg) < Math.abs(best - avg) ? f : best
+      })
+    : null
+
   // Auto-advance intro-roster → intro-reveal (with progress tracking)
   useEffect(() => {
     if (phase !== 'intro-roster') { setIntroProgress(0); return }
@@ -1085,20 +1099,6 @@ function CharacterRoleGame({ story, storyIdx, total, showTutorial, onLockIn }: {
     setTokenMods(prev => ({ ...prev, [char]: (prev[char] ?? 0) + delta }))
     setTokens(t => t - 1)
   }
-
-  // Consensus = nearest Fibonacci to mean of all (modified) estimates
-  const allVals = CHARACTER_ORDER.map(c => {
-    const base = c === userChar ? userEst : (aiEsts[c] ?? null)
-    if (base === null) return null
-    return base + (tokenMods[c] ?? 0)
-  }).filter((v): v is number => v !== null)
-
-  const consensus = allVals.length === 4
-    ? FIBONACCI.reduce((best, f) => {
-        const avg = allVals.reduce((s, v) => s + v, 0) / allVals.length
-        return Math.abs(f - avg) < Math.abs(best - avg) ? f : best
-      })
-    : null
 
   const knightAutoChar = knightIsAI && phase === 'knight-auto'
     ? aiChars.find(c => c === 'knight') : null
