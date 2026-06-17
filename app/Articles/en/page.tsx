@@ -7,6 +7,7 @@ export const metadata = {
 }
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 const ARTICLES = [
   {
@@ -14,53 +15,79 @@ const ARTICLES = [
     label: 'Product Management',
     readTime: '8 min read',
     date: 'June 2026',
-    title: 'How Should You Estimate? A PM\'s Guide to Agile Estimation Methods',
+    title: "How Should You Estimate? A PM's Guide to Agile Estimation Methods",
     excerpt:
       'Story points, T-shirt sizing, planning poker, PERT — every team has an opinion. This article breaks down the four main approaches, when each shines, and lets you test your calibration in an interactive sprint planning simulation.',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80',
     interactive: true,
   },
 ]
 
 export default function ArticlesIndex() {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-28 pb-16 md:pt-32 md:pb-20">
-      <div className="border-t border-gray-800 mb-12" />
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-28 pb-16 md:pt-32 md:pb-20">
+      <div className="border-t border-gray-800 dark:border-gray-800 mb-12" />
 
       <div className="mb-10">
         <p className="text-xs font-semibold text-purple-400 uppercase tracking-widest mb-3">Writing</p>
-        <h1 className="text-3xl md:text-4xl font-bold text-white">Articles</h1>
-        <p className="text-gray-400 mt-3 leading-relaxed">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Articles</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-3 leading-relaxed">
           PM perspectives on estimation, prioritization, and building products that ship on time.
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {ARTICLES.map((a) => (
           <Link
             key={a.slug}
             href={a.slug}
-            className="group block rounded-2xl border border-gray-800 bg-gray-900/40 hover:border-purple-600/50 hover:bg-gray-900/70 transition-all p-6 md:p-8"
+            className="group flex flex-col rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/60 hover:border-purple-400 dark:hover:border-purple-600/50 hover:shadow-lg dark:hover:shadow-purple-900/20 transition-all duration-300 overflow-hidden"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">{a.label}</span>
-              <span className="text-gray-700">·</span>
-              <span className="text-xs text-gray-500">{a.readTime}</span>
-              <span className="text-gray-700">·</span>
-              <span className="text-xs text-gray-500">{a.date}</span>
-              {a.interactive && (
-                <>
-                  <span className="text-gray-700">·</span>
-                  <span className="text-xs font-semibold text-green-400">Interactive</span>
-                </>
-              )}
+            {/* Card image */}
+            <div className="relative h-48 w-full flex-shrink-0 overflow-hidden">
+              <Image
+                src={a.image}
+                alt={a.title}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-purple-300 uppercase tracking-wider bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                  {a.label}
+                </span>
+                {a.interactive && (
+                  <span className="text-[11px] font-semibold text-green-300 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                    Interactive
+                  </span>
+                )}
+              </div>
             </div>
-            <h2 className="text-xl font-bold text-gray-100 group-hover:text-white transition-colors mb-2 leading-snug">
-              {a.title}
-            </h2>
-            <p className="text-sm text-gray-400 leading-relaxed">{a.excerpt}</p>
-            <p className="mt-4 text-xs font-semibold text-purple-400 group-hover:text-purple-300 transition-colors">
-              Read article →
-            </p>
+
+            {/* Card content */}
+            <div className="flex flex-col flex-1 p-5">
+              <div className="flex items-center gap-2 mb-3 text-xs text-gray-500 dark:text-gray-500">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+                </svg>
+                <span>{a.readTime}</span>
+                <span className="text-gray-400 dark:text-gray-700">·</span>
+                <span>{a.date}</span>
+              </div>
+
+              <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-white transition-colors leading-snug mb-2">
+                {a.title}
+              </h2>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed flex-1 line-clamp-3">
+                {a.excerpt}
+              </p>
+
+              <p className="mt-4 text-xs font-semibold text-purple-500 dark:text-purple-400 group-hover:text-purple-400 dark:group-hover:text-purple-300 transition-colors">
+                Read article →
+              </p>
+            </div>
           </Link>
         ))}
       </div>
