@@ -65,7 +65,7 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
                 src={EmeryHeadshot}
                 alt="Headshot of Emery"
                 fill
-                className="object-cover object-[center_20%] scale-125"
+                className="object-cover object-top scale-125 translate-y-[10%]"
               />
             </div>
           </div>

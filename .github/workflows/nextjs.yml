@@ -81,6 +81,8 @@ jobs:
         run: sed -i 's/MAPBOX_TOKEN_PLACEHOLDER/${{ secrets.MAPBOX_TOKEN }}/g' public/sncf-map/map.html
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
       - name: Static HTML export with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next export
       - name: Upload artifact

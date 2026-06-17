@@ -14,6 +14,7 @@ import HumanSide from '@/components/human-side'
 import Testimonials from '@/components/testimonials'
 import Newsletter from '@/components/newsletter'
 import CollapsibleSection from '@/components/collapsible-section'
+import WhatIsEmeryUpTo from '@/components/WhatIsEmeryUpTo'
 
 export default function Home() {
   const locale = 'en'
@@ -31,6 +32,7 @@ export default function Home() {
         <HumanSide locale={locale} />
       </CollapsibleSection>
       <Testimonials locale={locale} />
+      <WhatIsEmeryUpTo locale={locale} />
       <Newsletter locale={locale} />
     </>
   )

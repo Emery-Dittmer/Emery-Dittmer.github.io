@@ -14,8 +14,10 @@ export default function Header() {
   const copy = {
     en: {
       projects: 'Projects',
-      journey: 'Journey',
+      journey: 'My Story',
       skills: 'Skills',
+      pm: 'PM',
+      articles: 'Articles',
       linkedin: 'LinkedIn',
       contact: 'Contact',
       contactSubject: 'Contact Request',
@@ -24,8 +26,10 @@ export default function Header() {
     },
     fr: {
       projects: 'Projets',
-      journey: 'Parcours',
+      journey: 'Mon histoire',
       skills: 'Compétences',
+      pm: 'PM',
+      articles: 'Articles',
       linkedin: 'LinkedIn',
       contact: 'Contact',
       contactSubject: 'Demande de contact',
@@ -85,6 +89,24 @@ export default function Header() {
                   className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
                 >
                   {t.skills}
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href={`/PMDashboard/${locale}`}
+                  className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
+                >
+                  {t.pm}
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href={`/Articles/${locale}`}
+                  className="font-medium text-white-600 hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
+                >
+                  {t.articles}
                 </Link>
               </li>
 
