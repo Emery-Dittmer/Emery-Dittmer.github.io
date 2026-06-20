@@ -148,7 +148,6 @@ export default function HumanSide({ locale = 'en' }: { locale?: Locale }) {
 
                 {/* Content */}
                 <div className="absolute inset-0 p-6 flex flex-col">
-                  <span className="text-2xl">{item.emoji}</span>
                   <div className="mt-auto">
                     <h4 className="font-semibold text-white text-base mb-1 leading-snug">
                       {item.title}
