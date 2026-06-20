@@ -1,4 +1,30 @@
 import { Locale } from '@/lib/i18n'
+import type { IconType } from 'react-icons'
+import {
+  SiPython, SiR,
+  SiPowerbi, SiTableau, SiFigma, SiD3dotjs,
+  SiDatabricks, SiMicrosoftazure, SiApachespark, SiDbt,
+  SiMicrosoftexcel, SiJira,
+  SiMapbox, SiNextdotjs,
+} from 'react-icons/si'
+
+const SKILL_META: Record<string, { icon: IconType; color: string }> = {
+  'Python':            { icon: SiPython,        color: '#3776AB' },
+  'R':                 { icon: SiR,              color: '#276DC3' },
+  'Power BI':          { icon: SiPowerbi,        color: '#F2C811' },
+  'Tableau':           { icon: SiTableau,        color: '#E97627' },
+  'Figma':             { icon: SiFigma,          color: '#A259FF' },
+  'D3 / React charts': { icon: SiD3dotjs,       color: '#F9A03C' },
+  'Databricks':        { icon: SiDatabricks,     color: '#FF3621' },
+  'Azure':             { icon: SiMicrosoftazure, color: '#0078D4' },
+  'PySpark':           { icon: SiApachespark,    color: '#E25A1C' },
+  'dbt':               { icon: SiDbt,            color: '#FF694A' },
+  'Excel (advanced)':  { icon: SiMicrosoftexcel, color: '#217346' },
+  'Excel (avancé)':    { icon: SiMicrosoftexcel, color: '#217346' },
+  'JIRA':              { icon: SiJira,           color: '#0052CC' },
+  'Mapbox GL':         { icon: SiMapbox,         color: '#4264FB' },
+  'Next.js':           { icon: SiNextdotjs,      color: '#FFFFFF' },
+}
 
 export default function Abilities({ locale = 'en' }: { locale?: Locale }) {
   const copy = {
@@ -91,13 +117,13 @@ export default function Abilities({ locale = 'en' }: { locale?: Locale }) {
   }
   const t = copy[locale]
 
-  const colorMap: Record<string, { ring: string; badge: string; dot: string }> = {
-    purple: { ring: 'border-purple-700/40', badge: 'bg-purple-900/30 text-purple-300', dot: 'bg-purple-500' },
-    blue:   { ring: 'border-blue-700/40',   badge: 'bg-blue-900/30 text-blue-300',     dot: 'bg-blue-500'   },
-    cyan:   { ring: 'border-cyan-700/40',    badge: 'bg-cyan-900/30 text-cyan-300',     dot: 'bg-cyan-500'   },
-    orange: { ring: 'border-orange-700/40',  badge: 'bg-orange-900/30 text-orange-300', dot: 'bg-orange-500' },
-    green:  { ring: 'border-green-700/40',   badge: 'bg-green-900/30 text-green-300',   dot: 'bg-green-500'  },
-    pink:   { ring: 'border-pink-700/40',    badge: 'bg-pink-900/30 text-pink-300',     dot: 'bg-pink-500'   },
+  const colorMap: Record<string, { ring: string; badge: string; dot: string; icon: string }> = {
+    purple: { ring: 'border-purple-700/40', badge: 'bg-purple-900/30 text-purple-300', dot: 'bg-purple-500', icon: 'text-purple-300' },
+    blue:   { ring: 'border-blue-700/40',   badge: 'bg-blue-900/30 text-blue-300',     dot: 'bg-blue-500',   icon: 'text-blue-300'   },
+    cyan:   { ring: 'border-cyan-700/40',    badge: 'bg-cyan-900/30 text-cyan-300',     dot: 'bg-cyan-500',   icon: 'text-cyan-300'   },
+    orange: { ring: 'border-orange-700/40',  badge: 'bg-orange-900/30 text-orange-300', dot: 'bg-orange-500', icon: 'text-orange-300' },
+    green:  { ring: 'border-green-700/40',   badge: 'bg-green-900/30 text-green-300',   dot: 'bg-green-500',  icon: 'text-green-300'  },
+    pink:   { ring: 'border-pink-700/40',    badge: 'bg-pink-900/30 text-pink-300',     dot: 'bg-pink-500',   icon: 'text-pink-300'   },
   }
 
   return (
@@ -124,11 +150,23 @@ export default function Abilities({ locale = 'en' }: { locale?: Locale }) {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {area.skills.map((s) => (
-                      <span key={s} className={`text-xs px-2 py-0.5 rounded-full ${c.badge}`}>
-                        {s}
-                      </span>
-                    ))}
+                    {area.skills.map((s) => {
+                      const meta = SKILL_META[s]
+                      return (
+                        <span
+                          key={s}
+                          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${c.badge}`}
+                        >
+                          {meta?.icon && (
+                            <meta.icon
+                              className="w-3 h-3 flex-shrink-0"
+                              style={{ color: meta.color }}
+                            />
+                          )}
+                          {s}
+                        </span>
+                      )
+                    })}
                   </div>
 
                   <p className="text-sm text-gray-400 mt-auto leading-relaxed">{area.note}</p>
