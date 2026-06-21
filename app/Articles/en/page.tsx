@@ -11,6 +11,17 @@ import Image from 'next/image'
 
 const ARTICLES = [
   {
+    slug: '/Articles/en/ai-beyond-copilot',
+    label: 'Technology & AI',
+    readTime: '9 min read',
+    date: 'June 2026',
+    title: 'Beyond the Copilot: AI Was Never Going to Stay in the Passenger Seat',
+    excerpt:
+      'The copilot metaphor for AI is already obsolete. As AI velocity outpaces our frameworks for understanding it, the honest question isn\'t whether AI will stay our assistant — it\'s what kind of relationship we actually want before that choice is made for us.',
+    image: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=800&q=80',
+    interactive: false,
+  },
+  {
     slug: '/Articles/en/estimation-methods',
     label: 'Product Management',
     readTime: '8 min read',

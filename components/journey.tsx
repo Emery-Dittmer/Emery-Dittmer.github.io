@@ -34,7 +34,6 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
         { year: '2012', label: 'First solo cross-country road trip' },
         { year: '2018', label: 'Built first predictive analytics model' },
         { year: '2021', label: 'Led data reporting across 3 business units' },
-        { year: '2023', label: 'Capstone project selected for industry showcase' },
         { year: '2025', label: 'Ran 10k in under 40 minutes' },
       ],
       items: [
@@ -118,7 +117,6 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
         { year: '2012', label: 'Premier road trip en solo à travers le pays' },
         { year: '2018', label: 'Premier modèle de prédiction construit' },
         { year: '2021', label: 'Pilotage des données pour 3 unités commerciales' },
-        { year: '2023', label: 'Projet de capstone sélectionné pour la vitrine industrie' },
         { year: '2025', label: '10 km courus en moins de 40 minutes' },
       ],
       items: [
@@ -456,8 +454,6 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
               </div>
             </div>
 
-            <MilestoneMarker year={t.milestones[3].year} label={t.milestones[3].label} />
-
             {/* 5th item — Compass Data & McGill */}
             <div className="md:grid md:grid-cols-12 md:gap-6 items-center">
               {/* Image */}
@@ -484,7 +480,7 @@ export default function Zigzag({ locale = 'en' }: { locale?: Locale }) {
               </div>
             </div>
 
-            <MilestoneMarker year={t.milestones[4].year} label={t.milestones[4].label} />
+            <MilestoneMarker year={t.milestones[3].year} label={t.milestones[3].label} />
 
             {/* 6th item — Paris */}
             <div className="md:grid md:grid-cols-12 md:gap-6 items-center">
