@@ -131,7 +131,6 @@ export default function Certifications({
         ? prev[key].filter(v => v !== value)
         : [...prev[key], value],
     }))
-    setExpandedSections({})
   }
 
   const clearFilters = () => {
