@@ -40,51 +40,135 @@ const DOMAIN_ORDER = [
   'Agile & Project Management',
 ]
 
+function groupByKey(arr: Cert[], key: 'domain' | 'year' | 'technology'): Record<string, Cert[]> {
+  return arr.reduce((acc, item) => {
+    const k = item[key]
+    acc[k] = acc[k] ?? []
+    acc[k].push(item)
+    return acc
+  }, {} as Record<string, Cert[]>)
+}
+
 export default function Certifications({
   locale = 'en',
   data,
 }: {
-  locale?: Locale;
+  locale?: Locale
   data?: Array<{
-    section: string;
+    section: string
     certification: Array<{
-      name: string;
-      image: string;
-      company: string;
-      link: string;
-      linktxt: string;
-      h: number;
-    }>;
-  }>;
+      name: string
+      image: string
+      company: string
+      link: string
+      linktxt: string
+      h: number
+    }>
+  }>
 }) {
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [filters, setFilters] = useState({
+    year: [] as string[],
+    domain: [] as string[],
+    technology: [] as string[],
+  })
+  const [groupBy, setGroupBy] = useState<'domain' | 'year' | 'technology' | 'none'>('domain')
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
+  const allCerts = certsByLocale[locale] ?? certsByLocale.en
+
+  const availableYears = [...new Set(allCerts.map(c => c.year))].sort((a, b) => Number(b) - Number(a))
+  const availableDomains = DOMAIN_ORDER.filter(d => allCerts.some(c => c.domain === d))
+  const availableTechnologies = [...new Set(allCerts.map(c => c.technology))].sort()
+
+  const toggleFilter = (key: 'year' | 'domain' | 'technology', value: string) => {
+    setFilters(prev => ({
       ...prev,
-      [section]: !prev[section],
-    }));
-  };
+      [key]: prev[key].includes(value)
+        ? prev[key].filter(v => v !== value)
+        : [...prev[key], value],
+    }))
+    setExpandedSections({})
+  }
 
-  const showLabel = locale === 'fr' ? 'Afficher plus' : 'Show more';
-  const hideLabel = locale === 'fr' ? 'Afficher moins' : 'Show less';
+  const clearFilters = () => {
+    setFilters({ year: [], domain: [], technology: [] })
+    setExpandedSections({})
+  }
+
+  const hasActiveFilters =
+    filters.year.length > 0 || filters.domain.length > 0 || filters.technology.length > 0
+
+  const filteredCerts = allCerts
+    .filter(c => filters.year.length === 0 || filters.year.includes(c.year))
+    .filter(c => filters.domain.length === 0 || filters.domain.includes(c.domain))
+    .filter(c => filters.technology.length === 0 || filters.technology.includes(c.technology))
+
+  const grouped: Record<string, Cert[]> =
+    groupBy === 'none'
+      ? { All: filteredCerts }
+      : groupByKey(filteredCerts, groupBy)
+
+  const sectionKeys =
+    groupBy === 'domain'
+      ? DOMAIN_ORDER.filter(d => grouped[d])
+      : groupBy === 'year'
+        ? Object.keys(grouped).sort((a, b) => Number(b) - Number(a))
+        : groupBy === 'none'
+          ? ['All']
+          : Object.keys(grouped).sort()
+
+  const showLabel = locale === 'fr' ? 'Afficher plus' : 'Show more'
+  const hideLabel = locale === 'fr' ? 'Afficher moins' : 'Show less'
 
   return (
     <>
-    <div className="max-w-sm mx-auto grid mx-auto">
-    <div className="py-1 md:py-2 border-t border-gray-800"></div></div>
-    <h3 className="h2 text-center"> Certifications </h3>
-    <div className="flex items-center justify-center">
-      <div className="text-center my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-auto md:grid-cols-1 xl:px-0">
-        <div className="certifications max-w-sm mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 items-start md:max-w-2xl lg:max-w-none">
-          {certsByLocale[locale].map((cert) => (
-            <CertificationCard key={cert.name} {...cert} />
-          ))}
+      <div className="max-w-sm mx-auto grid mx-auto">
+        <div className="py-1 md:py-2 border-t border-gray-800"></div>
+      </div>
+      <h3 className="h2 text-center"> Certifications </h3>
+      <div className="flex items-center justify-center">
+        <div className="text-center my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-auto md:grid-cols-1 xl:px-0">
+
+          {/* FILTER BAR PLACEHOLDER — replaced in Task 3 */}
+
+          <div className="certifications max-w-sm mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 items-start md:max-w-2xl lg:max-w-none">
+            {sectionKeys.map(sectionKey => {
+              const certs = grouped[sectionKey] ?? []
+              const isExpanded = expandedSections[sectionKey] ?? false
+              const visibleCerts = isExpanded ? certs : certs.slice(0, 2)
+              return (
+                <div className="certifications-section" key={sectionKey}>
+                  {groupBy !== 'none' && (
+                    <h2 className="section-title">{sectionKey}</h2>
+                  )}
+                  <div className="certifications-grid grid grid-cols-2 gap-auto max-w-sm">
+                    {visibleCerts.map(cert => (
+                      <CertificationCard key={cert.name} {...cert} />
+                    ))}
+                  </div>
+                  {certs.length > 2 && (
+                    <button
+                      type="button"
+                      className="mt-4 text-sm font-semibold text-purple-400 hover:text-purple-200 transition duration-150 ease-in-out"
+                      onClick={() =>
+                        setExpandedSections(prev => ({
+                          ...prev,
+                          [sectionKey]: !prev[sectionKey],
+                        }))
+                      }
+                    >
+                      {isExpanded ? hideLabel : showLabel}
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
         </div>
       </div>
-    </div>
     </>
-  );
+  )
 }
 
 
