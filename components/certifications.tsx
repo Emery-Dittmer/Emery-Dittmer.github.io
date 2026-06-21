@@ -49,6 +49,50 @@ function groupByKey(arr: Cert[], key: 'domain' | 'year' | 'technology'): Record<
   }, {} as Record<string, Cert[]>)
 }
 
+function FilterDropdown({
+  label,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string
+  options: string[]
+  selected: string[]
+  onToggle: (value: string) => void
+}) {
+  return (
+    <details className="relative">
+      <summary className="cursor-pointer list-none flex items-center gap-1 px-3 py-1.5 rounded border border-gray-700 text-sm text-gray-300 hover:border-purple-500 transition-colors select-none">
+        {label}
+        {selected.length > 0 && (
+          <span className="ml-1 px-1.5 py-0.5 text-xs bg-purple-600 text-white rounded-full">
+            {selected.length}
+          </span>
+        )}
+        <svg className="w-3 h-3 ml-1 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </summary>
+      <div className="absolute top-full left-0 mt-1 z-20 min-w-[180px] bg-gray-900 border border-gray-700 rounded-lg p-2 shadow-xl">
+        {options.map(opt => (
+          <label
+            key={opt}
+            className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-800 cursor-pointer text-sm text-gray-300"
+          >
+            <input
+              type="checkbox"
+              checked={selected.includes(opt)}
+              onChange={() => onToggle(opt)}
+              className="accent-purple-500"
+            />
+            {opt}
+          </label>
+        ))}
+      </div>
+    </details>
+  )
+}
+
 export default function Certifications({
   locale = 'en',
   data,
@@ -129,7 +173,53 @@ export default function Certifications({
       <div className="flex items-center justify-center">
         <div className="text-center my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-auto md:grid-cols-1 xl:px-0">
 
-          {/* FILTER BAR PLACEHOLDER — replaced in Task 3 */}
+          {/* Filter bar */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+            <FilterDropdown
+              label={locale === 'fr' ? 'Année' : 'Year'}
+              options={availableYears}
+              selected={filters.year}
+              onToggle={v => toggleFilter('year', v)}
+            />
+            <FilterDropdown
+              label={locale === 'fr' ? 'Domaine' : 'Domain'}
+              options={availableDomains}
+              selected={filters.domain}
+              onToggle={v => toggleFilter('domain', v)}
+            />
+            <FilterDropdown
+              label={locale === 'fr' ? 'Technologie' : 'Technology'}
+              options={availableTechnologies}
+              selected={filters.technology}
+              onToggle={v => toggleFilter('technology', v)}
+            />
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-400">
+                {locale === 'fr' ? 'Grouper par :' : 'Group by:'}
+              </span>
+              <select
+                value={groupBy}
+                onChange={e => {
+                  setGroupBy(e.target.value as typeof groupBy)
+                  setExpandedSections({})
+                }}
+                className="px-2 py-1.5 rounded border border-gray-700 bg-gray-900 text-sm text-gray-300 hover:border-purple-500 transition-colors cursor-pointer"
+              >
+                <option value="domain">{locale === 'fr' ? 'Domaine' : 'Domain'}</option>
+                <option value="year">{locale === 'fr' ? 'Année' : 'Year'}</option>
+                <option value="technology">{locale === 'fr' ? 'Technologie' : 'Technology'}</option>
+                <option value="none">{locale === 'fr' ? 'Aucun' : 'None'}</option>
+              </select>
+            </div>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-sm text-purple-400 hover:text-purple-200 transition-colors"
+              >
+                {locale === 'fr' ? 'Effacer les filtres' : 'Clear filters'}
+              </button>
+            )}
+          </div>
 
           <div className="certifications max-w-sm mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 items-start md:max-w-2xl lg:max-w-none">
             {sectionKeys.map(sectionKey => {
