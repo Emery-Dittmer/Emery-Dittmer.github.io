@@ -2,7 +2,7 @@ import { Locale } from '@/lib/i18n'
 import type { IconType } from 'react-icons'
 import {
   SiPython, SiR,
-  SiPowerbi, SiTableau, SiFigma, SiD3dotjs,
+  SiPowerbi, SiTableau, SiFigma, SiD3Dotjs,
   SiDatabricks, SiMicrosoftazure, SiApachespark, SiDbt,
   SiMicrosoftexcel, SiJira,
   SiMapbox, SiNextdotjs,
