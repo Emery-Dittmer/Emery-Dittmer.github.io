@@ -14,7 +14,7 @@ const SKILL_META: Record<string, { icon: IconType; color: string }> = {
   'Power BI':          { icon: SiPowerbi,        color: '#F2C811' },
   'Tableau':           { icon: SiTableau,        color: '#E97627' },
   'Figma':             { icon: SiFigma,          color: '#A259FF' },
-  'D3 / React charts': { icon: SiD3dotjs,       color: '#F9A03C' },
+  'D3 / React charts': { icon: SiD3Dotjs,       color: '#F9A03C' },
   'Databricks':        { icon: SiDatabricks,     color: '#FF3621' },
   'Azure':             { icon: SiMicrosoftazure, color: '#0078D4' },
   'PySpark':           { icon: SiApachespark,    color: '#E25A1C' },
