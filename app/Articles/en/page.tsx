@@ -32,6 +32,39 @@ const ARTICLES = [
     image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80',
     interactive: true,
   },
+  {
+    slug: '/Articles/en/sncf-analytics',
+    label: 'Data & Analysis',
+    readTime: '8 min read',
+    date: 'June 2026',
+    title: 'Are French Trains Actually On Time? I Collected 25 Days of Real Data to Find Out',
+    excerpt:
+      '86% on time across 46,400 trips — but the aggregate hides what\'s interesting. Regional trains outperform TGV. OUIGO averages a 9.6-minute delay when late. And the ICE cross-border numbers are in a different category entirely.',
+    image: '/images/sncf/01_on_time_by_type.png',
+    interactive: false,
+  },
+  {
+    slug: '/Articles/en/sncf-architecture',
+    label: 'Engineering',
+    readTime: '10 min read',
+    date: 'June 2026',
+    title: 'Building a Real-Time French Train Tracker on AWS for Under $20/Month',
+    excerpt:
+      'GTFS-RT is ephemeral by design — nobody stores historical snapshots for you. This is how a two-Lambda, SQS-decoupled pipeline collects SNCF, Eurostar, and Trenitalia data every 10 minutes and keeps it queryable in RDS PostgreSQL.',
+    image: '/images/sncf/architecture-diagram.png',
+    interactive: false,
+  },
+  {
+    slug: '/Articles/en/sncf-cost',
+    label: 'Engineering',
+    readTime: '7 min read',
+    date: 'June 2026',
+    title: 'How I Cut This AWS Pipeline from $56 to $16/Month',
+    excerpt:
+      'The first month\'s bill was $56. A NAT Gateway I\'d added out of habit was costing $32/month before transferring a single byte. Here\'s the full breakdown — and why the fix meant moving everything out of the VPC entirely.',
+    image: '/images/sncf/cost-comparison.png',
+    interactive: false,
+  },
 ]
 
 export default function ArticlesIndex() {

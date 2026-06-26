@@ -115,7 +115,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Time series & panel data',
           id: 'time-series-panel-data',
-          proficiency: 4,
+          proficiency: 3,
           description: 'Statistical methods for data indexed over time or across multiple entities and time periods simultaneously.',
           contributions: [
             { laneId: 'data-science', percentage: 85 },
@@ -126,7 +126,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Differences-in-differences',
           id: 'differences-in-differences',
-          proficiency: 5,
+          proficiency: 3,
           description: 'Quasi-experimental method comparing outcome changes between treatment and control groups over time.',
           contributions: [
             { laneId: 'data-science', percentage: 90 },
@@ -146,7 +146,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Causal inference',
           id: 'causal-inference',
-          proficiency: 5,
+          proficiency: 3,
           description: 'Frameworks and methods for establishing cause-and-effect relationships from observational or experimental data.',
           contributions: [
             { laneId: 'data-science', percentage: 90 },
@@ -624,13 +624,14 @@ export const skillsConfig: { lanes: Lane[] } = {
       color: '#5F5E5A',
       skills: [
         {
-          name: 'Writing & prioritising a product backlog',
-          id: 'writing-prioritising-a-product-backlog',
+          name: 'Defining success criteria & acceptance tests',
+          id: 'defining-success-criteria-acceptance-tests',
           proficiency: 5,
-          description: 'Maintaining an ordered list of work items, each with clear scope and business value, ready for sprint planning.',
+          description: 'Setting clear, measurable conditions agreed with stakeholders that determine when a deliverable is complete.',
           contributions: [
-            { laneId: 'project-management', percentage: 90 },
+            { laneId: 'project-management', percentage: 85 },
             { laneId: 'data-analytics', percentage: 20 },
+            { laneId: 'data-governance', percentage: 20 },
           ],
         },
         {
@@ -645,7 +646,7 @@ export const skillsConfig: { lanes: Lane[] } = {
         {
           name: 'Building & maintaining a project roadmap',
           id: 'building-maintaining-a-project-roadmap',
-          proficiency: 4,
+          proficiency: 5,
           description: 'A high-level plan showing milestones, inter-team dependencies, and the expected delivery timeline.',
           contributions: [
             { laneId: 'project-management', percentage: 90 },
@@ -653,14 +654,13 @@ export const skillsConfig: { lanes: Lane[] } = {
           ],
         },
         {
-          name: 'Defining success criteria & acceptance tests',
-          id: 'defining-success-criteria-acceptance-tests',
-          proficiency: 4,
-          description: 'Setting clear, measurable conditions agreed with stakeholders that determine when a deliverable is complete.',
+          name: 'Facilitating cross-team delivery',
+          id: 'facilitating-cross-team-delivery',
+          proficiency: 5,
+          description: 'Coordinating work across multiple teams with different priorities to achieve a shared programme objective.',
           contributions: [
-            { laneId: 'project-management', percentage: 85 },
+            { laneId: 'project-management', percentage: 90 },
             { laneId: 'data-analytics', percentage: 20 },
-            { laneId: 'data-governance', percentage: 20 },
           ],
         },
         {
@@ -684,6 +684,16 @@ export const skillsConfig: { lanes: Lane[] } = {
           ],
         },
         {
+          name: 'Writing & prioritising a product backlog',
+          id: 'writing-prioritising-a-product-backlog',
+          proficiency: 5,
+          description: 'Maintaining an ordered list of work items, each with clear scope and business value, ready for sprint planning.',
+          contributions: [
+            { laneId: 'project-management', percentage: 90 },
+            { laneId: 'data-analytics', percentage: 20 },
+          ],
+        },
+        {
           name: 'Scoping & estimating data projects',
           id: 'scoping-estimating-data-projects',
           proficiency: 4,
@@ -692,16 +702,6 @@ export const skillsConfig: { lanes: Lane[] } = {
             { laneId: 'project-management', percentage: 85 },
             { laneId: 'data-engineering', percentage: 20 },
             { laneId: 'data-science', percentage: 20 },
-            { laneId: 'data-analytics', percentage: 20 },
-          ],
-        },
-        {
-          name: 'Facilitating cross-team delivery',
-          id: 'facilitating-cross-team-delivery',
-          proficiency: 5,
-          description: 'Coordinating work across multiple teams with different priorities to achieve a shared programme objective.',
-          contributions: [
-            { laneId: 'project-management', percentage: 90 },
             { laneId: 'data-analytics', percentage: 20 },
           ],
         },

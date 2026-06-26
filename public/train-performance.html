@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>French Train Performance</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #16213e;
+      border-bottom: 1px solid #0f3460;
+      padding: 1.5rem 2rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+    }
+    header p.subtitle {
+      margin-top: 0.35rem;
+      font-size: 0.9rem;
+      color: #8892b0;
+    }
+    header p.last-updated {
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+      color: #6a7490;
+    }
+
+    /* ── Main content ── */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.25rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* Wide trend card spans full row */
+    .card-full {
+      grid-column: 1 / -1;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ccd6f6;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    /* Fixed heights for canvas containers */
+    .chart-wrapper.bar-wrapper   { height: 260px; }
+    .chart-wrapper.donut-wrapper { height: 280px; }
+    .chart-wrapper.line-wrapper  { height: 300px; }
+
+    canvas { display: block; width: 100% !important; }
+
+    /* ── Spinner ── */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      z-index: 100;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #0f3460;
+      border-top-color: #e94560;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-overlay p { color: #8892b0; font-size: 0.9rem; }
+
+    /* ── Error banner ── */
+    #error-banner {
+      display: none;
+      background: #3b0a0a;
+      border: 1px solid #7f1d1d;
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem auto;
+      max-width: 700px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: #16213e;
+      border-top: 1px solid #0f3460;
+      padding: 1.25rem 2rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #6a7490;
+      line-height: 1.6;
+    }
+    footer a {
+      color: #e94560;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      main { padding: 1rem 0.75rem; gap: 1rem; }
+      .card { padding: 1rem; }
+      .chart-wrapper.bar-wrapper   { height: 220px; }
+      .chart-wrapper.donut-wrapper { height: 240px; }
+      .chart-wrapper.line-wrapper  { height: 240px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <p>Fetching train performance data…</p>
+</div>
+
+<!-- Error banner (shown if fetch fails) -->
+<div id="error-banner"></div>
+
+<!-- Header -->
+<header>
+  <h1>🚄 French Train Performance</h1>
+  <p class="subtitle">Last 30 days of real-time data</p>
+  <p class="last-updated" id="last-updated"></p>
+</header>
+
+<!-- Charts -->
+<main id="dashboard" style="display:none;">
+
+  <!-- 1. On-time rate by train type -->
+  <div class="card">
+    <h2>On-Time Rate by Train Type</h2>
+    <div class="chart-wrapper bar-wrapper">
+      <canvas id="chartOnTime"></canvas>
+    </div>
+  </div>
+
+  <!-- 2. Delay distribution -->
+  <div class="card">
+    <h2>Delay Distribution</h2>
+    <div class="chart-wrapper donut-wrapper">
+      <canvas id="chartDoughnut"></canvas>
+    </div>
+  </div>
+
+  <!-- 3. 30-day trend (full width) -->
+  <div class="card card-full">
+    <h2>30-Day Average Delay Trend</h2>
+    <div class="chart-wrapper line-wrapper">
+      <canvas id="chartTrend"></canvas>
+    </div>
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <p>Data collected from SNCF, Eurostar and Trenitalia GTFS-RT feeds every 10 minutes.
+     On-time = departure within 60 seconds of schedule.</p>
+  <p style="margin-top:0.4rem;">
+    <a href="#">Read the analysis on Medium →</a>
+  </p>
+</footer>
+
+<script>
+  const API = 'https://gpvwn1lb29.execute-api.eu-west-3.amazonaws.com/performance';
+
+  /* ── Colour helpers ── */
+  function onTimeColor(pct) {
+    if (pct >= 80) return '#22c55e';   // green
+    if (pct >= 60) return '#f59e0b';   // amber
+    return '#ef4444';                   // red
+  }
+
+  const DIST_COLORS = {
+    'on time':           '#22c55e',
+    'slight (1-5 min)':  '#facc15',
+    'moderate (5-15 min)':'#f97316',
+    'severe (>15 min)':  '#ef4444',
+  };
+
+  const SOURCE_PALETTE = [
+    '#60a5fa', '#34d399', '#f472b6', '#fbbf24',
+    '#a78bfa', '#fb923c', '#38bdf8',
+  ];
+
+  /* ── Chart defaults ── */
+  Chart.defaults.color = '#8892b0';
+  Chart.defaults.borderColor = '#0f3460';
+  Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+  /* ── Build charts ── */
+  function buildOnTimeChart(byTrainType) {
+    // Sort descending by on_time_pct
+    const sorted = [...byTrainType].sort((a, b) => b.on_time_pct - a.on_time_pct);
+    const labels = sorted.map(d => d.train_type);
+    const values = sorted.map(d => d.on_time_pct);
+    const colors = values.map(onTimeColor);
+
+    new Chart(document.getElementById('chartOnTime'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderColor: colors,
+          borderWidth: 0,
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.parsed.x.toFixed(1)} % on time`,
+            }
+          },
+          // Draw % labels on bars
+          afterDraw: undefined,
+        },
+        scales: {
+          x: {
+            min: 0,
+            max: 100,
+            ticks: { callback: v => v + '%' },
+            grid: { color: '#1e2d4d' },
+          },
+          y: {
+            grid: { display: false },
+          }
+        },
+      },
+      plugins: [{
+        id: 'barLabels',
+        afterDatasetsDraw(chart) {
+          const { ctx } = chart;
+          chart.data.datasets.forEach((dataset, i) => {
+            const meta = chart.getDatasetMeta(i);
+            meta.data.forEach((bar, idx) => {
+              const val = dataset.data[idx];
+              const x = bar.x + 6;
+              const y = bar.y;
+              ctx.save();
+              ctx.fillStyle = '#e0e0e0';
+              ctx.font = '600 11px sans-serif';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(val.toFixed(1) + '%', x, y);
+              ctx.restore();
+            });
+          });
+        }
+      }]
+    });
+  }
+
+  function buildDoughnutChart(delayDist) {
+    const filtered = delayDist.filter(d => d.band !== 'no data');
+    const labels  = filtered.map(d => d.band);
+    const values  = filtered.map(d => d.trips);
+    const colors  = labels.map(l => DIST_COLORS[l] || '#94a3b8');
+
+    new Chart(document.getElementById('chartDoughnut'), {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderColor: '#16213e',
+          borderWidth: 3,
+          hoverOffset: 8,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '60%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 16,
+              boxWidth: 14,
+              font: { size: 12 },
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = ((ctx.parsed / total) * 100).toFixed(1);
+                return ` ${ctx.parsed.toLocaleString()} trips (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function buildTrendChart(dailyTrend) {
+    // Group by source
+    const sourceMap = {};
+    dailyTrend.forEach(row => {
+      if (!sourceMap[row.source]) sourceMap[row.source] = {};
+      sourceMap[row.source][row.service_date] = row.avg_delay_min;
+    });
+
+    // Collect all unique dates, sorted
+    const allDates = [...new Set(dailyTrend.map(d => d.service_date))].sort();
+
+    // Format dates for display: "May 24"
+    function fmtDate(iso) {
+      const d = new Date(iso + 'T00:00:00Z');
+      return d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    }
+
+    const sources = Object.keys(sourceMap).sort();
+    const datasets = sources.map((src, idx) => ({
+      label: src.charAt(0).toUpperCase() + src.slice(1),
+      data: allDates.map(dt => sourceMap[src][dt] ?? null),
+      borderColor: SOURCE_PALETTE[idx % SOURCE_PALETTE.length],
+      backgroundColor: SOURCE_PALETTE[idx % SOURCE_PALETTE.length] + '22',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      tension: 0.3,
+      spanGaps: false,
+      fill: false,
+    }));
+
+    new Chart(document.getElementById('chartTrend'), {
+      type: 'line',
+      data: {
+        labels: allDates.map(fmtDate),
+        datasets,
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              padding: 16,
+              boxWidth: 14,
+              font: { size: 12 },
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const v = ctx.parsed.y;
+                return v === null ? null : ` ${ctx.dataset.label}: ${v.toFixed(1)} min`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: '#1e2d4d' },
+            ticks: {
+              maxTicksLimit: 10,
+              maxRotation: 45,
+            }
+          },
+          y: {
+            grid: { color: '#1e2d4d' },
+            title: {
+              display: true,
+              text: 'Avg delay (min)',
+              color: '#8892b0',
+              font: { size: 11 },
+            },
+            ticks: { callback: v => v + ' min' },
+            beginAtZero: true,
+          }
+        }
+      }
+    });
+  }
+
+  /* ── Fetch & render ── */
+  async function init() {
+    try {
+      const res = await fetch(API);
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      const data = await res.json();
+
+      // Last updated
+      const dates = (data.daily_trend || []).map(d => d.service_date).sort();
+      if (dates.length) {
+        const latest = new Date(dates[dates.length - 1] + 'T00:00:00Z');
+        document.getElementById('last-updated').textContent =
+          'Last updated: ' + latest.toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'
+          });
+      }
+
+      buildOnTimeChart(data.by_train_type || []);
+      buildDoughnutChart(data.delay_distribution || []);
+      buildTrendChart(data.daily_trend || []);
+
+      document.getElementById('loading-overlay').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'grid';
+
+    } catch (err) {
+      const banner = document.getElementById('error-banner');
+      banner.style.display = 'block';
+      banner.textContent = `Could not load performance data: ${err.message}. Please try refreshing the page.`;
+      document.getElementById('loading-overlay').style.display = 'none';
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -264,10 +264,21 @@ export default function Certifications({
 const certsByLocale: Record<string, Cert[]> = {
   en: [
     {
+      name: 'Agentforce Specialist',
+      image: data_iku, // TODO: replace with Salesforce logo
+      company: 'Issued by: Salesforce',
+      link: 'https://www.linkedin.com/in/emery-dittmer/overlay/Certifications/64566854/treasury/?profileId=ACoAACHO37sBQx_F4D8tcDyCMaoNO33RdErKRJs',
+      linktxt: 'View Details',
+      h: 100,
+      year: '2026',
+      domain: 'AI & Compliance',
+      technology: 'Salesforce',
+    },
+    {
       name: 'GDPR & Data Privacy Fundamentals',
       image: data_iku, // TODO: replace with DataCamp logo
       company: 'Issued by: DataCamp',
-      link: 'https://www.datacamp.com/certificate/GDP0012869164274',
+      link: 'https://www.linkedin.com/in/emery-dittmer/overlay/Certifications/1619361530/treasury/?profileId=ACoAACHO37sBQx_F4D8tcDyCMaoNO33RdErKRJs',
       linktxt: 'View Details',
       h: 100,
       year: '2026',
@@ -278,7 +289,7 @@ const certsByLocale: Record<string, Cert[]> = {
       name: 'EU AI Act Literacy',
       image: data_iku, // TODO: replace with DataCamp logo
       company: 'Issued by: DataCamp',
-      link: 'https://www.datacamp.com/certificate/EU0027355940737',
+      link: 'https://www.datacamp.com/skill-verification/EU0027355940737',
       linktxt: 'View Details',
       h: 100,
       year: '2026',
@@ -464,10 +475,21 @@ const certsByLocale: Record<string, Cert[]> = {
   ],
   fr: [
     {
+      name: 'Agentforce Specialist',
+      image: data_iku, // TODO: replace with Salesforce logo
+      company: 'Délivré par : Salesforce',
+      link: 'https://www.linkedin.com/in/emery-dittmer/overlay/Certifications/64566854/treasury/?profileId=ACoAACHO37sBQx_F4D8tcDyCMaoNO33RdErKRJs',
+      linktxt: 'Voir les détails',
+      h: 100,
+      year: '2026',
+      domain: 'AI & Compliance',
+      technology: 'Salesforce',
+    },
+    {
       name: 'GDPR & Data Privacy Fundamentals',
       image: data_iku, // TODO: replace with DataCamp logo
       company: 'Délivré par : DataCamp',
-      link: 'https://www.datacamp.com/certificate/GDP0012869164274',
+      link: 'https://www.linkedin.com/in/emery-dittmer/overlay/Certifications/1619361530/treasury/?profileId=ACoAACHO37sBQx_F4D8tcDyCMaoNO33RdErKRJs',
       linktxt: 'Voir les détails',
       h: 100,
       year: '2026',
@@ -478,7 +500,7 @@ const certsByLocale: Record<string, Cert[]> = {
       name: 'EU AI Act Literacy',
       image: data_iku, // TODO: replace with DataCamp logo
       company: 'Délivré par : DataCamp',
-      link: 'https://www.datacamp.com/certificate/EU0027355940737',
+      link: 'https://www.datacamp.com/skill-verification/EU0027355940737',
       linktxt: 'Voir les détails',
       h: 100,
       year: '2026',
