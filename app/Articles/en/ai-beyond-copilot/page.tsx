@@ -7,26 +7,492 @@ export const metadata = {
 }
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 function P({ children }: { children: React.ReactNode }) {
   return <p className="text-gray-300 leading-relaxed text-[15px]">{children}</p>
 }
 
-function Callout({ icon, children }: { icon: string; children: React.ReactNode }) {
+function Callout({
+  icon,
+  children,
+  tone = 'default',
+}: {
+  icon: string
+  children: React.ReactNode
+  tone?: 'default' | 'sky'
+}) {
+  const toneClasses =
+    tone === 'sky'
+      ? 'border-blue-800/40 bg-gradient-to-br from-blue-950/50 via-indigo-950/40 to-purple-950/40'
+      : 'border-gray-800 bg-gray-900/60'
   return (
-    <div className="flex gap-3 rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+    <div className={`flex gap-3 rounded-xl border p-4 ${toneClasses}`}>
       <span className="text-xl shrink-0">{icon}</span>
       <p className="text-sm text-gray-300 leading-relaxed">{children}</p>
     </div>
   )
 }
 
-function StatBlock({ stat, label, sub }: { stat: string; label: string; sub: string }) {
+function PullQuote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5 text-center space-y-1">
-      <p className="text-3xl font-bold text-purple-400">{stat}</p>
-      <p className="text-sm font-semibold text-white">{label}</p>
+    <blockquote className="my-2 py-8 border-y border-purple-800/40 text-center">
+      <p className="text-2xl md:text-4xl font-bold text-white leading-snug tracking-tight">
+        {children}
+      </p>
+    </blockquote>
+  )
+}
+
+function BarRow({ pct, value, label, sub }: { pct: number; value: string; label: string; sub: string }) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-sm font-semibold text-white">{label}</span>
+        <span className="text-sm font-bold text-purple-400 tabular-nums">{value}</span>
+      </div>
+      <div className="h-2.5 rounded-full bg-gray-800 overflow-hidden">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-purple-600 to-purple-400"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
       <p className="text-xs text-gray-500">{sub}</p>
+    </div>
+  )
+}
+
+function CapabilityChart() {
+  const rows = [
+    { label: 'Human alone', speed: 3, judgment: 9 },
+    { label: 'AI alone', speed: 9, judgment: 4 },
+    { label: 'Human + AI', speed: 8, judgment: 8 },
+  ]
+  const max = 10
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5 space-y-5">
+      <div className="flex items-center gap-4 text-xs">
+        <span className="flex items-center gap-1.5 text-gray-300">
+          <span className="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block" /> Speed / throughput
+        </span>
+        <span className="flex items-center gap-1.5 text-gray-300">
+          <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" /> Judgment / reliability
+        </span>
+      </div>
+      <div className="space-y-4">
+        {rows.map(r => (
+          <div key={r.label} className={r.label === 'Human + AI' ? 'space-y-1.5 rounded-lg border border-purple-800/40 bg-purple-950/20 p-3 -m-3' : 'space-y-1.5'}>
+            <p className="text-sm font-semibold text-white">{r.label}</p>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <div className="h-2 rounded-full bg-gray-800 flex-1 overflow-hidden">
+                  <div className="h-full rounded-full bg-purple-400" style={{ width: `${(r.speed / max) * 100}%` }} />
+                </div>
+                <span className="text-xs text-gray-500 w-5 text-right tabular-nums">{r.speed}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-2 rounded-full bg-gray-800 flex-1 overflow-hidden">
+                  <div className="h-full rounded-full bg-gray-400" style={{ width: `${(r.judgment / max) * 100}%` }} />
+                </div>
+                <span className="text-xs text-gray-500 w-5 text-right tabular-nums">{r.judgment}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-gray-500 text-center pt-1 border-t border-gray-800">
+        Illustrative comparison on a 0–10 conceptual scale, not measured data. The case for augmentation:
+        combined use approaches AI&apos;s raw speed without giving up most of human judgment.
+      </p>
+    </div>
+  )
+}
+
+function DeliverablesChart() {
+  const rows = [
+    {
+      label: 'Controlled task, with Copilot',
+      pct: 55.8,
+      direction: 'faster' as const,
+      source: 'Peng et al., 2023',
+      url: 'https://arxiv.org/abs/2302.06590',
+      detail: 'RCT · scripted HTTP-server task',
+    },
+    {
+      label: 'Real repos, experienced devs, with AI',
+      pct: 19,
+      direction: 'slower' as const,
+      source: 'METR, Jul 2025',
+      url: 'https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/',
+      detail: "RCT · developers' own production codebases",
+    },
+  ]
+  const maxPct = 60
+  const sources = [
+    {
+      title: 'The Impact of AI on Developer Productivity: Evidence from GitHub Copilot',
+      authors: 'Peng, Kalliamvakou, Cihon & Demirer, 2023',
+      note: 'Controlled experiment, 95 developers, scripted HTTP-server task. Funded by GitHub/Microsoft.',
+      url: 'https://arxiv.org/abs/2302.06590',
+    },
+    {
+      title: 'Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity',
+      authors: 'METR, July 2025',
+      note: "RCT, 16 experienced developers, 246 tasks in their own mature repos. Independent research org.",
+      url: 'https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/',
+    },
+    {
+      title: 'Measuring AI Ability to Complete Long Tasks',
+      authors: 'METR, March 2025',
+      note: 'Task-length-at-50%-reliability trend across frontier agents, 2019–2025.',
+      url: 'https://arxiv.org/abs/2503.14499',
+    },
+  ]
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5 space-y-5">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">
+        What the research actually shows
+      </p>
+      <div className="space-y-6">
+        {rows.map(r => {
+          const width = (r.pct / maxPct) * 100
+          const labelInside = width > 62
+          const isFaster = r.direction === 'faster'
+          const labelText = `${r.pct}% ${r.direction}`
+          return (
+            <div key={r.label} className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-white">{r.label}</p>
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-gray-500 underline underline-offset-2 hover:text-purple-300 shrink-0"
+                >
+                  {r.source} ↗
+                </a>
+              </div>
+              <div className="relative h-20 rounded-lg bg-gray-800/40 overflow-hidden">
+                <div className="absolute inset-y-0 left-1/2 w-px bg-gray-600 z-10" />
+                {isFaster ? (
+                  <div className="absolute inset-y-0 left-1/2 right-0 flex items-center">
+                    <div
+                      className="h-full rounded-r-lg bg-gradient-to-r from-purple-600 to-purple-400 shadow-[0_0_24px_rgba(192,132,252,0.4)] flex items-center justify-end pr-4"
+                      style={{ width: `${width}%` }}
+                    >
+                      {labelInside && (
+                        <span className="text-xl font-extrabold text-white whitespace-nowrap">{labelText}</span>
+                      )}
+                    </div>
+                    {!labelInside && (
+                      <span className="ml-3 text-xl font-extrabold text-purple-300 whitespace-nowrap">{labelText}</span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="absolute inset-y-0 left-0 right-1/2 flex flex-row-reverse items-center">
+                    <div
+                      className="h-full rounded-l-lg bg-gradient-to-l from-rose-600 to-rose-400 shadow-[0_0_24px_rgba(251,113,133,0.4)] flex items-center justify-start pl-4"
+                      style={{ width: `${width}%` }}
+                    >
+                      {labelInside && (
+                        <span className="text-xl font-extrabold text-white whitespace-nowrap">{labelText}</span>
+                      )}
+                    </div>
+                    {!labelInside && (
+                      <span className="mr-3 text-xl font-extrabold text-rose-400 whitespace-nowrap">{labelText}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <p className="text-[11px] text-gray-600">{r.detail}</p>
+            </div>
+          )
+        })}
+
+        <div className="pt-4 border-t border-gray-800 space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-gray-300">AI working alone, no human in the loop</p>
+            <a
+              href="https://arxiv.org/abs/2503.14499"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 underline underline-offset-2 hover:text-purple-300 text-[11px] shrink-0"
+            >
+              METR, Mar 2025 ↗
+            </a>
+          </div>
+          <p className="text-sm font-semibold text-purple-300">
+            Task length it can complete autonomously ~doubles every 7 months
+          </p>
+          <p className="text-[11px] text-gray-600">
+            50% reliability threshold, frontier agents (e.g. Devin/Cursor-style autonomous mode), 2019–2025 trend
+          </p>
+        </div>
+      </div>
+      <p className="text-xs text-gray-500 text-center pt-3 border-t border-gray-800">
+        Three real data points, three different framings — a scripted benchmark, developers&apos; own production
+        codebases, and agents working with nobody watching. None of them agree on a single number, because
+        &quot;does AI make you more productive&quot; isn&apos;t one question.
+      </p>
+
+      <details className="group pt-1">
+        <summary className="cursor-pointer list-none text-xs font-semibold text-gray-400 hover:text-purple-300 flex items-center justify-center gap-1.5 select-none">
+          <span>Sources &amp; further reading</span>
+          <span className="transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="mt-4 space-y-4">
+          {sources.map(s => (
+            <div key={s.url} className="border-t border-gray-800 pt-3 first:border-t-0 first:pt-0">
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-semibold text-gray-200 underline underline-offset-2 hover:text-purple-300"
+              >
+                {s.title} ↗
+              </a>
+              <p className="text-xs text-gray-500 mt-0.5">{s.authors}</p>
+              <p className="text-[11px] text-gray-600 mt-1">{s.note}</p>
+            </div>
+          ))}
+        </div>
+      </details>
+    </div>
+  )
+}
+
+function VelocityChart() {
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5">
+      <svg
+        viewBox="0 0 500 220"
+        className="w-full h-auto"
+        role="img"
+        aria-label="Conceptual chart showing AI capability rising steeply over time, a Copilot-style workflow stepping up in progress-then-review increments, and traditional tools staying roughly flat"
+      >
+        {/* gridlines */}
+        <g stroke="#27272a" strokeWidth="1">
+          <line x1="20" y1="45" x2="350" y2="45" />
+          <line x1="20" y1="95" x2="350" y2="95" />
+          <line x1="20" y1="145" x2="350" y2="145" />
+        </g>
+        {/* axes */}
+        <line x1="20" y1="170" x2="350" y2="170" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="185" y="200" textAnchor="middle" fill="#71717a" fontSize="11">Time</text>
+        <text x="20" y="14" fill="#71717a" fontSize="11">↑ Capability</text>
+
+        {/* traditional tools line */}
+        <path d="M20,165 C140,163 260,160 350,150" fill="none" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="350" cy="150" r="4" fill="#71717a" />
+        <text x="360" y="147" fill="#a1a1aa" fontSize="12" fontWeight="600">Traditional tools</text>
+        <text x="360" y="161" fill="#71717a" fontSize="10">(hammer, spreadsheet)</text>
+
+        {/* copilot workflow: progress, review, progress, review... */}
+        <path
+          d="M20,160 L20,146 L75,146 L75,127 L130,127 L130,110 L185,110 L185,94 L240,94 L240,79 L295,79 L295,66 L350,66"
+          fill="none"
+          stroke="#38bdf8"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="350" cy="66" r="4.5" fill="#38bdf8" />
+        <text x="360" y="63" fill="#7dd3fc" fontSize="12" fontWeight="600">Copilot workflow</text>
+        <text x="360" y="77" fill="#71717a" fontSize="10">progress → review → progress…</text>
+
+        {/* AI capability line */}
+        <path d="M20,160 C140,155 260,105 350,30" fill="none" stroke="#c084fc" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="350" cy="30" r="4.5" fill="#c084fc" />
+        <text x="360" y="27" fill="#d8b4fe" fontSize="12" fontWeight="600">AI capability</text>
+        <text x="360" y="41" fill="#71717a" fontSize="10">and rising</text>
+      </svg>
+      <p className="mt-3 text-xs text-gray-500 text-center">
+        Illustrative, not measured data — the point is the shape of the gap, not the exact curve. The
+        Copilot line steps up because each burst of AI progress still waits on a human review checkpoint
+        before the next one starts.
+      </p>
+    </div>
+  )
+}
+
+function ParametersChart() {
+  const points = [
+    { label: 'GPT-2', year: '2019', display: '1.5B', params: 1.5e9, url: 'https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf' },
+    { label: 'GPT-3', year: '2020', display: '175B', params: 175e9, url: 'https://arxiv.org/abs/2005.14165' },
+    { label: 'PaLM', year: '2022', display: '540B', params: 540e9, url: 'https://arxiv.org/abs/2204.02311' },
+  ]
+  const logs = points.map(p => Math.log10(p.params))
+  const minLog = Math.min(...logs)
+  const maxLog = Math.max(...logs)
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5 space-y-4">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">
+        Model parameters, officially disclosed
+      </p>
+      <div className="flex items-end justify-center gap-8 h-32">
+        {points.map((p, i) => {
+          const h = ((logs[i] - minLog) / (maxLog - minLog)) * 80 + 20
+          return (
+            <div key={p.label} className="flex h-full w-16 flex-col items-center justify-end">
+              <span className="mb-1 text-xs font-bold text-white">{p.display}</span>
+              <div
+                className="w-full rounded-t-md bg-gradient-to-t from-purple-700 to-purple-400"
+                style={{ height: `${h}%` }}
+              />
+              <a
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 text-[11px] text-gray-400 underline underline-offset-2 hover:text-purple-300"
+              >
+                {p.label}
+              </a>
+              <span className="text-[10px] text-gray-600">{p.year}</span>
+            </div>
+          )
+        })}
+      </div>
+      <p className="text-[11px] text-gray-600 text-center pt-2 border-t border-gray-800">
+        Bar height is log-scaled — the raw jump is ~360× in three years. Newer frontier models (GPT-4 and
+        beyond) no longer disclose parameter counts at all.
+      </p>
+    </div>
+  )
+}
+
+function EfficiencyChart() {
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-3">
+        Compute needed for the same performance
+      </p>
+      <svg
+        viewBox="0 0 500 220"
+        className="w-full h-auto"
+        role="img"
+        aria-label="Line chart showing the compute required to reach a fixed level of language model performance declining over time"
+      >
+        <g stroke="#27272a" strokeWidth="1">
+          <line x1="20" y1="45" x2="350" y2="45" />
+          <line x1="20" y1="95" x2="350" y2="95" />
+          <line x1="20" y1="145" x2="350" y2="145" />
+        </g>
+        <line x1="20" y1="170" x2="350" y2="170" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="185" y="200" textAnchor="middle" fill="#71717a" fontSize="11">Time</text>
+        <text x="20" y="14" fill="#71717a" fontSize="11">↓ Compute needed</text>
+
+        <path d="M20,30 C120,55 200,95 260,130 C300,152 330,162 350,166" fill="none" stroke="#c084fc" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="20" cy="30" r="4" fill="#c084fc" />
+        <circle cx="350" cy="166" r="4.5" fill="#c084fc" />
+        <text x="360" y="169" fill="#d8b4fe" fontSize="12" fontWeight="600">−50% every ~8mo</text>
+      </svg>
+      <p className="mt-3 text-xs text-gray-500 text-center">
+        Curve illustrates the cited rate, not literal measured points. Source:{' '}
+        <a
+          href="https://epoch.ai/blog/algorithmic-progress-in-language-models"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-400 underline underline-offset-2 hover:text-purple-300"
+        >
+          Epoch AI, algorithmic progress in language models ↗
+        </a>
+      </p>
+    </div>
+  )
+}
+
+function MMLUChart() {
+  const points = [
+    { label: 'GPT-3', year: '2020', score: 43.9, x: 75, y: 164, dy: -12 },
+    { label: 'Chinchilla', year: '2022', score: 67.5, x: 195, y: 104, dy: -12 },
+    { label: 'PaLM 540B', year: '2022', score: 69.3, x: 255, y: 99, dy: 20 },
+    { label: 'GPT-4', year: '2023', score: 86.4, x: 340, y: 55, dy: 20 },
+    { label: 'Claude 3 Opus', year: '2024', score: 86.8, x: 400, y: 54, dy: -12 },
+    { label: 'GPT-4o', year: '2024', score: 88.7, x: 445, y: 49, dy: 20 },
+  ]
+  const yTicks = [
+    { score: 100, y: 20 },
+    { score: 80, y: 71 },
+    { score: 60, y: 123 },
+    { score: 40, y: 174 },
+  ]
+  const sources = [
+    { label: 'MMLU paper (Hendrycks et al., 2021)', url: 'https://arxiv.org/abs/2009.03300' },
+    { label: 'Chinchilla (Hoffmann et al., 2022)', url: 'https://arxiv.org/abs/2203.15556' },
+    { label: 'PaLM (Chowdhery et al., 2022)', url: 'https://arxiv.org/abs/2204.02311' },
+    { label: 'GPT-4 Technical Report', url: 'https://arxiv.org/abs/2303.08774' },
+    { label: 'Claude 3 model family', url: 'https://www.anthropic.com/news/claude-3-family' },
+    { label: 'GPT-4o System Card', url: 'https://openai.com/index/gpt-4o-system-card/' },
+  ]
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-3">
+        MMLU benchmark score by release date
+      </p>
+      <svg
+        viewBox="0 0 520 220"
+        className="w-full h-auto"
+        role="img"
+        aria-label="Scatter chart of published MMLU benchmark scores for GPT-3, Chinchilla, PaLM, GPT-4, Claude 3 Opus and GPT-4o by release year, approaching the human-expert average"
+      >
+        {yTicks.map(t => (
+          <g key={t.score}>
+            <line x1="40" y1={t.y} x2="460" y2={t.y} stroke="#27272a" strokeWidth="1" />
+            <text x="34" y={t.y + 3} textAnchor="end" fill="#71717a" fontSize="10">{t.score}</text>
+          </g>
+        ))}
+        <line x1="40" y1="200" x2="460" y2="200" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="250" y="216" textAnchor="middle" fill="#71717a" fontSize="11">Release date</text>
+
+        {/* human expert reference */}
+        <line x1="40" y1="46" x2="460" y2="46" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="5 4" />
+        <text x="44" y="40" fill="#fbbf24" fontSize="10" fontWeight="600">Human expert avg. ≈ 89.8%</text>
+
+        {points.map(p => (
+          <g key={p.label}>
+            <circle cx={p.x} cy={p.y} r="6" fill="#c084fc" stroke="#0b0b12" strokeWidth="1.5" />
+            <text x={p.x} y={p.y + p.dy} textAnchor="middle" fill="#e9d5ff" fontSize="10.5" fontWeight="600">
+              {p.label}
+            </text>
+            <text x={p.x} y={p.y + p.dy + (p.dy < 0 ? -11 : 11)} textAnchor="middle" fill="#71717a" fontSize="9">
+              {p.score}% · {p.year}
+            </text>
+          </g>
+        ))}
+      </svg>
+      <p className="mt-3 text-xs text-gray-500 text-center">
+        Recreated from published benchmark results, not copied from any single source — inspired by the kind
+        of MMLU-over-time charts you&apos;ll see across the industry (e.g.{' '}
+        <a
+          href="https://labelyourdata.com/articles/llm-fine-tuning/llm-model-size"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-400 underline underline-offset-2 hover:text-purple-300"
+        >
+          Label Your Data ↗
+        </a>
+        ).
+      </p>
+      <details className="group pt-3 mt-2 border-t border-gray-800">
+        <summary className="cursor-pointer list-none text-xs font-semibold text-gray-400 hover:text-purple-300 flex items-center justify-center gap-1.5 select-none">
+          <span>Sources &amp; further reading</span>
+          <span className="transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <ul className="mt-3 space-y-1.5">
+          {sources.map(s => (
+            <li key={s.url} className="text-xs text-center">
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 underline underline-offset-2 hover:text-purple-300"
+              >
+                {s.label} ↗
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
     </div>
   )
 }
@@ -42,6 +508,18 @@ export default function AIBeyondCopilotArticle() {
         <span>/</span>
         <span className="text-gray-300">Beyond the Copilot</span>
       </nav>
+
+      {/* Header image */}
+      <div className="relative mb-10 -mx-4 sm:-mx-6 md:mx-0 aspect-[16/9] md:aspect-[21/9] overflow-hidden md:rounded-2xl">
+        <Image
+          src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=1600&q=80"
+          alt="Abstract render evoking AI and machine intelligence"
+          fill
+          priority
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+      </div>
 
       {/* Header */}
       <div className="mb-10">
@@ -76,18 +554,21 @@ export default function AIBeyondCopilotArticle() {
               because it preserved the most important thing: you were still the pilot. The machine was just along for the
               ride.
             </P>
-            <P>
-              That framing has aged badly. Not because the product failed, but because the trajectory of the technology
-              made the metaphor obsolete faster than anyone expected. A copilot waits for direction. It doesn&apos;t
-              anticipate. It doesn&apos;t architect. It certainly doesn&apos;t start refactoring your codebase at 3 a.m.
-              while you sleep. But increasingly, the tools we build around AI do all of those things.
-            </P>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:items-center">
+              <P>
+                That framing has aged badly. Not because the product failed, but because the trajectory of the technology
+                made the metaphor obsolete faster than anyone expected. A copilot waits for direction. It doesn&apos;t
+                anticipate. It doesn&apos;t architect. It certainly doesn&apos;t start refactoring your codebase at 3 a.m.
+                while you sleep. But increasingly, the tools we build around AI do all of those things.
+              </P>
+              <DeliverablesChart />
+            </div>
             <P>
               The problem is we haven&apos;t replaced the metaphor. We&apos;re still using the language of copilots and
               assistants to describe something that is rapidly becoming something else entirely — and the gap between
               our vocabulary and our reality is where most of the anxiety about AI lives.
             </P>
-            <Callout icon="✈️">
+            <Callout icon="✈️" tone="sky">
               The copilot metaphor implies a fixed division of labour. But the velocity of AI development doesn&apos;t
               respect fixed divisions. The passenger seat today is the driver&apos;s seat by next year — and the
               cockpit door may not be labeled the same way twice.
@@ -106,6 +587,13 @@ export default function AIBeyondCopilotArticle() {
               ceiling rises. A hammer is a hammer in ten years. Spreadsheets got better slowly, over decades. AI systems
               are improving on timescales that make annual planning feel like archaeology.
             </P>
+            <VelocityChart />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ParametersChart />
+              <EfficiencyChart />
+            </div>
+            <MMLUChart />
+            <PullQuote>AI is not a copilot. It is the pilot.</PullQuote>
             <P>
               This creates a specific kind of cognitive dissonance. The tool you onboarded three months ago is not the
               same tool you&apos;re using today. The workflows you built around it are already optimised for a version that
@@ -176,19 +664,22 @@ export default function AIBeyondCopilotArticle() {
               numbers obscure.
             </P>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <StatBlock
-                stat="76%"
+            <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5 space-y-5">
+              <BarRow
+                pct={76}
+                value="76%"
                 label="Use or plan to use AI tools"
                 sub="A supermajority — but adoption is not the same as confidence"
               />
-              <StatBlock
-                stat="45%"
+              <BarRow
+                pct={45}
+                value="45%"
                 label="Don't fully trust AI output"
                 sub="Verification adds back much of the time saved"
               />
-              <StatBlock
-                stat="~1 in 3"
+              <BarRow
+                pct={33}
+                value="~1 in 3"
                 label="Worried about job displacement"
                 sub="The fear is real and concentrated in junior roles"
               />
@@ -281,6 +772,7 @@ export default function AIBeyondCopilotArticle() {
               requirements. The stakeholder conversation that needs a human in the room. The ethical question
               the model cannot answer because it requires values, not probabilities.
             </P>
+            <CapabilityChart />
             <P>
               But this only works if we are intentional about what we keep. The best version of an AI-augmented
               workflow is not one where you hand everything to the model and review the output. It is one where
