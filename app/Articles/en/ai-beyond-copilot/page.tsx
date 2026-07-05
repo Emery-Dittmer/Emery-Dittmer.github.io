@@ -402,67 +402,31 @@ function EfficiencyChart() {
 }
 
 function MMLUChart() {
-  const points = [
-    { label: 'GPT-3', year: '2020', score: 43.9, x: 75, y: 164, dy: -12 },
-    { label: 'Chinchilla', year: '2022', score: 67.5, x: 195, y: 104, dy: -12 },
-    { label: 'PaLM 540B', year: '2022', score: 69.3, x: 255, y: 99, dy: 20 },
-    { label: 'GPT-4', year: '2023', score: 86.4, x: 340, y: 55, dy: 20 },
-    { label: 'Claude 3 Opus', year: '2024', score: 86.8, x: 400, y: 54, dy: -12 },
-    { label: 'GPT-4o', year: '2024', score: 88.7, x: 445, y: 49, dy: 20 },
-  ]
-  const yTicks = [
-    { score: 100, y: 20 },
-    { score: 80, y: 71 },
-    { score: 60, y: 123 },
-    { score: 40, y: 174 },
-  ]
-  const sources = [
-    { label: 'MMLU paper (Hendrycks et al., 2021)', url: 'https://arxiv.org/abs/2009.03300' },
-    { label: 'Chinchilla (Hoffmann et al., 2022)', url: 'https://arxiv.org/abs/2203.15556' },
-    { label: 'PaLM (Chowdhery et al., 2022)', url: 'https://arxiv.org/abs/2204.02311' },
-    { label: 'GPT-4 Technical Report', url: 'https://arxiv.org/abs/2303.08774' },
-    { label: 'Claude 3 model family', url: 'https://www.anthropic.com/news/claude-3-family' },
-    { label: 'GPT-4o System Card', url: 'https://openai.com/index/gpt-4o-system-card/' },
-  ]
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5">
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-3">
         MMLU benchmark score by release date
       </p>
-      <svg
-        viewBox="0 0 520 220"
-        className="w-full h-auto"
-        role="img"
-        aria-label="Scatter chart of published MMLU benchmark scores for GPT-3, Chinchilla, PaLM, GPT-4, Claude 3 Opus and GPT-4o by release year, approaching the human-expert average"
-      >
-        {yTicks.map(t => (
-          <g key={t.score}>
-            <line x1="40" y1={t.y} x2="460" y2={t.y} stroke="#27272a" strokeWidth="1" />
-            <text x="34" y={t.y + 3} textAnchor="end" fill="#71717a" fontSize="10">{t.score}</text>
-          </g>
-        ))}
-        <line x1="40" y1="200" x2="460" y2="200" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="250" y="216" textAnchor="middle" fill="#71717a" fontSize="11">Release date</text>
-
-        {/* human expert reference */}
-        <line x1="40" y1="46" x2="460" y2="46" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="5 4" />
-        <text x="44" y="40" fill="#fbbf24" fontSize="10" fontWeight="600">Human expert avg. ≈ 89.8%</text>
-
-        {points.map(p => (
-          <g key={p.label}>
-            <circle cx={p.x} cy={p.y} r="6" fill="#c084fc" stroke="#0b0b12" strokeWidth="1.5" />
-            <text x={p.x} y={p.y + p.dy} textAnchor="middle" fill="#e9d5ff" fontSize="10.5" fontWeight="600">
-              {p.label}
-            </text>
-            <text x={p.x} y={p.y + p.dy + (p.dy < 0 ? -11 : 11)} textAnchor="middle" fill="#71717a" fontSize="9">
-              {p.score}% · {p.year}
-            </text>
-          </g>
-        ))}
-      </svg>
+      <div className="relative w-full overflow-hidden rounded-lg border border-gray-800">
+        <Image
+          src="/images/articles/llm-mmlu-model-size.jpg"
+          alt="Bubble chart of 100+ LLM releases from 2020-2025 by MMLU score and release date, bubble size showing parameter count and color showing developer, with a human-expert reference line at 89.8%"
+          width={1200}
+          height={630}
+          className="w-full h-auto"
+        />
+      </div>
       <p className="mt-3 text-xs text-gray-500 text-center">
-        Recreated from published benchmark results, not copied from any single source — inspired by the kind
-        of MMLU-over-time charts you&apos;ll see across the industry (e.g.{' '}
+        Chart credit:{' '}
+        <a
+          href="https://informationisbeautiful.net/visualizations/the-rise-of-generative-ai-large-language-models-llms-like-chatgpt/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-400 underline underline-offset-2 hover:text-purple-300"
+        >
+          Information is Beautiful ↗
+        </a>
+        , via{' '}
         <a
           href="https://labelyourdata.com/articles/llm-fine-tuning/llm-model-size"
           target="_blank"
@@ -471,28 +435,8 @@ function MMLUChart() {
         >
           Label Your Data ↗
         </a>
-        ).
+        . Reused under CC BY-NC (non-commercial, attributed).
       </p>
-      <details className="group pt-3 mt-2 border-t border-gray-800">
-        <summary className="cursor-pointer list-none text-xs font-semibold text-gray-400 hover:text-purple-300 flex items-center justify-center gap-1.5 select-none">
-          <span>Sources &amp; further reading</span>
-          <span className="transition-transform group-open:rotate-180">⌄</span>
-        </summary>
-        <ul className="mt-3 space-y-1.5">
-          {sources.map(s => (
-            <li key={s.url} className="text-xs text-center">
-              <a
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 underline underline-offset-2 hover:text-purple-300"
-              >
-                {s.label} ↗
-              </a>
-            </li>
-          ))}
-        </ul>
-      </details>
     </div>
   )
 }
