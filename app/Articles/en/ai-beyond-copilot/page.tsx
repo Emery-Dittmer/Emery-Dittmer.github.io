@@ -264,7 +264,40 @@ function DeliverablesChart() {
   )
 }
 
+function sigmoidPath({
+  x0,
+  x1,
+  yStart,
+  yPlateau,
+  k = 9,
+  midpoint = 0.5,
+  samples = 60,
+}: {
+  x0: number
+  x1: number
+  yStart: number
+  yPlateau: number
+  k?: number
+  midpoint?: number
+  samples?: number
+}) {
+  // y = A * S(f(x)) + B, where S is the logistic sigmoid and f(x) = k * (x - midpoint)
+  const A = yPlateau - yStart
+  const B = yStart
+  const points: string[] = []
+  for (let i = 0; i <= samples; i++) {
+    const t = i / samples
+    const fx = k * (t - midpoint)
+    const s = 1 / (1 + Math.exp(-fx))
+    const y = A * s + B
+    const x = x0 + t * (x1 - x0)
+    points.push(`${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`)
+  }
+  return points.join(' ')
+}
+
 function VelocityChart() {
+  const aiCapabilityPath = sigmoidPath({ x0: 20, x1: 460, yStart: 162, yPlateau: 15 })
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5">
       <svg
@@ -303,13 +336,14 @@ function VelocityChart() {
         <text x="470" y="45" fill="#7dd3fc" fontSize="12" fontWeight="600">Copilot workflow</text>
         <text x="470" y="59" fill="#71717a" fontSize="10">progress → review → progress…</text>
 
-        {/* AI capability line: S-curve — slow start, exponential takeoff, then plateau */}
+        {/* AI capability line: y = A·S(f(x)) + B, a true logistic sigmoid — slow start, exponential takeoff, plateau */}
         <path
-          d="M20,160 C100,158 180,152 220,138 C260,112 300,50 330,28 C360,19 400,16 460,15"
+          d={aiCapabilityPath}
           fill="none"
           stroke="#c084fc"
           strokeWidth="2.5"
           strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <circle cx="460" cy="15" r="4.5" fill="#c084fc" />
         <text x="470" y="12" fill="#d8b4fe" fontSize="12" fontWeight="600">AI capability</text>
@@ -317,10 +351,10 @@ function VelocityChart() {
       </svg>
       <p className="mt-3 text-xs text-gray-500 text-center">
         Illustrative, not measured data — the point is the shape of the gap, not the exact curve. AI
-        capability is modeled as an S-curve (slow start, rapid takeoff, then a plateau), while the
-        Copilot workflow and traditional tools keep advancing on roughly linear paths — the Copilot
-        line steps up because each burst of AI progress still waits on a human review checkpoint
-        before the next one starts.
+        capability is a real logistic sigmoid, y = A·S(f(x)) + B (slow start, exponential takeoff,
+        then a plateau), while the Copilot workflow and traditional tools keep advancing on roughly
+        linear paths — the Copilot line steps up because each burst of AI progress still waits on a
+        human review checkpoint before the next one starts.
       </p>
     </div>
   )
