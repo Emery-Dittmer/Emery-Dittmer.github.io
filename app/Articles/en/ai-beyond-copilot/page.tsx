@@ -208,53 +208,56 @@ function DeliverablesChart() {
             </div>
           )
         })}
-
-        <div className="pt-4 border-t border-gray-800 space-y-1.5">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-gray-300">AI working alone, no human in the loop</p>
-            <a
-              href="https://arxiv.org/abs/2503.14499"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 underline underline-offset-2 hover:text-purple-300 text-[11px] shrink-0"
-            >
-              METR, Mar 2025 ↗
-            </a>
-          </div>
-          <p className="text-sm font-semibold text-purple-300">
-            Task length it can complete autonomously ~doubles every 7 months
-          </p>
-          <p className="text-[11px] text-gray-600">
-            50% reliability threshold, frontier agents (e.g. Devin/Cursor-style autonomous mode), 2019–2025 trend
-          </p>
-        </div>
       </div>
-      <p className="text-xs text-gray-500 text-center pt-3 border-t border-gray-800">
-        Three real data points, three different framings — a scripted benchmark, developers&apos; own production
-        codebases, and agents working with nobody watching. None of them agree on a single number, because
-        &quot;does AI make you more productive&quot; isn&apos;t one question.
-      </p>
 
       <details className="group pt-1">
         <summary className="cursor-pointer list-none text-xs font-semibold text-gray-400 hover:text-purple-300 flex items-center justify-center gap-1.5 select-none">
-          <span>Sources &amp; further reading</span>
+          <span>More detail &amp; sources</span>
           <span className="transition-transform group-open:rotate-180">⌄</span>
         </summary>
-        <div className="mt-4 space-y-4">
-          {sources.map(s => (
-            <div key={s.url} className="border-t border-gray-800 pt-3 first:border-t-0 first:pt-0">
+        <div className="mt-4 space-y-5">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-gray-300">AI working alone, no human in the loop</p>
               <a
-                href={s.url}
+                href="https://arxiv.org/abs/2503.14499"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-semibold text-gray-200 underline underline-offset-2 hover:text-purple-300"
+                className="text-gray-500 underline underline-offset-2 hover:text-purple-300 text-[11px] shrink-0"
               >
-                {s.title} ↗
+                METR, Mar 2025 ↗
               </a>
-              <p className="text-xs text-gray-500 mt-0.5">{s.authors}</p>
-              <p className="text-[11px] text-gray-600 mt-1">{s.note}</p>
             </div>
-          ))}
+            <p className="text-sm font-semibold text-purple-300">
+              Task length it can complete autonomously ~doubles every 7 months
+            </p>
+            <p className="text-[11px] text-gray-600">
+              50% reliability threshold, frontier agents (e.g. Devin/Cursor-style autonomous mode), 2019–2025 trend
+            </p>
+          </div>
+
+          <p className="text-xs text-gray-500 border-t border-gray-800 pt-4">
+            Three real data points, three different framings — a scripted benchmark, developers&apos; own production
+            codebases, and agents working with nobody watching. None of them agree on a single number, because
+            &quot;does AI make you more productive&quot; isn&apos;t one question.
+          </p>
+
+          <div className="space-y-4 border-t border-gray-800 pt-4">
+            {sources.map(s => (
+              <div key={s.url} className="border-t border-gray-800 pt-3 first:border-t-0 first:pt-0">
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-gray-200 underline underline-offset-2 hover:text-purple-300"
+                >
+                  {s.title} ↗
+                </a>
+                <p className="text-xs text-gray-500 mt-0.5">{s.authors}</p>
+                <p className="text-[11px] text-gray-600 mt-1">{s.note}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </details>
     </div>
@@ -265,50 +268,58 @@ function VelocityChart() {
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5">
       <svg
-        viewBox="0 0 500 220"
+        viewBox="0 0 620 220"
         className="w-full h-auto"
         role="img"
-        aria-label="Conceptual chart showing AI capability rising steeply over time, a Copilot-style workflow stepping up in progress-then-review increments, and traditional tools staying roughly flat"
+        aria-label="Conceptual chart showing AI capability as an S-curve that rises steeply then plateaus over an extended timeline, a Copilot-style workflow stepping up in progress-then-review increments on a roughly linear trend, and traditional tools staying roughly flat"
       >
         {/* gridlines */}
         <g stroke="#27272a" strokeWidth="1">
-          <line x1="20" y1="45" x2="350" y2="45" />
-          <line x1="20" y1="95" x2="350" y2="95" />
-          <line x1="20" y1="145" x2="350" y2="145" />
+          <line x1="20" y1="45" x2="460" y2="45" />
+          <line x1="20" y1="95" x2="460" y2="95" />
+          <line x1="20" y1="145" x2="460" y2="145" />
         </g>
         {/* axes */}
-        <line x1="20" y1="170" x2="350" y2="170" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="185" y="200" textAnchor="middle" fill="#71717a" fontSize="11">Time</text>
+        <line x1="20" y1="170" x2="460" y2="170" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="240" y="200" textAnchor="middle" fill="#71717a" fontSize="11">Time</text>
         <text x="20" y="14" fill="#71717a" fontSize="11">↑ Capability</text>
 
-        {/* traditional tools line */}
-        <path d="M20,165 C140,163 260,160 350,150" fill="none" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="350" cy="150" r="4" fill="#71717a" />
-        <text x="360" y="147" fill="#a1a1aa" fontSize="12" fontWeight="600">Traditional tools</text>
-        <text x="360" y="161" fill="#71717a" fontSize="10">(hammer, spreadsheet)</text>
+        {/* traditional tools line: continues its roughly linear trend */}
+        <path d="M20,165 C160,163 320,160 460,152" fill="none" stroke="#71717a" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="460" cy="152" r="4" fill="#71717a" />
+        <text x="470" y="149" fill="#a1a1aa" fontSize="12" fontWeight="600">Traditional tools</text>
+        <text x="470" y="163" fill="#71717a" fontSize="10">(hammer, spreadsheet)</text>
 
-        {/* copilot workflow: progress, review, progress, review... */}
+        {/* copilot workflow: progress, review, progress, review... continues its linear trend */}
         <path
-          d="M20,160 L20,146 L75,146 L75,127 L130,127 L130,110 L185,110 L185,94 L240,94 L240,79 L295,79 L295,66 L350,66"
+          d="M20,160 L20,146 L75,146 L75,132 L130,132 L130,118 L185,118 L185,104 L240,104 L240,90 L295,90 L295,76 L350,76 L350,62 L405,62 L405,48 L460,48"
           fill="none"
           stroke="#38bdf8"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle cx="350" cy="66" r="4.5" fill="#38bdf8" />
-        <text x="360" y="63" fill="#7dd3fc" fontSize="12" fontWeight="600">Copilot workflow</text>
-        <text x="360" y="77" fill="#71717a" fontSize="10">progress → review → progress…</text>
+        <circle cx="460" cy="48" r="4.5" fill="#38bdf8" />
+        <text x="470" y="45" fill="#7dd3fc" fontSize="12" fontWeight="600">Copilot workflow</text>
+        <text x="470" y="59" fill="#71717a" fontSize="10">progress → review → progress…</text>
 
-        {/* AI capability line */}
-        <path d="M20,160 C140,155 260,105 350,30" fill="none" stroke="#c084fc" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="350" cy="30" r="4.5" fill="#c084fc" />
-        <text x="360" y="27" fill="#d8b4fe" fontSize="12" fontWeight="600">AI capability</text>
-        <text x="360" y="41" fill="#71717a" fontSize="10">and rising</text>
+        {/* AI capability line: S-curve — slow start, exponential takeoff, then plateau */}
+        <path
+          d="M20,160 C100,158 180,152 220,138 C260,112 300,50 330,28 C360,19 400,16 460,15"
+          fill="none"
+          stroke="#c084fc"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+        <circle cx="460" cy="15" r="4.5" fill="#c084fc" />
+        <text x="470" y="12" fill="#d8b4fe" fontSize="12" fontWeight="600">AI capability</text>
+        <text x="470" y="26" fill="#71717a" fontSize="10">then plateaus</text>
       </svg>
       <p className="mt-3 text-xs text-gray-500 text-center">
-        Illustrative, not measured data — the point is the shape of the gap, not the exact curve. The
-        Copilot line steps up because each burst of AI progress still waits on a human review checkpoint
+        Illustrative, not measured data — the point is the shape of the gap, not the exact curve. AI
+        capability is modeled as an S-curve (slow start, rapid takeoff, then a plateau), while the
+        Copilot workflow and traditional tools keep advancing on roughly linear paths — the Copilot
+        line steps up because each burst of AI progress still waits on a human review checkpoint
         before the next one starts.
       </p>
     </div>
@@ -499,19 +510,21 @@ export default function AIBeyondCopilotArticle() {
               ride.
             </P>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:items-center">
-              <P>
-                That framing has aged badly. Not because the product failed, but because the trajectory of the technology
-                made the metaphor obsolete faster than anyone expected. A copilot waits for direction. It doesn&apos;t
-                anticipate. It doesn&apos;t architect. It certainly doesn&apos;t start refactoring your codebase at 3 a.m.
-                while you sleep. But increasingly, the tools we build around AI do all of those things.
-              </P>
+              <div className="space-y-4">
+                <P>
+                  That framing has aged badly. Not because the product failed, but because the trajectory of the technology
+                  made the metaphor obsolete faster than anyone expected. A copilot waits for direction. It doesn&apos;t
+                  anticipate. It doesn&apos;t architect. It certainly doesn&apos;t start refactoring your codebase at 3 a.m.
+                  while you sleep. But increasingly, the tools we build around AI do all of those things.
+                </P>
+                <P>
+                  The problem is we haven&apos;t replaced the metaphor. We&apos;re still using the language of copilots and
+                  assistants to describe something that is rapidly becoming something else entirely — and the gap between
+                  our vocabulary and our reality is where most of the anxiety about AI lives.
+                </P>
+              </div>
               <DeliverablesChart />
             </div>
-            <P>
-              The problem is we haven&apos;t replaced the metaphor. We&apos;re still using the language of copilots and
-              assistants to describe something that is rapidly becoming something else entirely — and the gap between
-              our vocabulary and our reality is where most of the anxiety about AI lives.
-            </P>
             <Callout icon="✈️" tone="sky">
               The copilot metaphor implies a fixed division of labour. But the velocity of AI development doesn&apos;t
               respect fixed divisions. The passenger seat today is the driver&apos;s seat by next year — and the
