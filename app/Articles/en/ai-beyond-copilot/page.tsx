@@ -264,32 +264,30 @@ function DeliverablesChart() {
   )
 }
 
-function sigmoidPath({
+function exponentialPath({
   x0,
   x1,
   yStart,
-  yPlateau,
-  k = 9,
-  midpoint = 0.5,
+  yEnd,
+  k = 4.5,
   samples = 60,
 }: {
   x0: number
   x1: number
   yStart: number
-  yPlateau: number
+  yEnd: number
   k?: number
-  midpoint?: number
   samples?: number
 }) {
-  // y = A * S(f(x)) + B, where S is the logistic sigmoid and f(x) = k * (x - midpoint)
-  const A = yPlateau - yStart
+  // y = A * (e^(k*x) - 1) / (e^k - 1) + B — continuously accelerating growth, no plateau
+  const A = yEnd - yStart
   const B = yStart
+  const denom = Math.exp(k) - 1
   const points: string[] = []
   for (let i = 0; i <= samples; i++) {
     const t = i / samples
-    const fx = k * (t - midpoint)
-    const s = 1 / (1 + Math.exp(-fx))
-    const y = A * s + B
+    const growth = (Math.exp(k * t) - 1) / denom
+    const y = A * growth + B
     const x = x0 + t * (x1 - x0)
     points.push(`${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`)
   }
@@ -297,14 +295,14 @@ function sigmoidPath({
 }
 
 function VelocityChart() {
-  const aiCapabilityPath = sigmoidPath({ x0: 20, x1: 460, yStart: 162, yPlateau: 15 })
+  const aiCapabilityPath = exponentialPath({ x0: 20, x1: 460, yStart: 162, yEnd: 15 })
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-5">
       <svg
         viewBox="0 0 620 220"
         className="w-full h-auto"
         role="img"
-        aria-label="Conceptual chart showing AI capability as an S-curve that rises steeply then plateaus over an extended timeline, a Copilot-style workflow stepping up in progress-then-review increments on a roughly linear trend, and traditional tools staying roughly flat"
+        aria-label="Conceptual chart showing AI capability rising on an accelerating exponential curve over an extended timeline, a Copilot-style workflow stepping up in progress-then-review increments on a roughly linear trend, and traditional tools staying roughly flat"
       >
         {/* gridlines */}
         <g stroke="#27272a" strokeWidth="1">
@@ -336,7 +334,7 @@ function VelocityChart() {
         <text x="470" y="45" fill="#7dd3fc" fontSize="12" fontWeight="600">Copilot workflow</text>
         <text x="470" y="59" fill="#71717a" fontSize="10">progress → review → progress…</text>
 
-        {/* AI capability line: y = A·S(f(x)) + B, a true logistic sigmoid — slow start, exponential takeoff, plateau */}
+        {/* AI capability line: y = A·(e^(kx) - 1)/(e^k - 1) + B, a true exponential — continuously accelerating, no plateau */}
         <path
           d={aiCapabilityPath}
           fill="none"
@@ -347,14 +345,14 @@ function VelocityChart() {
         />
         <circle cx="460" cy="15" r="4.5" fill="#c084fc" />
         <text x="470" y="12" fill="#d8b4fe" fontSize="12" fontWeight="600">AI capability</text>
-        <text x="470" y="26" fill="#71717a" fontSize="10">then plateaus</text>
+        <text x="470" y="26" fill="#71717a" fontSize="10">and accelerating</text>
       </svg>
       <p className="mt-3 text-xs text-gray-500 text-center">
         Illustrative, not measured data — the point is the shape of the gap, not the exact curve. AI
-        capability is a real logistic sigmoid, y = A·S(f(x)) + B (slow start, exponential takeoff,
-        then a plateau), while the Copilot workflow and traditional tools keep advancing on roughly
-        linear paths — the Copilot line steps up because each burst of AI progress still waits on a
-        human review checkpoint before the next one starts.
+        capability is a real computed exponential curve (continuously accelerating, no plateau), while
+        the Copilot workflow and traditional tools keep advancing on roughly linear paths — the Copilot
+        line steps up because each burst of AI progress still waits on a human review checkpoint
+        before the next one starts.
       </p>
     </div>
   )
