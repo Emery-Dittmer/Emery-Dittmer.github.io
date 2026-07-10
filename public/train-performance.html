@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>French Train Performance</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,159 +22,251 @@
     /* ── Header ── */
     header {
       background: #16213e;
-      border-bottom: 1px solid #0f3460;
-      padding: 1.5rem 2rem;
+      border-bottom: 2px solid #e94560;
+      padding: 1.4rem 2rem 1rem;
       text-align: center;
     }
-    header h1 {
-      font-size: clamp(1.4rem, 4vw, 2rem);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      color: #ffffff;
+    header h1 { font-size: clamp(1.3rem, 4vw, 1.9rem); font-weight: 700; color: #fff; }
+    header p.subtitle { margin-top: 0.3rem; font-size: 0.85rem; color: #8892b0; }
+    header p.last-updated { margin-top: 0.2rem; font-size: 0.75rem; color: #5a6480; }
+
+    /* ── Filter bar ── */
+    #filter-bar {
+      background: #16213e;
+      border-bottom: 1px solid #0f3460;
+      padding: 0.85rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      justify-content: center;
     }
-    header p.subtitle {
-      margin-top: 0.35rem;
-      font-size: 0.9rem;
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
       color: #8892b0;
     }
-    header p.last-updated {
-      margin-top: 0.25rem;
-      font-size: 0.8rem;
-      color: #6a7490;
+    .filter-group label { white-space: nowrap; }
+    .filter-group input[type="date"],
+    .filter-group input[type="time"] {
+      background: #0f1a2e;
+      border: 1px solid #0f3460;
+      border-radius: 6px;
+      color: #e0e0e0;
+      padding: 0.3rem 0.55rem;
+      font-size: 0.82rem;
+      outline: none;
+    }
+    .filter-group input:focus { border-color: #e94560; }
+    .filter-sep { color: #5a6480; font-size: 0.8rem; }
+    #apply-btn {
+      background: #e94560;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.35rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #apply-btn:hover { background: #c73652; }
+    #apply-btn:disabled { background: #5a6480; cursor: not-allowed; }
+
+    /* ── Stats row ── */
+    #stats-row {
+      display: none;
+      max-width: 1200px;
+      width: 100%;
+      margin: 1.25rem auto 0;
+      padding: 0 1.25rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .stat-card {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      text-align: center;
+    }
+    .stat-card .stat-value {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #e94560;
+      line-height: 1;
+    }
+    .stat-card .stat-label {
+      font-size: 0.72rem;
+      color: #8892b0;
+      margin-top: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    /* ── Main content ── */
+    /* ── Main grid ── */
     main {
       flex: 1;
       max-width: 1200px;
       width: 100%;
-      margin: 0 auto;
-      padding: 2rem 1.25rem;
+      margin: 1.25rem auto 2rem;
+      padding: 0 1.25rem;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
+      gap: 1.25rem;
       align-items: start;
     }
-
-    /* Wide trend card spans full row */
-    .card-full {
-      grid-column: 1 / -1;
-    }
+    .card-full { grid-column: 1 / -1; }
 
     /* ── Card ── */
     .card {
       background: #16213e;
       border: 1px solid #0f3460;
       border-radius: 12px;
-      padding: 1.5rem;
+      padding: 1.25rem 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.85rem;
     }
     .card h2 {
-      font-size: 1rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      color: #ccd6f6;
-      letter-spacing: 0.03em;
+      color: #8892b0;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .chart-wrapper {
-      position: relative;
-      width: 100%;
-    }
-    /* Fixed heights for canvas containers */
-    .chart-wrapper.bar-wrapper   { height: 260px; }
-    .chart-wrapper.donut-wrapper { height: 280px; }
-    .chart-wrapper.line-wrapper  { height: 300px; }
-
+    .chart-wrapper { position: relative; width: 100%; }
+    .bar-wrapper   { height: 260px; }
+    .donut-wrapper { height: 280px; }
+    .line-wrapper  { height: 280px; }
+    .map-wrapper   { height: 500px; border-radius: 8px; overflow: hidden; }
     canvas { display: block; width: 100% !important; }
+
+    /* ── Map legend ── */
+    .map-legend {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.75rem;
+      color: #8892b0;
+    }
+    .map-legend-item { display: flex; align-items: center; gap: 0.4rem; }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    #map-status { font-size: 0.75rem; color: #5a6480; font-style: italic; }
 
     /* ── Spinner ── */
     #loading-overlay {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: #1a1a2e;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      z-index: 100;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; z-index: 9999;
     }
     .spinner {
-      width: 48px;
-      height: 48px;
+      width: 44px; height: 44px;
       border: 4px solid #0f3460;
       border-top-color: #e94560;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    #loading-overlay p { color: #8892b0; font-size: 0.9rem; }
+    #loading-overlay p { color: #8892b0; font-size: 0.85rem; }
 
     /* ── Error banner ── */
     #error-banner {
       display: none;
-      background: #3b0a0a;
-      border: 1px solid #7f1d1d;
-      color: #fca5a5;
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      margin: 1.5rem auto;
-      max-width: 700px;
-      font-size: 0.9rem;
-      text-align: center;
+      background: #3b0a0a; border: 1px solid #7f1d1d;
+      color: #fca5a5; border-radius: 8px;
+      padding: 0.9rem 1.25rem; margin: 1.25rem auto;
+      max-width: 700px; font-size: 0.85rem; text-align: center;
     }
 
     /* ── Footer ── */
     footer {
-      background: #16213e;
-      border-top: 1px solid #0f3460;
-      padding: 1.25rem 2rem;
-      text-align: center;
-      font-size: 0.78rem;
-      color: #6a7490;
-      line-height: 1.6;
+      background: #16213e; border-top: 1px solid #0f3460;
+      padding: 1.1rem 2rem; text-align: center;
+      font-size: 0.75rem; color: #5a6480; line-height: 1.7;
     }
-    footer a {
-      color: #e94560;
-      text-decoration: none;
-      font-weight: 600;
-    }
+    footer a { color: #e94560; text-decoration: none; font-weight: 600; }
     footer a:hover { text-decoration: underline; }
 
     /* ── Responsive ── */
-    @media (max-width: 600px) {
-      main { padding: 1rem 0.75rem; gap: 1rem; }
-      .card { padding: 1rem; }
-      .chart-wrapper.bar-wrapper   { height: 220px; }
-      .chart-wrapper.donut-wrapper { height: 240px; }
-      .chart-wrapper.line-wrapper  { height: 240px; }
+    @media (max-width: 700px) {
+      #stats-row { grid-template-columns: repeat(2, 1fr); }
+      main { margin-top: 1rem; }
+      .bar-wrapper { height: 220px; }
+      .donut-wrapper { height: 240px; }
+      .line-wrapper { height: 240px; }
+      .map-wrapper { height: 360px; }
+    }
+    @media (max-width: 400px) {
+      #stats-row { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- Loading overlay -->
 <div id="loading-overlay">
   <div class="spinner"></div>
-  <p>Fetching train performance data…</p>
+  <p id="loading-msg">Fetching train data…</p>
 </div>
 
-<!-- Error banner (shown if fetch fails) -->
 <div id="error-banner"></div>
 
-<!-- Header -->
 <header>
   <h1>🚄 French Train Performance</h1>
-  <p class="subtitle">Last 30 days of real-time data</p>
+  <p class="subtitle">Real-time GTFS-RT data · updated daily</p>
   <p class="last-updated" id="last-updated"></p>
 </header>
 
-<!-- Charts -->
+<div id="filter-bar">
+  <div class="filter-group">
+    <label for="from-date">From</label>
+    <input type="date" id="from-date" />
+  </div>
+  <div class="filter-group">
+    <label for="to-date">To</label>
+    <input type="date" id="to-date" />
+  </div>
+  <span class="filter-sep">|</span>
+  <div class="filter-group">
+    <label for="time-from">Depart after</label>
+    <input type="time" id="time-from" value="00:00" />
+  </div>
+  <div class="filter-group">
+    <label for="time-to">before</label>
+    <input type="time" id="time-to" value="23:59" />
+  </div>
+  <button id="apply-btn">Apply</button>
+</div>
+
+<div id="stats-row">
+  <div class="stat-card">
+    <div class="stat-value" id="stat-trips">—</div>
+    <div class="stat-label">Trips analysed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-ontime">—</div>
+    <div class="stat-label">Overall on-time</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-delay">—</div>
+    <div class="stat-label">Avg departure delay</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-sources">—</div>
+    <div class="stat-label">Feed sources</div>
+  </div>
+</div>
+
 <main id="dashboard" style="display:none;">
 
-  <!-- 1. On-time rate by train type -->
   <div class="card">
     <h2>On-Time Rate by Train Type</h2>
     <div class="chart-wrapper bar-wrapper">
@@ -180,7 +274,6 @@
     </div>
   </div>
 
-  <!-- 2. Delay distribution -->
   <div class="card">
     <h2>Delay Distribution</h2>
     <div class="chart-wrapper donut-wrapper">
@@ -188,7 +281,6 @@
     </div>
   </div>
 
-  <!-- 3. 30-day trend (full width) -->
   <div class="card card-full">
     <h2>30-Day Average Delay Trend</h2>
     <div class="chart-wrapper line-wrapper">
@@ -196,274 +288,345 @@
     </div>
   </div>
 
+  <div class="card card-full">
+    <h2>Delay Map — Stations</h2>
+    <div class="chart-wrapper map-wrapper" id="map-container"></div>
+    <div class="map-legend">
+      <span class="map-legend-item"><span class="legend-dot" style="background:#22c55e"></span> On time (≤2 min avg)</span>
+      <span class="map-legend-item"><span class="legend-dot" style="background:#f59e0b"></span> Slight (2–5 min)</span>
+      <span class="map-legend-item"><span class="legend-dot" style="background:#ef4444"></span> Delayed (&gt;5 min)</span>
+      <span style="margin-left:auto;" id="map-status"></span>
+    </div>
+  </div>
+
 </main>
 
-<!-- Footer -->
 <footer>
   <p>Data collected from SNCF, Eurostar and Trenitalia GTFS-RT feeds every 10 minutes.
-     On-time = departure within 60 seconds of schedule.</p>
+     On-time = departure within 60 seconds of published schedule.
+     Map shows average delay per consecutive-stop segment over the selected period.</p>
   <p style="margin-top:0.4rem;">
     <a href="#">Read the analysis on Medium →</a>
   </p>
 </footer>
 
 <script>
-  const API = 'https://gpvwn1lb29.execute-api.eu-west-3.amazonaws.com/performance';
+  const BASE   = 'https://gpvwn1lb29.execute-api.eu-west-3.amazonaws.com';
+  const PERF   = BASE + '/performance';
+  const SECT   = BASE + '/sections';
 
   /* ── Colour helpers ── */
-  function onTimeColor(pct) {
-    if (pct >= 80) return '#22c55e';   // green
-    if (pct >= 60) return '#f59e0b';   // amber
-    return '#ef4444';                   // red
-  }
+  const onTimeColor = pct => pct >= 80 ? '#22c55e' : pct >= 60 ? '#f59e0b' : '#ef4444';
+  const delayColor  = d   => d === null ? '#4a5568' : d <= 2 ? '#22c55e' : d <= 5 ? '#f59e0b' : '#ef4444';
 
   const DIST_COLORS = {
-    'on time':           '#22c55e',
-    'slight (1-5 min)':  '#facc15',
+    'on time':            '#22c55e',
+    'slight (1-5 min)':   '#facc15',
     'moderate (5-15 min)':'#f97316',
-    'severe (>15 min)':  '#ef4444',
+    'severe (>15 min)':   '#ef4444',
   };
+  const SOURCE_PALETTE = ['#60a5fa','#34d399','#f472b6','#fbbf24','#a78bfa','#fb923c','#38bdf8'];
 
-  const SOURCE_PALETTE = [
-    '#60a5fa', '#34d399', '#f472b6', '#fbbf24',
-    '#a78bfa', '#fb923c', '#38bdf8',
-  ];
+  /* ── Chart.js defaults ── */
+  Chart.defaults.color          = '#8892b0';
+  Chart.defaults.borderColor    = '#0f3460';
+  Chart.defaults.font.family    = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-  /* ── Chart defaults ── */
-  Chart.defaults.color = '#8892b0';
-  Chart.defaults.borderColor = '#0f3460';
-  Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  /* ── Persistent instances ── */
+  let charts = {};
+  let mapInst = null, mapLayers = [];
 
-  /* ── Build charts ── */
-  function buildOnTimeChart(byTrainType) {
-    // Sort descending by on_time_pct
-    const sorted = [...byTrainType].sort((a, b) => b.on_time_pct - a.on_time_pct);
-    const labels = sorted.map(d => d.train_type);
-    const values = sorted.map(d => d.on_time_pct);
-    const colors = values.map(onTimeColor);
+  /* ── Filter helpers ── */
+  function buildQS() {
+    const from = document.getElementById('from-date').value;
+    const to   = document.getElementById('to-date').value;
+    const tf   = document.getElementById('time-from').value;
+    const tt   = document.getElementById('time-to').value;
+    const p    = new URLSearchParams();
+    if (from) p.set('from_date', from);
+    if (to)   p.set('to_date',   to);
+    if (tf)   p.set('hour_from', tf.split(':')[0]);
+    if (tt)   p.set('hour_to',   tt.split(':')[0]);
+    const s = p.toString();
+    return s ? '?' + s : '';
+  }
 
-    new Chart(document.getElementById('chartOnTime'), {
+  function setDefaultDates() {
+    const today = new Date();
+    const yest  = new Date(today); yest.setDate(today.getDate() - 1);
+    const ago   = new Date(today); ago.setDate(today.getDate() - 30);
+    document.getElementById('to-date').value   = yest.toISOString().slice(0,10);
+    document.getElementById('from-date').value = ago.toISOString().slice(0,10);
+  }
+
+  /* ── Stats bar ── */
+  function updateStats(byType, dailyTrend) {
+    const totalTrips = byType.reduce((s, r) => s + (r.total_trips || 0), 0);
+    const totalOnTime = byType.reduce((s, r) => s + (r.on_time_pct || 0) * (r.total_trips || 0), 0);
+    const overallPct  = totalTrips ? (totalOnTime / totalTrips).toFixed(1) : '—';
+    const totalDelay  = byType.reduce((s, r) => s + (r.avg_delay_min || 0) * (r.total_trips || 0), 0);
+    const overallDelay = totalTrips ? (totalDelay / totalTrips).toFixed(1) : '—';
+    const sources = new Set(dailyTrend.map(d => d.source));
+
+    document.getElementById('stat-trips').textContent  = totalTrips.toLocaleString();
+    document.getElementById('stat-ontime').textContent = overallPct + '%';
+    document.getElementById('stat-delay').textContent  = overallDelay + ' min';
+    document.getElementById('stat-sources').textContent = sources.size;
+    document.getElementById('stats-row').style.display = 'grid';
+  }
+
+  /* ── Charts ── */
+  function buildOnTimeChart(data) {
+    const sorted = [...data].sort((a, b) => b.on_time_pct - a.on_time_pct);
+    return new Chart(document.getElementById('chartOnTime'), {
       type: 'bar',
       data: {
-        labels,
+        labels: sorted.map(d => d.train_type),
         datasets: [{
-          data: values,
-          backgroundColor: colors,
-          borderColor: colors,
-          borderWidth: 0,
-          borderRadius: 4,
-        }]
+          data: sorted.map(d => d.on_time_pct),
+          backgroundColor: sorted.map(d => onTimeColor(d.on_time_pct)),
+          borderWidth: 0, borderRadius: 4,
+        }],
       },
       options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => ` ${ctx.parsed.x.toFixed(1)} % on time`,
-            }
-          },
-          // Draw % labels on bars
-          afterDraw: undefined,
+          tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x.toFixed(1)}% on time` } },
         },
         scales: {
-          x: {
-            min: 0,
-            max: 100,
-            ticks: { callback: v => v + '%' },
-            grid: { color: '#1e2d4d' },
-          },
-          y: {
-            grid: { display: false },
-          }
+          x: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e2d4d' } },
+          y: { grid: { display: false } },
         },
       },
       plugins: [{
         id: 'barLabels',
         afterDatasetsDraw(chart) {
           const { ctx } = chart;
-          chart.data.datasets.forEach((dataset, i) => {
-            const meta = chart.getDatasetMeta(i);
-            meta.data.forEach((bar, idx) => {
-              const val = dataset.data[idx];
-              const x = bar.x + 6;
-              const y = bar.y;
+          chart.data.datasets.forEach((ds, i) => {
+            chart.getDatasetMeta(i).data.forEach((bar, idx) => {
               ctx.save();
-              ctx.fillStyle = '#e0e0e0';
-              ctx.font = '600 11px sans-serif';
+              ctx.fillStyle = '#ccd6f6';
+              ctx.font = '600 10px sans-serif';
               ctx.textBaseline = 'middle';
-              ctx.fillText(val.toFixed(1) + '%', x, y);
+              ctx.fillText(ds.data[idx].toFixed(1) + '%', bar.x + 5, bar.y);
               ctx.restore();
             });
           });
-        }
-      }]
+        },
+      }],
     });
   }
 
-  function buildDoughnutChart(delayDist) {
-    const filtered = delayDist.filter(d => d.band !== 'no data');
-    const labels  = filtered.map(d => d.band);
-    const values  = filtered.map(d => d.trips);
-    const colors  = labels.map(l => DIST_COLORS[l] || '#94a3b8');
-
-    new Chart(document.getElementById('chartDoughnut'), {
+  function buildDoughnutChart(data) {
+    const filtered = data.filter(d => d.band !== 'no data');
+    return new Chart(document.getElementById('chartDoughnut'), {
       type: 'doughnut',
       data: {
-        labels,
+        labels: filtered.map(d => d.band),
         datasets: [{
-          data: values,
-          backgroundColor: colors,
-          borderColor: '#16213e',
-          borderWidth: 3,
-          hoverOffset: 8,
-        }]
+          data: filtered.map(d => d.trips),
+          backgroundColor: filtered.map(d => DIST_COLORS[d.band] || '#94a3b8'),
+          borderColor: '#16213e', borderWidth: 3, hoverOffset: 8,
+        }],
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '60%',
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
         plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 16,
-              boxWidth: 14,
-              font: { size: 12 },
-            }
-          },
+          legend: { position: 'bottom', labels: { padding: 14, boxWidth: 12, font: { size: 11 } } },
           tooltip: {
             callbacks: {
               label: ctx => {
                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                const pct = ((ctx.parsed / total) * 100).toFixed(1);
-                return ` ${ctx.parsed.toLocaleString()} trips (${pct}%)`;
-              }
-            }
-          }
-        }
-      }
+                return ` ${ctx.parsed.toLocaleString()} trips (${((ctx.parsed / total) * 100).toFixed(1)}%)`;
+              },
+            },
+          },
+        },
+      },
     });
   }
 
-  function buildTrendChart(dailyTrend) {
-    // Group by source
+  function buildTrendChart(data) {
     const sourceMap = {};
-    dailyTrend.forEach(row => {
-      if (!sourceMap[row.source]) sourceMap[row.source] = {};
-      sourceMap[row.source][row.service_date] = row.avg_delay_min;
+    data.forEach(r => {
+      if (!sourceMap[r.source]) sourceMap[r.source] = {};
+      sourceMap[r.source][r.service_date] = r.avg_delay_min;
     });
-
-    // Collect all unique dates, sorted
-    const allDates = [...new Set(dailyTrend.map(d => d.service_date))].sort();
-
-    // Format dates for display: "May 24"
-    function fmtDate(iso) {
-      const d = new Date(iso + 'T00:00:00Z');
-      return d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-    }
-
-    const sources = Object.keys(sourceMap).sort();
-    const datasets = sources.map((src, idx) => ({
-      label: src.charAt(0).toUpperCase() + src.slice(1),
-      data: allDates.map(dt => sourceMap[src][dt] ?? null),
-      borderColor: SOURCE_PALETTE[idx % SOURCE_PALETTE.length],
-      backgroundColor: SOURCE_PALETTE[idx % SOURCE_PALETTE.length] + '22',
-      borderWidth: 2,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      tension: 0.3,
-      spanGaps: false,
-      fill: false,
-    }));
-
-    new Chart(document.getElementById('chartTrend'), {
+    const allDates = [...new Set(data.map(d => d.service_date))].sort();
+    const fmtDate  = iso => new Date(iso + 'T00:00:00Z').toLocaleDateString('en-GB', {
+      month: 'short', day: 'numeric', timeZone: 'UTC',
+    });
+    const sources  = Object.keys(sourceMap).sort();
+    return new Chart(document.getElementById('chartTrend'), {
       type: 'line',
       data: {
         labels: allDates.map(fmtDate),
-        datasets,
+        datasets: sources.map((src, i) => ({
+          label: src.charAt(0).toUpperCase() + src.slice(1),
+          data: allDates.map(dt => sourceMap[src][dt] ?? null),
+          borderColor: SOURCE_PALETTE[i % SOURCE_PALETTE.length],
+          backgroundColor: SOURCE_PALETTE[i % SOURCE_PALETTE.length] + '22',
+          borderWidth: 2, pointRadius: 2, pointHoverRadius: 5,
+          tension: 0.3, spanGaps: false, fill: false,
+        })),
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              padding: 16,
-              boxWidth: 14,
-              font: { size: 12 },
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: ctx => {
-                const v = ctx.parsed.y;
-                return v === null ? null : ` ${ctx.dataset.label}: ${v.toFixed(1)} min`;
-              }
-            }
-          }
+          legend: { position: 'top', labels: { padding: 14, boxWidth: 12, font: { size: 11 } } },
+          tooltip: { callbacks: { label: ctx => ctx.parsed.y === null ? null : ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} min` } },
         },
         scales: {
-          x: {
-            grid: { color: '#1e2d4d' },
-            ticks: {
-              maxTicksLimit: 10,
-              maxRotation: 45,
-            }
-          },
+          x: { grid: { color: '#1e2d4d' }, ticks: { maxTicksLimit: 10, maxRotation: 40 } },
           y: {
-            grid: { color: '#1e2d4d' },
-            title: {
-              display: true,
-              text: 'Avg delay (min)',
-              color: '#8892b0',
-              font: { size: 11 },
-            },
+            grid: { color: '#1e2d4d' }, beginAtZero: true,
+            title: { display: true, text: 'Avg delay (min)', color: '#8892b0', font: { size: 10 } },
             ticks: { callback: v => v + ' min' },
-            beginAtZero: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
-  /* ── Fetch & render ── */
-  async function init() {
-    try {
-      const res = await fetch(API);
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-      const data = await res.json();
+  /* ── Map ── */
+  function initMap() {
+    if (mapInst) return mapInst;
+    mapInst = L.map('map-container', { zoomControl: true }).setView([46.8, 2.5], 5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 16,
+    }).addTo(mapInst);
+    return mapInst;
+  }
 
-      // Last updated
-      const dates = (data.daily_trend || []).map(d => d.service_date).sort();
+  function renderMap(stops) {
+    const map = initMap();
+    mapLayers.forEach(l => map.removeLayer(l));
+    mapLayers = [];
+
+    if (!stops || stops.length === 0) {
+      document.getElementById('map-status').textContent = 'No station data available';
+      return;
+    }
+
+    const maxTrips = Math.max(...stops.map(s => s.trip_count), 1);
+
+    stops.forEach(st => {
+      const color   = delayColor(st.avg_delay_min);
+      const radius  = 4 + (st.trip_count / maxTrips) * 10;
+      const delay   = st.avg_delay_min !== null ? st.avg_delay_min.toFixed(1) + ' min' : 'N/A';
+      const ontime  = st.on_time_pct  !== null ? st.on_time_pct.toFixed(1)  + '%'     : 'N/A';
+
+      const circle = L.circleMarker([st.lat, st.lon], {
+        radius,
+        color:       color,
+        fillColor:   color,
+        fillOpacity: 0.75,
+        weight:      1,
+        opacity:     0.9,
+      }).bindTooltip(
+        `<b>${st.stop_name}</b><br>
+         Avg delay: <b>${delay}</b> · On-time: <b>${ontime}</b><br>
+         Trips observed: ${st.trip_count.toLocaleString()}`,
+        { sticky: true, className: 'leaflet-tooltip-dark' }
+      );
+      circle.addTo(map);
+      mapLayers.push(circle);
+    });
+
+    document.getElementById('map-status').textContent =
+      stops.length.toLocaleString() + ' stations · circle size = trip frequency';
+
+    map.invalidateSize();
+  }
+
+  /* ── Main load ── */
+  async function loadData() {
+    const btn = document.getElementById('apply-btn');
+    btn.disabled = true;
+    document.getElementById('loading-overlay').style.display = 'flex';
+    document.getElementById('error-banner').style.display   = 'none';
+    document.getElementById('loading-msg').textContent       = 'Fetching train data…';
+
+    const qs = buildQS();
+
+    try {
+      const [perfRes, sectRes] = await Promise.all([
+        fetch(PERF + qs),
+        fetch(SECT + qs),
+      ]);
+
+      if (!perfRes.ok) throw new Error(`Performance API returned HTTP ${perfRes.status}`);
+      const perf = await perfRes.json();
+
+      // Section data is optional — don't block the page on it
+      let sect = null;
+      if (sectRes.ok) {
+        sect = await sectRes.json();
+      } else {
+        document.getElementById('map-status').textContent = `Map unavailable (HTTP ${sectRes.status})`;
+      }
+
+      /* Last-updated label */
+      const dates = (perf.daily_trend || []).map(d => d.service_date).sort();
       if (dates.length) {
         const latest = new Date(dates[dates.length - 1] + 'T00:00:00Z');
         document.getElementById('last-updated').textContent =
-          'Last updated: ' + latest.toLocaleDateString('en-GB', {
-            day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'
+          'Data through ' + latest.toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
           });
       }
 
-      buildOnTimeChart(data.by_train_type || []);
-      buildDoughnutChart(data.delay_distribution || []);
-      buildTrendChart(data.daily_trend || []);
+      /* Stats row */
+      updateStats(perf.by_train_type || [], perf.daily_trend || []);
 
+      /* Destroy and rebuild charts */
+      Object.values(charts).forEach(c => c.destroy());
+      charts = {};
+      charts.onTime   = buildOnTimeChart(perf.by_train_type       || []);
+      charts.doughnut = buildDoughnutChart(perf.delay_distribution || []);
+      charts.trend    = buildTrendChart(perf.daily_trend           || []);
+
+      /* Show dashboard before map init (Leaflet needs visible container) */
       document.getElementById('loading-overlay').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'grid';
+      document.getElementById('dashboard').style.display       = 'grid';
+
+      /* Render map */
+      if (sect) renderMap(sect.stops || []);
 
     } catch (err) {
       const banner = document.getElementById('error-banner');
       banner.style.display = 'block';
-      banner.textContent = `Could not load performance data: ${err.message}. Please try refreshing the page.`;
+      banner.textContent   = `Could not load data: ${err.message}`;
       document.getElementById('loading-overlay').style.display = 'none';
+    } finally {
+      btn.disabled = false;
     }
   }
 
-  init();
+  /* ── Wire up ── */
+  document.getElementById('apply-btn').addEventListener('click', loadData);
+
+  setDefaultDates();
+  loadData();
 </script>
+
+<!-- Leaflet tooltip dark theme -->
+<style>
+  .leaflet-tooltip-dark {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    color: #e0e0e0;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 6px;
+    padding: 6px 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .leaflet-tooltip-dark::before { display: none; }
+</style>
+
 </body>
 </html>
