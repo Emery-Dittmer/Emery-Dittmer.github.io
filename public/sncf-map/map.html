@@ -331,6 +331,11 @@
       padding: 14px 16px; width: 220px; display: none;
     }
     #search-panel.open { display: block; }
+    /* Mobile-only chrome (close bar, tab switcher — EME-110): hidden by
+       default so desktop, which never triggers the mobile click-handler
+       branch that shows/styles them, doesn't render bare unstyled elements.
+       Actual visible styling for both is under the mobile media query. */
+    .sheet-close-bar, #mobile-panel-tabs { display: none; }
     /* ── Track Editor ───────────────────────────────────────────────── */
     #track-btn.active { background: #0e1e26; border-color: #06b6d4; color: #06b6d4; }
     #track-panel {
@@ -491,9 +496,48 @@
         overflow-y: auto;
         border-radius: 14px 14px 0 0;
         border-bottom: none;
-        padding: 14px 16px 20px;
+        padding: 32px 16px 20px;
         box-sizing: border-box;
       }
+
+      /* Bigger, obvious close affordance on every bottom sheet (EME-110) —
+         a full-width tap strip with a chevron, not just re-tapping the
+         small sidebar toggle icon. Markup is injected via JS (the "Mobile
+         bottom-sheet chrome" block near the search/settings panel handlers)
+         so the same behavior applies to all four panels. */
+      .sheet-close-bar {
+        position: absolute; top: 0; left: 0; right: 0; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; -webkit-tap-highlight-color: transparent;
+      }
+      .sheet-close-bar::before {
+        content: ''; width: 36px; height: 4px; border-radius: 2px;
+        background: #3a4050;
+      }
+      .sheet-close-bar .sheet-close-chevron {
+        position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+        font-size: 20px; line-height: 1; color: #8b949e;
+      }
+
+      /* Mobile tab switcher for the merged Search / Filters sheet (EME-110) */
+      #mobile-panel-tabs {
+        display: flex; gap: 6px; margin: 4px 0 14px;
+      }
+      #mobile-panel-tabs button {
+        flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #2a2f3a;
+        background: #1c2029; color: #8b949e; font-size: 12px; font-weight: 600;
+        cursor: pointer;
+      }
+      #mobile-panel-tabs button.active {
+        background: #334155; border-color: #64748b; color: #e6edf3;
+      }
+
+      /* Bigger tap target for the search-clear button (EME-110) — 16px was
+         fine for a mouse pointer but too small to reliably tap. */
+      #train-search-clear {
+        width: 28px !important; height: 28px !important; font-size: 16px !important;
+      }
+      #train-search-input { padding-right: 34px !important; }
 
       /* Popup: let it be slightly narrower and ensure it fits */
       .mapboxgl-popup-content {
@@ -503,13 +547,19 @@
         font-size: 12px;
       }
 
-      /* Timeline: tighten up controls for narrow screens */
+      /* Timeline: tighten up controls for narrow screens, and reflow to two
+         rows so the LIVE pill/speed buttons don't eat width from the
+         scrubber track (EME-110) — row 1 is play + full-width slider, row 2
+         is speed + LIVE centered underneath. */
       #timeline {
         padding: 8px 10px 10px;
-        gap: 8px;
+        gap: 6px;
+        flex-wrap: wrap;
       }
-      #tl-live { padding: 5px 8px; font-size: 11px; }
-      #tl-play { padding: 5px 10px; }
+      #tl-play { padding: 5px 10px; order: 1; }
+      #tl-wrap { order: 2; flex-basis: calc(100% - 46px); }
+      #tl-speeds { order: 3; flex: 1; justify-content: center; }
+      #tl-live { order: 4; padding: 5px 8px; font-size: 11px; }
       /* Hide x2/x4 speed buttons — x1 is enough on mobile */
       .tl-spd:not([data-step="60"]) { display: none; }
       .tl-spd[data-step="60"] { padding: 5px 8px; font-size: 10px; }
@@ -760,7 +810,8 @@
 <div id="search-panel">
   <div class="sp-label" style="margin-top:0">Search train</div>
   <div id="train-search-wrap" class="ac-wrap" style="margin-top:4px">
-    <input class="ac-input" id="train-search-input" type="text" placeholder="Train number or name…" autocomplete="off">
+    <input class="ac-input" id="train-search-input" type="text" placeholder="Train number or name…" autocomplete="off" style="padding-right:26px">
+    <button type="button" id="train-search-clear" title="Clear search" style="display:none;position:absolute;right:6px;top:50%;transform:translateY(-50%);width:16px;height:16px;padding:0;border:none;background:transparent;color:#6e7681;cursor:pointer;font-size:14px;line-height:1">✕</button>
     <div class="ac-drop" id="train-search-drop"></div>
   </div>
   <div class="sp-label" style="margin-top:10px">Schedule between stops</div>
@@ -1550,6 +1601,12 @@ function secsToTime(s) {
 const routeCache      = new Map(); // tripId → { stops, shape, shapeStopIndices, cachedAt }
 const routePending    = new Set();
 const ROUTE_CACHE_TTL = 24 * 60 * 60 * 1000;
+// Currently-live trains get their route (incl. per-stop delays) refreshed on
+// this much shorter cadence, matching REFRESH_MS, so a train that picks up a
+// new delay mid-journey doesn't keep rendering against its stale first-fetch
+// delay data for up to 24h (see EME-75). Non-live trains in knownTrains still
+// use the long TTL since their schedule/delay data isn't actively changing.
+const LIVE_ROUTE_REFRESH_MS = 30_000;
 
 const knownTrains = new Map(); // tripId → feature, accumulates all trains seen (persisted to localStorage)
 
@@ -1566,9 +1623,10 @@ function serviceDayKey() {
 
 function saveKnownTrains() {
   try {
-    // Only persist trains seen in the last 2 hours to keep the payload small.
-    const cutoff  = Date.now() - 2 * 60 * 60 * 1000;
-    const entries = [...knownTrains.entries()].filter(([, f]) => (f._seenAt || 0) >= cutoff);
+    // Persist all of the current service day's trains (needed for the timeline
+    // scrubber to work after a page reload) — knownTrains is already pruned to
+    // the current service day in fetchAndUpdate(), so no extra time filter here.
+    const entries = [...knownTrains.entries()];
     localStorage.setItem(LS_DATE_KEY,   serviceDayKey());
     localStorage.setItem(LS_TRAINS_KEY, JSON.stringify(entries));
   } catch { /* storage full */ }
@@ -1786,14 +1844,15 @@ async function fetchRouteData(tripId) {
 // the map fills with position-interpolated (straight-line) icons.
 const HIGH_PRIORITY_ROUTE_TYPES = new Set(["TGV INOUI", "OUIGO", "Lyria", "TER", "Intercités"]);
 
-function prefetchRoutes(features) {
+function prefetchRoutes(features, { forceRefresh = false } = {}) {
   const now = Date.now();
+  const ttl = forceRefresh ? LIVE_ROUTE_REFRESH_MS : ROUTE_CACHE_TTL;
 
   const toFetch = features.filter(f => {
     const id     = f.properties.trip_id;
     if (routePending.has(id)) return false;
     const cached = routeCache.get(id);
-    return !(cached && now - cached.cachedAt < ROUTE_CACHE_TTL);
+    return !(cached && now - cached.cachedAt < ttl);
   });
 
   // High-priority types first so they snap to actual track geometry before others
@@ -2345,14 +2404,36 @@ map.on("load", async () => {
   // Fetch all trips scheduled for today in parallel with the live fetch.
   // This populates knownTrains with trains that have already finished their
   // journey so the full-day timeline works even on a fresh page load.
+  // /trains/all is the heaviest query in the API and can occasionally time
+  // out (see EME-74) — retry once after a short delay rather than leaving
+  // knownTrains permanently unseeded for the rest of the session on a single
+  // transient failure.
+  async function fetchTrainsAllWithRetry(retries = 1) {
+    try {
+      const r = await fetch(`${API_URL}/trains/all`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
+    } catch (err) {
+      if (retries > 0) {
+        await new Promise(res => setTimeout(res, 3000));
+        return fetchTrainsAllWithRetry(retries - 1);
+      }
+      console.error("trains/all failed after retry:", err);
+      return null;
+    }
+  }
+
   const [, allData] = await Promise.all([
     fetchAndUpdate(),
-    fetch(`${API_URL}/trains/all`).then(r => r.json()).catch(() => null),
+    fetchTrainsAllWithRetry(),
   ]);
   if (allData?.features) {
+    const today = serviceDayKey();
     for (const raw of allData.features) {
       const f = normalizeFeature(raw);
-      if (!knownTrains.has(f.properties.trip_id)) knownTrains.set(f.properties.trip_id, f);
+      if (!knownTrains.has(f.properties.trip_id)) {
+        knownTrains.set(f.properties.trip_id, { ...f, _seenAt: Date.now(), _serviceDay: today });
+      }
     }
     saveKnownTrains();
   }
@@ -2536,9 +2617,14 @@ async function fetchAndUpdate() {
       `Next update in ${Math.round(REFRESH_MS / 1000)}s`;
     startUpdateCountdown();
     const fetchedAt = Date.now();
-    const pruneCutoff = fetchedAt - 60 * 60 * 1000; // 1 hour
-    for (const f of liveFeatures) knownTrains.set(f.properties.trip_id, { ...f, _seenAt: fetchedAt });
-    for (const [id, f] of knownTrains) if ((f._seenAt || 0) < pruneCutoff) knownTrains.delete(id);
+    // Only prune trains carried over from a previous service day — never evict
+    // trains from the current service day, since the timeline scrubber needs
+    // to render any of them regardless of when they were last seen in a live
+    // poll (a train scrubbed to isn't "live", so it wouldn't get its _seenAt
+    // refreshed here even though it's still valid for today's timeline).
+    const today = serviceDayKey();
+    for (const f of liveFeatures) knownTrains.set(f.properties.trip_id, { ...f, _seenAt: fetchedAt, _serviceDay: today });
+    for (const [id, f] of knownTrains) if ((f._serviceDay || today) !== today) knownTrains.delete(id);
     for (const id of routeCache.keys()) {
       const isActive = activeRouteData && id === activeRouteData.tripId;
       if (!isActive && !knownTrains.has(id)) routeCache.delete(id);
@@ -2546,7 +2632,7 @@ async function fetchAndUpdate() {
     scheduleRouteCacheSave();
     saveKnownTrains();
     tlSync();
-    prefetchRoutes(liveFeatures);
+    prefetchRoutes(liveFeatures, { forceRefresh: true });
   } catch (err) {
     console.error(err);
     document.getElementById("updated").textContent = "Connection error";
@@ -3194,11 +3280,21 @@ function formatGtfsTime(t) {
 (function initTrainSearch() {
   const input  = document.getElementById("train-search-input");
   const drop   = document.getElementById("train-search-drop");
+  const clearBtn = document.getElementById("train-search-clear");
   let timer    = null;
   let results  = [];
   let focusIdx = -1;
 
+  function updateClearBtn() { clearBtn.style.display = input.value ? "block" : "none"; }
+
   function close() { drop.classList.remove("open"); focusIdx = -1; }
+
+  clearBtn.addEventListener("click", () => {
+    input.value = '';
+    updateClearBtn();
+    close();
+    input.focus();
+  });
 
   function setFocus(idx) {
     drop.querySelectorAll(".ac-item").forEach((el, i) => {
@@ -3240,12 +3336,14 @@ function formatGtfsTime(t) {
     const r = results[+item.dataset.i];
     if (!r) return;
     input.value = '';
+    updateClearBtn();
     close();
     focusTrain(r.trip_id, r.train_type);
   });
 
   input.addEventListener("input", () => {
     clearTimeout(timer);
+    updateClearBtn();
     const q = input.value.trim();
     if (q.length < 2) { close(); return; }
     timer = setTimeout(async () => {
@@ -3276,9 +3374,13 @@ function formatGtfsTime(t) {
       e.preventDefault();
       const r = results[focusIdx];
       input.value = '';
+      updateClearBtn();
       close();
       focusTrain(r.trip_id, r.train_type);
-    } else if (e.key === "Escape") { close(); }
+    } else if (e.key === "Escape") {
+      if (input.value) { input.value = ''; updateClearBtn(); }
+      close();
+    }
   });
 
   document.addEventListener("click", ev => {
@@ -3563,10 +3665,23 @@ const searchPanel = document.getElementById("search-panel");
 
 searchBtn.addEventListener("click", e => {
   e.stopPropagation();
-  searchPanel.classList.toggle("open");
-  searchBtn.classList.toggle("open");
-  settingsPanel.classList.remove("open");
-  settingsBtn.classList.remove("open");
+  if (isMobileLayout()) {
+    resetMobileTabDisplay();
+    const opening = !searchBtn.classList.contains("open") && !settingsBtn.classList.contains("open");
+    if (opening || !searchBtn.classList.contains("open")) {
+      showMobileTab("search");
+      searchBtn.classList.add("open");
+      settingsBtn.classList.remove("open");
+    } else {
+      closePanel(searchPanel, searchBtn);
+      closePanel(settingsPanel, settingsBtn);
+    }
+  } else {
+    searchPanel.classList.toggle("open");
+    searchBtn.classList.toggle("open");
+    settingsPanel.classList.remove("open");
+    settingsBtn.classList.remove("open");
+  }
   if (pickerActive) togglePicker();
 });
 
@@ -3576,15 +3691,89 @@ const settingsPanel = document.getElementById("settings-panel");
 
 settingsBtn.addEventListener("click", e => {
   e.stopPropagation();
-  settingsPanel.classList.toggle("open");
-  settingsBtn.classList.toggle("open");
-  searchPanel.classList.remove("open");
-  searchBtn.classList.remove("open");
+  if (isMobileLayout()) {
+    resetMobileTabDisplay();
+    const opening = !searchBtn.classList.contains("open") && !settingsBtn.classList.contains("open");
+    if (opening || !settingsBtn.classList.contains("open")) {
+      showMobileTab("settings");
+      settingsBtn.classList.add("open");
+      searchBtn.classList.remove("open");
+    } else {
+      closePanel(searchPanel, searchBtn);
+      closePanel(settingsPanel, settingsBtn);
+    }
+  } else {
+    settingsPanel.classList.toggle("open");
+    settingsBtn.classList.toggle("open");
+    searchPanel.classList.remove("open");
+    searchBtn.classList.remove("open");
+  }
   if (pickerActive) togglePicker();  // close picker when opening layers panel
 });
 
 document.querySelectorAll(".style-btn").forEach(btn =>
   btn.addEventListener("click", () => switchMapStyle(btn.dataset.style)));
+
+// ── Mobile bottom-sheet chrome (EME-110) ───────────────────────────────────
+// Adds a bigger, obvious close affordance to every bottom-sheet panel, and
+// merges Search + Filters into one sheet with tabs on narrow screens, instead
+// of two separate panels the user has to open/close independently. Desktop
+// layout/behavior (side panels, no tabs) is untouched — this only changes
+// what's visible/wired up under the existing mobile media query breakpoint.
+const MOBILE_BREAKPOINT = 540;
+const isMobileLayout = () => window.innerWidth <= MOBILE_BREAKPOINT;
+
+function closePanel(panel, btn) {
+  panel.classList.remove("open");
+  btn.classList.remove("open");
+}
+
+[
+  [document.getElementById("search-panel"),   searchBtn],
+  [document.getElementById("settings-panel"), settingsBtn],
+  [document.getElementById("picker-panel"),   document.getElementById("picker-btn")],
+  [document.getElementById("track-panel"),    document.getElementById("track-btn")],
+].forEach(([panel, btn]) => {
+  const bar = document.createElement("div");
+  bar.className = "sheet-close-bar";
+  bar.innerHTML = '<span class="sheet-close-chevron">⌄</span>';
+  bar.addEventListener("click", () => closePanel(panel, btn));
+  panel.prepend(bar);
+});
+
+// Tab bar injected at the top of #search-panel; on mobile it lets the user
+// flip between Search and Filters without leaving the sheet. It sits inline
+// (no special hiding needed) on desktop since the click handlers below only
+// ever call showMobileTab()/mark it relevant when isMobileLayout() is true —
+// desktop's click handlers use the original independent-panel toggle path.
+const mobileTabs = document.createElement("div");
+mobileTabs.id = "mobile-panel-tabs";
+mobileTabs.innerHTML = `
+  <button type="button" data-tab="search">Search</button>
+  <button type="button" data-tab="settings">Filters</button>
+`;
+searchPanel.insertBefore(mobileTabs, searchPanel.children[1]);
+
+function showMobileTab(tab) {
+  mobileTabs.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  if (tab === "search") {
+    searchPanel.classList.add("open");
+    settingsPanel.classList.add("open");
+    settingsPanel.style.display = "none";
+  } else {
+    settingsPanel.classList.add("open");
+    searchPanel.classList.add("open");
+    searchPanel.style.display = "none";
+  }
+}
+
+function resetMobileTabDisplay() {
+  searchPanel.style.display = "";
+  settingsPanel.style.display = "";
+}
+
+mobileTabs.querySelectorAll("button").forEach(b =>
+  b.addEventListener("click", e => { e.stopPropagation(); showMobileTab(b.dataset.tab); }));
 
 document.getElementById("tog-lgv").addEventListener("click", async function() {
   lgvLinesEnabled = !lgvLinesEnabled;

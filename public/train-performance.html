@@ -160,6 +160,20 @@
     }
     #map-status { font-size: 0.75rem; color: #5a6480; font-style: italic; }
 
+    /* ── Delays table ── */
+    .delays-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .delays-table th {
+      text-align: left; padding: 0.5rem 0.7rem; color: #8892b0;
+      font-weight: 600; font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.05em; border-bottom: 1px solid #0f3460;
+    }
+    .delays-table td { padding: 0.5rem 0.7rem; border-bottom: 1px solid #1e2d4d; }
+    .delays-table tr:last-child td { border-bottom: none; }
+    .delay-pill {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+
     /* ── Spinner ── */
     #loading-overlay {
       position: fixed; inset: 0;
@@ -299,6 +313,25 @@
     </div>
   </div>
 
+  <div class="card card-full">
+    <h2>Worst Delays</h2>
+    <div style="overflow-x:auto">
+      <table class="delays-table">
+        <thead>
+          <tr>
+            <th>Train</th>
+            <th>Station</th>
+            <th>Arrival</th>
+            <th>Delay</th>
+          </tr>
+        </thead>
+        <tbody id="delays-tbody">
+          <tr><td colspan="4" style="color:#5a6480">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </main>
 
 <footer>
@@ -314,6 +347,7 @@
   const BASE   = 'https://gpvwn1lb29.execute-api.eu-west-3.amazonaws.com';
   const PERF   = BASE + '/performance';
   const SECT   = BASE + '/sections';
+  const DELAYS = BASE + '/performance/delays';
 
   /* ── Colour helpers ── */
   const onTimeColor = pct => pct >= 80 ? '#22c55e' : pct >= 60 ? '#f59e0b' : '#ef4444';
@@ -542,6 +576,33 @@
     map.invalidateSize();
   }
 
+  /* ── Worst delays table ── */
+  function renderDelaysTable(rows) {
+    const tbody = document.getElementById('delays-tbody');
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:#5a6480">No delay data for this period</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => {
+      const trainLabel = r.train_name
+        ? `${r.train_name}${r.train_number ? ' · N° ' + r.train_number : ''}`
+        : (r.train_number ? `N° ${r.train_number}` : r.trip_id);
+      const when = r.actual_arrival_ts
+        ? new Date(r.actual_arrival_ts).toLocaleString('en-GB', {
+            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris',
+          })
+        : '—';
+      const delay = r.cumulative_delay_min;
+      const color = delayColor(delay);
+      return `<tr>
+        <td>${trainLabel}<div style="color:#5a6480;font-size:0.72rem">${r.train_type || ''}</div></td>
+        <td>${r.stop_name || '—'}</td>
+        <td>${when}</td>
+        <td><span class="delay-pill" style="background:${color}22;color:${color}">${delay != null ? delay.toFixed(1) + ' min' : '—'}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
   /* ── Main load ── */
   async function loadData() {
     const btn = document.getElementById('apply-btn');
@@ -553,9 +614,10 @@
     const qs = buildQS();
 
     try {
-      const [perfRes, sectRes] = await Promise.all([
+      const [perfRes, sectRes, delaysRes] = await Promise.all([
         fetch(PERF + qs),
         fetch(SECT + qs),
+        fetch(DELAYS + qs),
       ]);
 
       if (!perfRes.ok) throw new Error(`Performance API returned HTTP ${perfRes.status}`);
@@ -595,6 +657,14 @@
 
       /* Render map */
       if (sect) renderMap(sect.stops || []);
+
+      /* Render worst-delays table (optional — don't block the page on it) */
+      if (delaysRes.ok) {
+        const delaysData = await delaysRes.json();
+        renderDelaysTable(delaysData.delays || []);
+      } else {
+        renderDelaysTable([]);
+      }
 
     } catch (err) {
       const banner = document.getElementById('error-banner');
