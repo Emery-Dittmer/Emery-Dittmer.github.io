@@ -16,7 +16,7 @@ import sql from "@/assets/logos/logo-mysql.png";
 import excel from "@/assets/logos/excel_logo.png";
 import alteryx from "@/assets/logos/Alteryx_Logo.png";
 import orange from "@/assets/logos/orange_logo.png";
-import esri from "@/assets/logos/esri_logo.png";
+import esri from "@/assets/logos/Esri_Logo.png";
 
 import { Locale } from '@/lib/i18n';
 import SwimLaneVisualisation from './SwimLaneVisualisation';
