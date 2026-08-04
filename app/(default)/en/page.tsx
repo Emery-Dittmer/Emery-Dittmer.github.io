@@ -31,7 +31,9 @@ export default function Home() {
       <CollapsibleSection title="The Human Side">
         <HumanSide locale={locale} />
       </CollapsibleSection>
-      <Testimonials locale={locale} />
+      <CollapsibleSection title="What People Say">
+        <Testimonials locale={locale} />
+      </CollapsibleSection>
       <WhatIsEmeryUpTo locale={locale} />
       <Newsletter locale={locale} />
     </>

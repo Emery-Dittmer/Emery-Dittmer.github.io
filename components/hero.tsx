@@ -130,7 +130,7 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
                     <span className="ml-2">{t.resume}</span>
                   </div>
                 </a>
-                <a className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto" href="https://github.com/Emery-Dittmer" download="Dittmer Emery Resume.pdf">
+                <a className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto" href="https://github.com/Emery-Dittmer">
                   <div className="flex items-center space-x-2">
                     <Github/>
                     <span className="ml-2">{t.github}</span>
