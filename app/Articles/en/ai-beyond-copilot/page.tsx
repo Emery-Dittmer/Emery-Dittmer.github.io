@@ -513,7 +513,7 @@ export default function AIBeyondCopilotArticle() {
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">Technology &amp; AI</span>
           <span className="text-gray-700">·</span>
-          <span className="text-xs text-gray-500">9 min read</span>
+          <span className="text-xs text-gray-500">11 min read</span>
           <span className="text-gray-700">·</span>
           <span className="text-xs text-gray-500">June 2026</span>
         </div>
@@ -643,12 +643,12 @@ export default function AIBeyondCopilotArticle() {
         {/* Section 4 — Survey data */}
         <section>
           <h2 className="text-xl font-bold text-white mb-4 border-l-2 border-purple-500 pl-4">
-            What 81,000 developers are actually worried about
+            What 65,000 developers are actually worried about
           </h2>
           <div className="space-y-5">
             <P>
               The developer sentiment surveys of the last few years paint a nuanced picture that the AI enthusiasm
-              cycle tends to flatten. When you ask 81,000 developers what they think about AI in their workflow,
+              cycle tends to flatten. When you ask 65,000 developers what they think about AI in their workflow,
               you do not get a monolith. You get a distribution — and the distribution has edges that the headline
               numbers obscure.
             </P>
@@ -658,21 +658,33 @@ export default function AIBeyondCopilotArticle() {
                 pct={76}
                 value="76%"
                 label="Use or plan to use AI tools"
-                sub="A supermajority — but adoption is not the same as confidence"
+                sub="Up from 70% the year before — adoption keeps climbing"
               />
               <BarRow
                 pct={45}
                 value="45%"
-                label="Don't fully trust AI output"
-                sub="Verification adds back much of the time saved"
+                label="Say AI tools struggle with complex tasks"
+                sub="Professional developers rating AI 'bad' or 'very bad' on complex work"
               />
               <BarRow
-                pct={33}
-                value="~1 in 3"
-                label="Worried about job displacement"
-                sub="The fear is real and concentrated in junior roles"
+                pct={12}
+                value="11.7%"
+                label="Say AI threatens their current job"
+                sub="70% say it doesn't — real fear, but not majority sentiment"
               />
             </div>
+            <p className="text-xs text-gray-500 text-center -mt-2">
+              Source:{' '}
+              <a
+                href="https://survey.stackoverflow.co/2024/ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 underline underline-offset-2 hover:text-purple-300"
+              >
+                Stack Overflow 2024 Developer Survey ↗
+              </a>{' '}
+              — 65,000+ respondents, 185 countries
+            </p>
 
             <P>
               The top concerns that emerge from large developer surveys are not the sci-fi ones. They are not
