@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import Balancer from 'react-wrap-balancer'
 import { ArrowRight, ChevronDown, Check, X } from 'lucide-react'
 import { projectsConfig, ProjectType } from '@/lib/projectsConfig'
@@ -127,6 +128,16 @@ export default function Cards({ locale = 'en' }: { locale?: Locale }) {
   const [selectedYears,      setSelectedYears]      = useState<number[]>([])
   const [sort,               setSort]               = useState<SortKey>('year-desc')
   const [openDropdown,       setOpenDropdown]       = useState<DropdownKey>(null)
+
+  // ── Pre-select the domain filter from a ?lane= query param ─────────────
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    const lane = searchParams.get('lane') as LaneId | null
+    if (lane && laneOptions.some((l) => l.id === lane)) {
+      setSelectedLanes([lane])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const hasActiveFilters =
     selectedTypes.length > 0 ||

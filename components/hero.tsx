@@ -2,15 +2,26 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image';
+import Link from 'next/link';
 import EmeryHeadshot from '@/assets/images/emery_headshot_2026.jpg';
 import { Github, Project, Resume, Linkedin } from '@/assets/icons/';
 import { Locale } from '@/lib/i18n';
+import { LaneId } from '@/lib/skillsConfig';
 import WindCanvas from '@/components/wind-canvas';
 
 const ROLES = {
   en: ['Product Owner', 'Project Manager', 'Data Scientist', 'Technical Lead', 'Delivery Driver'],
   fr: ['Product Owner', 'Chef de projet', 'Data Scientist', 'Lead technique', 'Pilote de livraison'],
 }
+
+// Index-aligned with ROLES — which skill lane each rotating role links to on /Projects
+const ROLE_LANES: LaneId[] = [
+  'project-management', // Product Owner
+  'project-management', // Project Manager
+  'data-science',        // Data Scientist
+  'data-engineering',     // Technical Lead
+  'project-management',  // Delivery Driver
+]
 
 // ms between each tick: starts fast, decelerates to a stop
 const SPIN_SCHEDULE = [55, 60, 65, 75, 90, 110, 145, 185, 240, 300, 375, 460]
@@ -107,11 +118,12 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
             </h1>
             <div className="flex items-center justify-center md:justify-start gap-2 mb-6 text-xl text-gray-400" data-aos="fade-up" data-aos-delay="100">
               <span>{t.intro}</span>
-              <span
-                className={`font-semibold text-purple-400 transition-opacity ${spinning ? 'duration-75 opacity-50' : fading ? 'duration-300 opacity-0' : 'duration-300 opacity-100'}`}
+              <Link
+                href={`/Projects/${locale}?lane=${ROLE_LANES[roles.indexOf(displayRole)] ?? 'project-management'}`}
+                className={`font-semibold text-purple-400 hover:text-purple-300 underline decoration-purple-700/50 hover:decoration-purple-400 underline-offset-4 transition-opacity ${spinning ? 'duration-75 opacity-50' : fading ? 'duration-300 opacity-0' : 'duration-300 opacity-100'}`}
               >
                 {displayRole}
-              </span>
+              </Link>
             </div>
             <p className="text-xl text-gray-400 mb-8" data-aos="fade-up" data-aos-delay="200">
               {t.body}

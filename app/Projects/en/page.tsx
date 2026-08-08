@@ -6,6 +6,7 @@ export const metadata = {
     colorScheme: 'dark'
   }
   
+  import { Suspense } from 'react'
   import Cards from '@/components/cards'
   import Newsletter from '@/components/newsletter'
   import ProjectCarousel from '@/components/project-carousel'
@@ -15,7 +16,9 @@ export const metadata = {
     return (
       <>
         <ProjectCarousel locale={locale} />
-        <Cards locale={locale} />
+        <Suspense fallback={null}>
+          <Cards locale={locale} />
+        </Suspense>
         <Newsletter locale={locale} />
       </>
     )
