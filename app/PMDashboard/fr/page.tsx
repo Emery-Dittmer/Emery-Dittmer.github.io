@@ -6,6 +6,7 @@ export const metadata = {
 }
 
 import PMHero from '@/components/PMDashboard/PMHero'
+import PMTimeline from '@/components/PMDashboard/PMTimeline'
 import DeliveryTrackRecord from '@/components/PMDashboard/DeliveryTrackRecord'
 import ProjectLeadershipBoard from '@/components/PMDashboard/ProjectLeadershipBoard'
 import ProcessShowcase from '@/components/PMDashboard/ProcessShowcase'
@@ -15,6 +16,7 @@ export default function PMDashboardPage() {
   return (
     <>
       <PMHero locale={locale} />
+      <PMTimeline locale={locale} />
       <DeliveryTrackRecord locale={locale} />
       <ProjectLeadershipBoard locale={locale} />
       <ProcessShowcase locale={locale} />

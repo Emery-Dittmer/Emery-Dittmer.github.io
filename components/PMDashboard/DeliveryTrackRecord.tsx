@@ -62,7 +62,7 @@ export default function DeliveryTrackRecord({ locale = 'en' }: { locale?: Locale
   const t = copy[locale]
 
   return (
-    <section className="relative">
+    <section id="track-record" className="relative scroll-mt-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <div className="border-t border-gray-800 mb-8" />
         <h2 className="h2 text-center mb-2">{t.heading}</h2>
