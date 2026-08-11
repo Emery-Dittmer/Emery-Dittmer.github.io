@@ -12,7 +12,7 @@ export default function CollapsibleSection({ title, children, defaultOpen = fals
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div className="border-t border-gray-800">
+    <div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <button
           onClick={() => setOpen(!open)}

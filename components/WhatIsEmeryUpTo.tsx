@@ -93,8 +93,6 @@ export default function WhatIsEmeryUpTo({ locale = 'en' }: { locale?: Locale }) 
   return (
     <section className="relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
-        <div className="border-t border-gray-800 mb-4" />
-
         <button
           onClick={handleToggle}
           className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-800 bg-gray-900/60 hover:border-gray-700 transition-colors"

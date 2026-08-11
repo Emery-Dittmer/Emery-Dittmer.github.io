@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { Locale } from '@/lib/i18n'
+import Abilities from '@/components/abilities'
 
 // Vertex positions: [left%, top-px]  — icons centered horizontally via translateX(-50%)
 const VERTS = [
@@ -40,11 +42,13 @@ const SVGS = [
 
 export default function Features({ locale = 'en' }: { locale?: Locale }) {
   const [active, setActive] = useState<number | null>(null)
+  const [showSkills, setShowSkills] = useState(false)
 
   const copy = {
     en: {
       title: 'Delivering data projects end to end',
       intro: 'Most data work stalls between insight and action. Emery bridges that gap — leading projects from problem definition to production, with the technical depth to build what gets decided.',
+      skillsToggle: 'See the full skill breakdown',
       items: [
         {
           title: 'Project Delivery',
@@ -66,6 +70,7 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
     fr: {
       title: 'Livrer des projets data de bout en bout',
       intro: "La plupart des projets data échouent entre l'analyse et l'action. Emery comble cet écart — pilotant les projets de la définition du problème à la production, avec la profondeur technique pour construire ce qui a été décidé.",
+      skillsToggle: 'Voir le détail complet des compétences',
       items: [
         {
           title: 'Livraison de projets',
@@ -190,6 +195,27 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
               </div>
             </div>
           )}
+
+          {/* Skill breakdown toggle */}
+          <div className="mt-12 md:mt-16">
+            <button
+              onClick={() => setShowSkills((v) => !v)}
+              aria-expanded={showSkills}
+              className="mx-auto flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              {t.skillsToggle}
+              <ChevronDown
+                size={16}
+                className={`transition-transform duration-200 ${showSkills ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {showSkills && (
+              <div className="mt-10">
+                <Abilities locale={locale} hideHeader />
+              </div>
+            )}
+          </div>
 
         </div>
       </div>

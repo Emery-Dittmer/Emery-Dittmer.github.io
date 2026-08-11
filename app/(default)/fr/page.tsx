@@ -8,7 +8,6 @@ export const metadata = {
 
 import Hero from '@/components/hero'
 import Features from '@/components/features'
-import Abilities from '@/components/abilities'
 import ProjectCarousel from '@/components/project-carousel'
 import HumanSide from '@/components/human-side'
 import Testimonials from '@/components/testimonials'
@@ -22,9 +21,6 @@ export default function Home() {
     <>
       <Hero locale={locale} />
       <Features locale={locale} />
-      <CollapsibleSection title="Ce que j'apporte">
-        <Abilities locale={locale} />
-      </CollapsibleSection>
       <CollapsibleSection title="Projets récents">
         <ProjectCarousel locale={locale} />
       </CollapsibleSection>

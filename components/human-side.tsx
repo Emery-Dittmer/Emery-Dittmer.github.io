@@ -121,7 +121,7 @@ export default function HumanSide({ locale = 'en' }: { locale?: Locale }) {
     <section className="relative overflow-hidden">
       <WindCanvas particleCount={180} speed={0.9} maxOpacity={0.3} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
-        <div className="py-12 md:py-20 border-t border-gray-800">
+        <div className="py-12 md:py-20">
 
           <div className="max-w-3xl mx-auto text-center pb-12 md:pb-16">
             <h2 className="h2 mb-4">{t.title}</h2>

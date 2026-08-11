@@ -26,7 +26,7 @@ const SKILL_META: Record<string, { icon: IconType; color: string }> = {
   'Next.js':           { icon: SiNextdotjs,      color: '#FFFFFF' },
 }
 
-export default function Abilities({ locale = 'en' }: { locale?: Locale }) {
+export default function Abilities({ locale = 'en', hideHeader = false }: { locale?: Locale; hideHeader?: boolean }) {
   const copy = {
     en: {
       title: 'What I Bring to the Table',
@@ -126,64 +126,72 @@ export default function Abilities({ locale = 'en' }: { locale?: Locale }) {
     pink:   { ring: 'border-pink-700/40',    badge: 'bg-pink-900/30 text-pink-300',     dot: 'bg-pink-500',   icon: 'text-pink-300'   },
   }
 
+  const content = (
+    <>
+      {!hideHeader && (
+        <div className="max-w-3xl mx-auto text-center pb-12 md:pb-16">
+          <h2 className="h2 mb-4">{t.title}</h2>
+          <p className="text-xl text-gray-400">{t.intro}</p>
+        </div>
+      )}
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-aos="fade-up">
+        {t.areas.map((area) => {
+          const c = colorMap[area.color] ?? colorMap.purple
+          return (
+            <div
+              key={area.title}
+              className={`rounded-xl border ${c.ring} bg-gray-900/50 p-6 flex flex-col gap-4`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`inline-block w-2.5 h-2.5 rounded-full ${c.dot}`} />
+                <h4 className="font-semibold text-gray-100 text-base">{area.title}</h4>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {area.skills.map((s) => {
+                  const meta = SKILL_META[s]
+                  return (
+                    <span
+                      key={s}
+                      className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${c.badge}`}
+                    >
+                      {meta?.icon && (
+                        <meta.icon
+                          className="w-3 h-3 flex-shrink-0"
+                          style={{ color: meta.color }}
+                        />
+                      )}
+                      {s}
+                    </span>
+                  )
+                })}
+              </div>
+
+              <p className="text-sm text-gray-400 mt-auto leading-relaxed">{area.note}</p>
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="text-center mt-10">
+        <a
+          href={`/Skills/${locale}`}
+          className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
+        >
+          {t.cta}
+        </a>
+      </div>
+    </>
+  )
+
+  if (hideHeader) return content
+
   return (
     <section>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="py-12 md:py-20 border-t border-gray-800">
-
-          <div className="max-w-3xl mx-auto text-center pb-12 md:pb-16">
-            <h2 className="h2 mb-4">{t.title}</h2>
-            <p className="text-xl text-gray-400">{t.intro}</p>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-aos="fade-up">
-            {t.areas.map((area) => {
-              const c = colorMap[area.color] ?? colorMap.purple
-              return (
-                <div
-                  key={area.title}
-                  className={`rounded-xl border ${c.ring} bg-gray-900/50 p-6 flex flex-col gap-4`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-block w-2.5 h-2.5 rounded-full ${c.dot}`} />
-                    <h4 className="font-semibold text-gray-100 text-base">{area.title}</h4>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {area.skills.map((s) => {
-                      const meta = SKILL_META[s]
-                      return (
-                        <span
-                          key={s}
-                          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${c.badge}`}
-                        >
-                          {meta?.icon && (
-                            <meta.icon
-                              className="w-3 h-3 flex-shrink-0"
-                              style={{ color: meta.color }}
-                            />
-                          )}
-                          {s}
-                        </span>
-                      )
-                    })}
-                  </div>
-
-                  <p className="text-sm text-gray-400 mt-auto leading-relaxed">{area.note}</p>
-                </div>
-              )
-            })}
-          </div>
-
-          <div className="text-center mt-10">
-            <a
-              href={`/Skills/${locale}`}
-              className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
-            >
-              {t.cta}
-            </a>
-          </div>
-
+          {content}
         </div>
       </div>
     </section>
