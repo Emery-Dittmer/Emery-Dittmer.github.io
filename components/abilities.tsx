@@ -8,7 +8,7 @@ import {
   SiMapbox, SiNextdotjs,
 } from 'react-icons/si'
 
-const SKILL_META: Record<string, { icon: IconType; color: string }> = {
+export const SKILL_META: Record<string, { icon: IconType; color: string }> = {
   'Python':            { icon: SiPython,        color: '#3776AB' },
   'R':                 { icon: SiR,              color: '#276DC3' },
   'Power BI':          { icon: SiPowerbi,        color: '#F2C811' },
@@ -26,9 +26,22 @@ const SKILL_META: Record<string, { icon: IconType; color: string }> = {
   'Next.js':           { icon: SiNextdotjs,      color: '#FFFFFF' },
 }
 
-export default function Abilities({ locale = 'en', hideHeader = false }: { locale?: Locale; hideHeader?: boolean }) {
-  const copy = {
-    en: {
+export const ABILITY_COLOR_MAP: Record<string, { ring: string; badge: string; dot: string; icon: string }> = {
+  purple: { ring: 'border-purple-700/40', badge: 'bg-purple-900/30 text-purple-300', dot: 'bg-purple-500', icon: 'text-purple-300' },
+  violet: { ring: 'border-violet-700/40', badge: 'bg-violet-900/30 text-violet-300', dot: 'bg-violet-500', icon: 'text-violet-300' },
+  blue:   { ring: 'border-blue-700/40',   badge: 'bg-blue-900/30 text-blue-300',     dot: 'bg-blue-500',   icon: 'text-blue-300'   },
+  cyan:   { ring: 'border-cyan-700/40',    badge: 'bg-cyan-900/30 text-cyan-300',     dot: 'bg-cyan-500',   icon: 'text-cyan-300'   },
+  orange: { ring: 'border-orange-700/40',  badge: 'bg-orange-900/30 text-orange-300', dot: 'bg-orange-500', icon: 'text-orange-300' },
+  green:  { ring: 'border-green-700/40',   badge: 'bg-green-900/30 text-green-300',   dot: 'bg-green-500',  icon: 'text-green-300'  },
+  pink:   { ring: 'border-pink-700/40',    badge: 'bg-pink-900/30 text-pink-300',     dot: 'bg-pink-500',   icon: 'text-pink-300'   },
+}
+
+export function getAbilityAreas(locale: Locale) {
+  return ABILITY_COPY[locale].areas
+}
+
+const ABILITY_COPY = {
+  en: {
       title: 'What I Bring to the Table',
       intro: 'A hybrid skill set spanning the full data lifecycle — from pipeline to presentation, strategy to execution.',
       areas: [
@@ -114,17 +127,11 @@ export default function Abilities({ locale = 'en', hideHeader = false }: { local
       ],
       cta: 'Voir le détail des compétences →',
     },
-  }
-  const t = copy[locale]
+}
 
-  const colorMap: Record<string, { ring: string; badge: string; dot: string; icon: string }> = {
-    purple: { ring: 'border-purple-700/40', badge: 'bg-purple-900/30 text-purple-300', dot: 'bg-purple-500', icon: 'text-purple-300' },
-    blue:   { ring: 'border-blue-700/40',   badge: 'bg-blue-900/30 text-blue-300',     dot: 'bg-blue-500',   icon: 'text-blue-300'   },
-    cyan:   { ring: 'border-cyan-700/40',    badge: 'bg-cyan-900/30 text-cyan-300',     dot: 'bg-cyan-500',   icon: 'text-cyan-300'   },
-    orange: { ring: 'border-orange-700/40',  badge: 'bg-orange-900/30 text-orange-300', dot: 'bg-orange-500', icon: 'text-orange-300' },
-    green:  { ring: 'border-green-700/40',   badge: 'bg-green-900/30 text-green-300',   dot: 'bg-green-500',  icon: 'text-green-300'  },
-    pink:   { ring: 'border-pink-700/40',    badge: 'bg-pink-900/30 text-pink-300',     dot: 'bg-pink-500',   icon: 'text-pink-300'   },
-  }
+export default function Abilities({ locale = 'en', hideHeader = false }: { locale?: Locale; hideHeader?: boolean }) {
+  const t = ABILITY_COPY[locale]
+  const colorMap = ABILITY_COLOR_MAP
 
   const content = (
     <>

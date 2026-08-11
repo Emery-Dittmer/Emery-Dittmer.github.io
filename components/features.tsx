@@ -3,7 +3,32 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Locale } from '@/lib/i18n'
-import Abilities from '@/components/abilities'
+import Abilities, { getAbilityAreas, ABILITY_COLOR_MAP, SKILL_META } from '@/components/abilities'
+
+// Maps each triangle vertex (by index, matching `items`/`VERTS`) to indices
+// into the Abilities `areas` array, which is order-identical across locales:
+// 0 Data Science & ML, 1 BI & Visualization, 2 Data Engineering,
+// 3 Low-Code & Automation, 4 Project Delivery, 5 Geospatial & Niche.
+const VERTEX_ABILITY_INDICES = [
+  [4],        // Project Delivery
+  [0, 1, 2],  // Data Science & Analytics
+  [3, 5],     // Business Impact
+]
+
+// Popout-only split of the "Data Science & ML" area (index 0) into a leaner
+// stats/forecasting card plus a dedicated AI/modeling card, so the Data
+// Science & Analytics vertex renders 4 compact cards instead of 3 wider ones.
+// Skills are the same ones already listed in abilities.tsx — none invented.
+const AI_SPLIT = {
+  en: {
+    dataScience: { title: 'Data Science & ML', skills: ['Python', 'Time-series forecasting', 'Feature engineering', 'A/B testing', 'R'] },
+    ai:          { title: 'AI & Modeling',      skills: ['Scikit-learn', 'XGBoost'], note: 'Applied ML modeling — from feature engineering through model selection and validation.' },
+  },
+  fr: {
+    dataScience: { title: 'Science des données & ML', skills: ['Python', 'Prévision de séries temporelles', 'Feature engineering', 'Tests A/B', 'R'] },
+    ai:          { title: 'IA & Modélisation',          skills: ['Scikit-learn', 'XGBoost'], note: "Modélisation ML appliquée — du feature engineering à la sélection et validation de modèles." },
+  },
+}
 
 // Vertex positions: [left%, top-px]  — icons centered horizontally via translateX(-50%)
 const VERTS = [
@@ -162,36 +187,87 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
           {/* Modal popout */}
           {active !== null && (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
               onClick={() => setActive(null)}
             >
               {/* Backdrop */}
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-              {/* Card */}
               <div
-                className="relative z-10 w-full max-w-md rounded-2xl border border-purple-700/50 bg-gray-900 p-8 shadow-2xl shadow-purple-900/30"
+                className="relative z-10 flex flex-col lg:flex-row items-stretch gap-4 w-full max-w-md lg:max-w-4xl my-8"
                 onClick={e => e.stopPropagation()}
               >
-                {/* Close button */}
-                <button
-                  onClick={() => setActive(null)}
-                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-200 transition-colors"
-                  aria-label="Close"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
+                {/* Card */}
+                <div className="relative w-full lg:max-w-md rounded-2xl border border-purple-700/50 bg-gray-900 p-8 shadow-2xl shadow-purple-900/30 flex-shrink-0">
+                  {/* Close button */}
+                  <button
+                    onClick={() => setActive(null)}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-200 transition-colors"
+                    aria-label="Close"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
 
-                {/* Icon + title */}
-                <div className="flex flex-col items-center gap-3 mb-6">
-                  {SVGS[active]}
-                  <h4 className="font-semibold text-gray-100 text-xl">{t.items[active].title}</h4>
+                  {/* Icon + title */}
+                  <div className="flex flex-col items-center gap-3 mb-6">
+                    {SVGS[active]}
+                    <h4 className="font-semibold text-gray-100 text-xl">{t.items[active].title}</h4>
+                  </div>
+
+                  <p className="text-gray-400 leading-relaxed mb-5">{t.items[active].body}</p>
+                  <p className="text-sm text-purple-300 font-medium border-t border-gray-800 pt-4">{t.items[active].emphasis}</p>
                 </div>
 
-                <p className="text-gray-400 leading-relaxed mb-5">{t.items[active].body}</p>
-                <p className="text-sm text-purple-300 font-medium border-t border-gray-800 pt-4">{t.items[active].emphasis}</p>
+                {/* Related skill cards */}
+                <div className={`grid gap-3 sm:grid-cols-2 flex-shrink-0 ${active === 1 ? 'lg:w-96' : 'lg:grid-cols-1 lg:w-72'}`}>
+                  {(() => {
+                    const areas = getAbilityAreas(locale)
+                    const split = AI_SPLIT[locale]
+                    const cards = VERTEX_ABILITY_INDICES[active].flatMap((areaIdx) => {
+                      const area = areas[areaIdx]
+                      if (active === 1 && areaIdx === 0) {
+                        return [
+                          { ...split.dataScience, color: area.color, note: area.note },
+                          { ...split.ai, color: 'violet' },
+                        ]
+                      }
+                      return [area]
+                    })
+                    return cards.map((area) => {
+                      const c = ABILITY_COLOR_MAP[area.color] ?? ABILITY_COLOR_MAP.purple
+                      return (
+                        <div
+                          key={area.title}
+                          className={`rounded-lg border ${c.ring} bg-gray-900 p-3.5 shadow-xl flex flex-col gap-2`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-block w-1.5 h-1.5 rounded-full ${c.dot}`} />
+                            <h5 className="font-semibold text-gray-100 text-xs">{area.title}</h5>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {area.skills.map((s) => {
+                              const meta = SKILL_META[s]
+                              return (
+                                <span
+                                  key={s}
+                                  className={`inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-full ${c.badge}`}
+                                >
+                                  {meta?.icon && (
+                                    <meta.icon className="w-2.5 h-2.5 flex-shrink-0" style={{ color: meta.color }} />
+                                  )}
+                                  {s}
+                                </span>
+                              )
+                            })}
+                          </div>
+                          <p className="text-[11px] text-gray-400 leading-snug">{area.note}</p>
+                        </div>
+                      )
+                    })
+                  })()}
+                </div>
               </div>
             </div>
           )}

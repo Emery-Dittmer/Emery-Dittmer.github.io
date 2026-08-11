@@ -34,9 +34,10 @@ export default function ProjectCarousel({ locale = 'en' }: { locale?: Locale }) 
           {/* Grid */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-aos="fade-up">
             {featured.map((project) => (
-              <div
+              <a
                 key={project.id}
-                className="group relative h-72 rounded-xl overflow-hidden"
+                href={`/Projects/${locale}/${project.id}`}
+                className="group relative block h-72 rounded-xl overflow-hidden"
               >
                 {/* Background image */}
                 <Image
@@ -48,8 +49,8 @@ export default function ProjectCarousel({ locale = 'en' }: { locale?: Locale }) 
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
 
-                {/* Gradient overlay — darker at bottom where text lives */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
+                {/* Subtle scrim by default, darkens further on hover so text stays legible */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-colors duration-300 group-hover:from-black/85 group-hover:via-black/50 group-hover:to-black/20" />
 
                 {/* Content */}
                 <div className="absolute inset-0 p-6 flex flex-col">
@@ -57,18 +58,17 @@ export default function ProjectCarousel({ locale = 'en' }: { locale?: Locale }) 
                     <h4 className="font-semibold text-white text-base mb-1 leading-snug">
                       {project.title[locale]}
                     </h4>
-                    <p className="text-sm text-gray-200 leading-relaxed line-clamp-3">
-                      {project.description[locale]}
-                    </p>
-                    <a
-                      href={`/Projects/${locale}/${project.id}`}
-                      className="inline-block mt-2 text-xs text-purple-300 hover:text-purple-200 font-medium transition-colors"
-                    >
-                      {t.viewProject}
-                    </a>
+                    <div className="max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 transition-all duration-300 overflow-hidden">
+                      <p className="text-sm text-gray-200 leading-relaxed line-clamp-3">
+                        {project.description[locale]}
+                      </p>
+                      <span className="inline-block mt-2 text-xs text-purple-300 group-hover:text-purple-200 font-medium transition-colors">
+                        {t.viewProject}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
 
