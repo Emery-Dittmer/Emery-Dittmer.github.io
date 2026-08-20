@@ -7,8 +7,9 @@ export function generateStaticParams() {
   return projectsConfig.map((p) => ({ slug: p.id }))
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const project = projectsConfig.find((p) => p.id === params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const project = projectsConfig.find((p) => p.id === slug)
   if (!project) return {}
   return {
     title: `${project.title.fr} — Emery Dittmer`,
@@ -16,11 +17,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default function ProjectPage({ params }: { params: { slug: string } }) {
-  const project = projectsConfig.find((p) => p.id === params.slug)
+export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const project = projectsConfig.find((p) => p.id === slug)
   if (!project) notFound()
 
-  const { cover, gallery } = getProjectImages(params.slug)
+  const { cover, gallery } = getProjectImages(slug)
 
   return (
     <ProjectDetail
