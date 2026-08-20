@@ -30,19 +30,20 @@ const AI_SPLIT = {
   },
 }
 
-// Vertex positions: [left%, top-px]  — icons centered horizontally via translateX(-50%)
+// Vertex positions as [left%, top%] of the square graphic area — fully
+// percentage-based so the triangle scales cleanly at any container size
+// instead of relying on a fixed pixel height. Icons are centered on their
+// point via translate(-50%, -50%).
 const VERTS = [
-  { left: '50%',  top: 10  },  // Project Delivery  — top center
-  { left: '12%',  top: 220 },  // Data Science       — bottom left
-  { left: '88%',  top: 220 },  // Business Impact    — bottom right
+  { left: 50, top: 8  },   // Project Delivery  — top center
+  { left: 8,  top: 88 },   // Data Science       — bottom left
+  { left: 92, top: 88 },   // Business Impact    — bottom right
 ]
 
-// Icon center coords in SVG viewBox 0-100 (y = (top + 32) / 360 * 100)
-const LINE_PTS = [
-  [50,  11.7],
-  [12,  70  ],
-  [88,  70  ],
-]
+// Same points, used as the connecting-line endpoints — kept identical to
+// VERTS (not a separate hand-tuned set) so the lines always meet the icon
+// centers exactly regardless of viewport size.
+const LINE_PTS = VERTS.map((v) => [v.left, v.top])
 
 const SVGS = [
   <svg key="0" className="w-16 h-16" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -74,6 +75,7 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
       title: 'Delivering data projects end to end',
       intro: 'Most data work stalls between insight and action. Emery bridges that gap — leading projects from problem definition to production, with the technical depth to build what gets decided.',
       skillsToggle: 'See the full skill breakdown',
+      exploreHint: 'Click a node to explore',
       items: [
         {
           title: 'Project Delivery',
@@ -96,6 +98,7 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
       title: 'Livrer des projets data de bout en bout',
       intro: "La plupart des projets data échouent entre l'analyse et l'action. Emery comble cet écart — pilotant les projets de la définition du problème à la production, avec la profondeur technique pour construire ce qui a été décidé.",
       skillsToggle: 'Voir le détail complet des compétences',
+      exploreHint: 'Cliquez sur un nœud pour explorer',
       items: [
         {
           title: 'Livraison de projets',
@@ -128,10 +131,14 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
             <p className="text-xl text-gray-400">{t.intro}</p>
           </div>
 
-          {/* Triangle graphic */}
-          <div className="relative mx-auto w-full max-w-[480px] h-[360px]">
+          {/* Triangle graphic — square-ish, percentage-based so it scales
+              cleanly at any width instead of pinning a fixed pixel height */}
+          <div className="relative mx-auto w-full max-w-[420px] aspect-[6/5]">
 
-            {/* Connecting lines */}
+            {/* Connecting lines — viewBox matches VERTS' own 0-100 percentage
+                space 1:1, so "none" here just maps the box uniformly with no
+                distortion, unlike stretching a 100x100 box onto a fixed
+                480x360 rect. */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox="0 0 100 100"
@@ -159,23 +166,29 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
                 key={item.title}
                 style={{
                   position: 'absolute',
-                  left: VERTS[i].left,
-                  top: VERTS[i].top,
-                  transform: 'translateX(-50%)',
+                  left: `${VERTS[i].left}%`,
+                  top: `${VERTS[i].top}%`,
+                  transform: 'translate(-50%, -50%)',
                 }}
                 onClick={() => setActive(active === i ? null : i)}
-                className="flex flex-col items-center gap-2 group focus:outline-none"
+                className="flex flex-col items-center gap-1.5 sm:gap-2 group focus:outline-none"
                 aria-expanded={active === i}
+                aria-label={item.title}
               >
-                <div className={`transition-all duration-200 rounded-full
+                <div className={`relative transition-all duration-200 rounded-full
                   ${active === i
                     ? 'shadow-[0_0_24px_rgba(147,51,234,0.65)] scale-110'
                     : 'group-hover:scale-105 group-hover:shadow-[0_0_16px_rgba(147,51,234,0.35)]'
                   }`}
                 >
-                  {SVGS[i]}
+                  {active !== i && (
+                    <span className="absolute inset-0 rounded-full animate-ping bg-purple-500/20 [animation-duration:2.5s]" />
+                  )}
+                  <div className="scale-75 sm:scale-100">
+                    {SVGS[i]}
+                  </div>
                 </div>
-                <span className={`text-sm font-medium whitespace-nowrap transition-colors duration-150
+                <span className={`text-xs sm:text-sm font-medium whitespace-nowrap transition-colors duration-150
                   ${active === i ? 'text-purple-300' : 'text-gray-400 group-hover:text-gray-200'}`}
                 >
                   {item.title}
@@ -183,6 +196,9 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
               </button>
             ))}
           </div>
+          <p className="text-center text-xs text-gray-500 mt-3">
+            {t.exploreHint}
+          </p>
 
           {/* Modal popout */}
           {active !== null && (
