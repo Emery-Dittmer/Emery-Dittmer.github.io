@@ -6,6 +6,7 @@ import Chris from '@/assets/recomentations/Chris.jpg';
 import Alex from '@/assets/recomentations/Alex.jpg';
 import ylfa from '@/assets/recomentations/ylfa.jpg';
 import { Locale } from '@/lib/i18n';
+import CollapsibleSection from '@/components/collapsible-section';
 
 export default function Testimonials({ locale = 'en' }: { locale?: Locale }) {
   const copy = {
@@ -85,13 +86,12 @@ export default function Testimonials({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
 
   return (
-    <section>
+    <CollapsibleSection title={t.title}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="py-12 md:py-20">
+        <div className="pb-12 md:pb-20">
 
-          {/* Section header */}
-          <div className="max-w-3xl mx-auto text-center pb-12 md:pb-20">
-            <h2 className="h2 mb-4">{t.title}</h2>
+          {/* Section intro */}
+          <div className="max-w-3xl mx-auto text-center pb-12 md:pb-16">
             <p className="text-xl text-gray-400">{t.intro}</p>
           </div>
 
@@ -185,6 +185,6 @@ export default function Testimonials({ locale = 'en' }: { locale?: Locale }) {
 
         </div>
       </div>
-    </section>
+    </CollapsibleSection>
   )
 }
