@@ -4,6 +4,7 @@
 // match runs client-side against `window.location.pathname` instead.
 import { Locale } from '@/lib/i18n'
 import { projectsConfig } from '@/lib/projectsConfig'
+import { articlesConfig } from '@/lib/articlesConfig'
 
 export type Suggestion = {
   path: string
@@ -33,33 +34,23 @@ const SECTIONS: Suggestion[] = [
   },
 ]
 
-const ARTICLES: Suggestion[] = [
-  {
-    path: '/Articles/{locale}/sncf-analytics',
-    label: { en: 'Are French Trains Actually On Time?', fr: 'Are French Trains Actually On Time?' },
-    keywords: ['sncf', 'train', 'delay', 'analytics', 'gtfs'],
-  },
-  {
-    path: '/Articles/{locale}/sncf-architecture',
-    label: { en: 'Building a Real-Time French Train Tracker on AWS', fr: 'Building a Real-Time French Train Tracker on AWS' },
-    keywords: ['sncf', 'train', 'architecture', 'aws', 'gtfs', 'pipeline'],
-  },
-  {
-    path: '/Articles/{locale}/sncf-cost',
-    label: { en: 'How I Cut This AWS Pipeline from $56 to $16/Month', fr: 'How I Cut This AWS Pipeline from $56 to $16/Month' },
-    keywords: ['sncf', 'aws', 'cost', 'pipeline'],
-  },
-  {
-    path: '/Articles/{locale}/estimation-methods',
-    label: { en: 'Agile Estimation Methods', fr: 'Agile Estimation Methods' },
-    keywords: ['agile', 'estimation', 'scrum', 'sprint'],
-  },
-  {
-    path: '/Articles/{locale}/ai-beyond-copilot',
-    label: { en: 'Beyond the Copilot', fr: 'Beyond the Copilot' },
-    keywords: ['ai', 'copilot', 'productivity'],
-  },
-]
+// Extra match keywords per article slug — words not already present in the
+// title/path but still likely to appear in a broken/mistyped URL.
+const ARTICLE_KEYWORDS: Record<string, string[]> = {
+  'sncf-analytics': ['sncf', 'train', 'delay', 'analytics', 'gtfs'],
+  'sncf-architecture': ['sncf', 'train', 'architecture', 'aws', 'gtfs', 'pipeline'],
+  'sncf-cost': ['sncf', 'aws', 'cost', 'pipeline'],
+  'estimation-methods': ['agile', 'estimation', 'scrum', 'sprint'],
+  'ai-beyond-copilot': ['ai', 'copilot', 'productivity'],
+}
+
+// Sourced from articlesConfig so this can't drift out of sync with the
+// actual article list/titles.
+const ARTICLES: Suggestion[] = articlesConfig.map((a) => ({
+  path: `/Articles/{locale}/${a.slug}`,
+  label: a.title,
+  keywords: ARTICLE_KEYWORDS[a.slug],
+}))
 
 // One entry per project, generated from projectsConfig so it can't drift
 // out of sync with the actual project list/titles.
@@ -69,13 +60,20 @@ const PROJECTS: Suggestion[] = projectsConfig.map((p) => ({
 }))
 
 // Related-content links attached to specific projects — surfaced alongside
-// the project match itself (e.g. sncf-gtfs-collector -> its live map).
-const RELATED: Record<string, Suggestion[]> = {
-  'sncf-gtfs-collector': [
-    SECTIONS.find((s) => s.path === '/SNCFMap/{locale}')!,
-    ...ARTICLES.filter((a) => a.path.includes('sncf-')),
-  ],
-}
+// the project match itself. Derived from each project's own
+// relatedArticleSlugs (e.g. sncf-gtfs-collector's articles), plus a
+// hand-picked extra for the SNCF live map since it isn't itself an article.
+const RELATED: Record<string, Suggestion[]> = Object.fromEntries(
+  projectsConfig
+    .filter((p) => (p.relatedArticleSlugs?.length ?? 0) > 0)
+    .map((p) => [
+      p.id,
+      [
+        ...(p.id === 'sncf-gtfs-collector' ? [SECTIONS.find((s) => s.path === '/SNCFMap/{locale}')!] : []),
+        ...(p.relatedArticleSlugs ?? []).map((slug) => ARTICLES.find((a) => a.path.endsWith(`/${slug}`))!).filter(Boolean),
+      ],
+    ]),
+)
 
 const ALL_DESTINATIONS: Suggestion[] = [...SECTIONS, ...ARTICLES, ...PROJECTS]
 

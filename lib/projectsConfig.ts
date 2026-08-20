@@ -40,6 +40,9 @@ export type Project = {
 
   linkUrl?: string
   linkText?: { en: string; fr: string }
+
+  // Slugs into articlesConfig — articles that discuss this project.
+  relatedArticleSlugs?: string[]
 }
 
 // ─── Template ─────────────────────────────────────────────────────────────────
@@ -800,6 +803,7 @@ export const projectsConfig: Project[] = [
     certifications: [],
     linkUrl: 'https://emery-dittmer.github.io/SNCFMap/en',
     linkText: { en: 'View live map', fr: 'Voir la carte en direct' },
+    relatedArticleSlugs: ['sncf-analytics', 'sncf-architecture', 'sncf-cost'],
   },
 
   // ── Qlik → Power BI & Databricks Migration · 2025 ─────────────────────────

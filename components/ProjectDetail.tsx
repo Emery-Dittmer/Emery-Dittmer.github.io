@@ -2,9 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, ExternalLink, Tag, Award } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Tag, Award, FileText } from 'lucide-react'
 import { Project } from '@/lib/projectsConfig'
 import { skillsConfig } from '@/lib/skillsConfig'
+import { getArticle, getArticlePath } from '@/lib/articlesConfig'
 import ArchitectureDiagram from '@/components/ArchitectureDiagram'
 import ProjectGallery from '@/components/ProjectGallery'
 import { Locale } from '@/lib/i18n'
@@ -61,11 +62,16 @@ export default function ProjectDetail({
     viewProject:    locale === 'fr' ? 'Voir le projet' : 'View Project',
     noSkills:       locale === 'fr' ? 'Aucune compétence spécifiée.' : 'No skills specified.',
     noCerts:        locale === 'fr' ? 'Aucune certification spécifiée.' : 'No certifications specified.',
+    relatedArticles: locale === 'fr' ? 'Articles liés' : 'Related Articles',
   }
 
   const resolvedSkills = project.skills
     .map((id) => skillById[id])
     .filter(Boolean)
+
+  const resolvedArticles = (project.relatedArticleSlugs ?? [])
+    .map((slug) => getArticle(slug))
+    .filter(Boolean) as NonNullable<ReturnType<typeof getArticle>>[]
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
@@ -187,6 +193,26 @@ export default function ProjectDetail({
       {galleryImages.length > 0 && (
         <Section title={t.gallery}>
           <ProjectGallery images={galleryImages} />
+        </Section>
+      )}
+
+      {/* Related Articles */}
+      {resolvedArticles.length > 0 && (
+        <Section title={t.relatedArticles}>
+          <div className="flex flex-col gap-2">
+            {resolvedArticles.map((article) => (
+              <Link
+                key={article.slug}
+                href={getArticlePath(article.slug, locale)}
+                className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/40 px-4 py-3 hover:border-purple-700/50 transition-colors group"
+              >
+                <FileText size={16} className="text-purple-400 shrink-0" />
+                <span className="text-sm text-gray-300 group-hover:text-purple-300 transition-colors">
+                  {article.title[locale] ?? article.title.en}
+                </span>
+              </Link>
+            ))}
+          </div>
         </Section>
       )}
 

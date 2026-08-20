@@ -10,12 +10,14 @@ import { Suspense } from 'react'
 import Cards from '@/components/cards'
 import Newsletter from '@/components/newsletter'
 import ProjectCarousel from '@/components/project-carousel'
+import ProjectsByTheme from '@/components/projects-by-theme'
 
 export default function Home() {
   const locale = 'fr'
   return (
     <>
       <ProjectCarousel locale={locale} />
+      <ProjectsByTheme locale={locale} />
       <Suspense fallback={null}>
         <Cards locale={locale} />
       </Suspense>
