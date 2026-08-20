@@ -77,6 +77,10 @@ jobs:
             v3-${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+      - name: Sync latest sncf_collector HTML
+        run: node scripts/fetch-sncf-html.mjs
+        env:
+          SNCF_COLLECTOR_TOKEN: ${{ secrets.SNCF_COLLECTOR_TOKEN }}
       - name: Inject Mapbox token
         run: sed -i 's/MAPBOX_TOKEN_PLACEHOLDER/${{ secrets.MAPBOX_TOKEN }}/g' public/sncf-map/map.html
       - name: Build with Next.js

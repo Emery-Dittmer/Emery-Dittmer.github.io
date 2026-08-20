@@ -7,7 +7,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "dev": "next dev",
-    "prebuild": "node scripts/fetch-linear.mjs",
+    "prebuild": "node scripts/fetch-linear.mjs && node scripts/fetch-sncf-html.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

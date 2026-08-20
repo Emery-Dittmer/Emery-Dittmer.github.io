@@ -106,6 +106,7 @@ export default function Hero({ locale = 'en' }: { locale?: Locale }) {
                 src={EmeryHeadshot}
                 alt="Headshot of Emery"
                 fill
+                priority
                 className="object-cover object-top scale-125 translate-y-[10%] rounded-full"
               />
             </div>
