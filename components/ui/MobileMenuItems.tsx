@@ -1,6 +1,6 @@
 // MobileMenuItems.tsx
 import Link from 'next/link';
-import { getPathWithLocale } from '@/lib/i18n';
+import { getLanguageSwitchHref } from '@/lib/i18n';
 import ThemeToggle from './theme-toggle';
 
 interface MobileMenuItemsProps {
@@ -77,7 +77,7 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav, local
       <li className="flex justify-center py-2">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
           <Link
-            href={getPathWithLocale(pathname, 'en')}
+            href={getLanguageSwitchHref(pathname, 'en')}
             className={locale === 'en' ? 'text-purple-600 dark:text-purple-200' : 'text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-200'}
             onClick={closeMobileNav}
           >
@@ -85,7 +85,7 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav, local
           </Link>
           <span className="text-gray-400 dark:text-gray-600">/</span>
           <Link
-            href={getPathWithLocale(pathname, 'fr')}
+            href={getLanguageSwitchHref(pathname, 'fr')}
             className={locale === 'fr' ? 'text-purple-600 dark:text-purple-200' : 'text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-200'}
             onClick={closeMobileNav}
           >

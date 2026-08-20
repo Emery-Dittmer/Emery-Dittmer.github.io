@@ -5,6 +5,7 @@ export const metadata = {
 }
 
 import Link from 'next/link'
+import NotFoundSuggestions from '@/components/not-found-suggestions'
 
 export default function NotFound() {
   return (
@@ -57,6 +58,8 @@ export default function NotFound() {
         <span className="text-purple-400 font-mono">200 OK</span> the moment you head somewhere
         that actually exists.
       </p>
+
+      <NotFoundSuggestions />
 
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Link

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { getLocaleFromPathname, getPathWithLocale } from '@/lib/i18n'
+import { getLocaleFromPathname, getLanguageSwitchHref } from '@/lib/i18n'
 
 export default function LanguageSwitcher() {
   const pathname = usePathname() ?? '/'
@@ -11,7 +11,7 @@ export default function LanguageSwitcher() {
   return (
     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
       <Link
-        href={getPathWithLocale(pathname, 'en')}
+        href={getLanguageSwitchHref(pathname, 'en')}
         className={locale === 'en' ? 'text-purple-200' : 'text-gray-400 hover:text-purple-200'}
         aria-current={locale === 'en' ? 'true' : undefined}
       >
@@ -19,7 +19,7 @@ export default function LanguageSwitcher() {
       </Link>
       <span className="text-gray-600">/</span>
       <Link
-        href={getPathWithLocale(pathname, 'fr')}
+        href={getLanguageSwitchHref(pathname, 'fr')}
         className={locale === 'fr' ? 'text-purple-200' : 'text-gray-400 hover:text-purple-200'}
         aria-current={locale === 'fr' ? 'true' : undefined}
       >
