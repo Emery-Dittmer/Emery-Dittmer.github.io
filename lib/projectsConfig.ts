@@ -25,6 +25,9 @@ export type Project = {
   industry: string
   laneIds: LaneId[]
 
+  // One-line hook shown under the title on the project banner.
+  summary: { en: string; fr: string }
+
   description: { en: string; fr: string }
   purpose: { en: string; fr: string }
   howToUse: { en: string; fr: string }
@@ -85,6 +88,22 @@ import tgv_valley      from '@/assets/projects/tgv-valley.jpg'
 import stadium_aerial  from '@/assets/projects/stadium-aerial.jpg'
 import city_lights     from '@/assets/projects/city-lights-aerial.jpg'
 
+// Stock photos — distinct representative image per project
+import stock_workshop_seminar   from '@/assets/projects/stock-workshop-seminar.jpg'
+import stock_accounting_ledger  from '@/assets/projects/stock-accounting-ledger.jpg'
+import stock_government_building from '@/assets/projects/stock-government-building.jpg'
+import stock_fraud_documents    from '@/assets/projects/stock-fraud-documents.jpg'
+import stock_cinema_seats       from '@/assets/projects/stock-cinema-seats.jpg'
+import stock_finance_budget     from '@/assets/projects/stock-finance-budget.jpg'
+import stock_network_graph      from '@/assets/projects/stock-network-graph.jpg'
+import stock_resort_waste       from '@/assets/projects/stock-resort-waste.jpg'
+import stock_warehouse_boxes    from '@/assets/projects/stock-warehouse-boxes.jpg'
+import stock_warehouse_shelves  from '@/assets/projects/stock-warehouse-shelves.jpg'
+import stock_data_dashboard     from '@/assets/projects/stock-data-dashboard.jpg'
+import stock_beverage_factory   from '@/assets/projects/stock-beverage-factory.jpg'
+import stock_currency_exchange  from '@/assets/projects/stock-currency-exchange.jpg'
+import stock_data_center        from '@/assets/projects/stock-data-center.jpg'
+
 export const projectsConfig: Project[] = [
 
   // ── Workshop Effectiveness Analytics · 2020 ────────────────────────────────
@@ -95,11 +114,15 @@ export const projectsConfig: Project[] = [
       fr: 'Analyses de l\'efficacité d\'ateliers de conseil',
     },
     company: { en: 'Professional Project · RBC', fr: 'Projet professionnel · RBC' },
-    mediaSrc: workshop,
+    mediaSrc: stock_workshop_seminar,
     year: 2020,
     projectType: 'professional',
     industry: 'Finance & Banking',
     laneIds: ['business-intelligence', 'data-analytics'],
+    summary: {
+      en: 'Turned workshop attendance data into a targeted, demographic-led scheduling strategy for RBC.',
+      fr: 'Données de participation transformées en stratégie de planification ciblée pour RBC.',
+    },
     description: {
       en: 'Prepared a BI dashboard and report using advisor workshop attendance data. Segmented workshop participation by location, subject, and marketing factors. Insights allowed RBC to shift to a geographic and demographic approach to workshop scheduling, increasing value and effectiveness.*',
       fr: 'Préparation d\'un tableau de bord BI et d\'un rapport à partir des données d\'ateliers. Segmentation des participants par lieu, sujet et facteurs marketing pour permettre à RBC d\'adopter une approche ciblée.*',
@@ -136,11 +159,15 @@ export const projectsConfig: Project[] = [
       fr: 'Détecteur d\'écritures d\'extourne',
     },
     company: { en: 'Professional Project · PwC', fr: 'Projet professionnel · PwC' },
-    mediaSrc: reversal_finder,
+    mediaSrc: stock_accounting_ledger,
     year: 2021,
     projectType: 'professional',
     industry: 'Finance & Audit',
     laneIds: ['data-engineering', 'data-analytics'],
+    summary: {
+      en: 'An Alteryx workflow that auto-detects reversed journal entries, replacing a manual audit slog.',
+      fr: 'Un workflow Alteryx qui détecte automatiquement les extournes, remplaçant un audit manuel fastidieux.',
+    },
     description: {
       en: 'Developed an Alteryx workflow that automatically detected and matched journal entry reversals within ERP data, replacing a time-consuming manual audit procedure. The tool produced a structured report of matched pairs, freeing audit teams to focus on higher-risk transactions.*',
       fr: 'Développement d\'un workflow Alteryx détectant automatiquement les extournes d\'écritures comptables dans les données ERP, remplaçant une procédure d\'audit manuelle longue.*',
@@ -182,6 +209,10 @@ export const projectsConfig: Project[] = [
     projectType: 'academic',
     industry: 'Energy & Environment',
     laneIds: ['data-science', 'data-analytics', 'project-management'],
+    summary: {
+      en: 'Optimized where to build wind turbine blade recycling facilities across 108 Ontario wind farms.',
+      fr: 'Optimisation de l\'emplacement des installations de recyclage de pales sur 108 parcs éoliens ontariens.',
+    },
     description: {
       en: 'Led a 4-person academic research team over a 3-month engagement to model and optimize wind turbine blade recycling logistics across Ontario. Applied Capacitated Multi-Facility Weber Problem (CMFWP) and Travelling Salesman Problem (TSP) formulations across 108 Ontario wind farms. Produced policy-relevant recommendations for Canada\'s emerging wind turbine recycling industry.',
       fr: 'Direction d\'une équipe académique de 4 personnes sur 3 mois pour modéliser et optimiser la logistique de recyclage des pales d\'éoliennes en Ontario. Application des formulations CMFWP et TSP sur 108 parcs éoliens.',
@@ -221,11 +252,15 @@ export const projectsConfig: Project[] = [
       fr: 'Investigation et rapport financier gouvernemental',
     },
     company: { en: 'Professional Project · PwC / Canada Government', fr: 'Projet professionnel · PwC / Gouvernement du Canada' },
-    mediaSrc: accrual_forecast,
+    mediaSrc: stock_government_building,
     year: 2022,
     projectType: 'professional',
     industry: 'Government & Public Sector',
     laneIds: ['data-analytics', 'business-intelligence', 'project-management'],
+    summary: {
+      en: 'Consolidated fragmented federal spending data to surface overspending patterns for senior stakeholders.',
+      fr: 'Consolidation de données de dépenses fédérales fragmentées pour révéler des schémas de surcoûts.',
+    },
     description: {
       en: 'Led a financial impact assessment for the Government of Canada, managing a team of 1 over a sub-3-month mandate. Consolidated fragmented departmental spending data, identified significant overspending patterns, and surfaced the absence of a centralized expenditure management platform. Delivered a credible, evidence-based report with actionable recommendations to senior public sector stakeholders.',
       fr: 'Direction d\'une évaluation d\'impact financier pour le gouvernement du Canada sur moins de 3 mois. Consolidation de données de dépenses fragmentées, identification de schémas de surcoûts et livraison de recommandations basées sur des données probantes.',
@@ -263,11 +298,15 @@ export const projectsConfig: Project[] = [
       fr: 'Outil de détection du risque de fraude',
     },
     company: { en: 'Professional Project · PwC', fr: 'Projet professionnel · PwC' },
-    mediaSrc: fraud_risk,
+    mediaSrc: stock_fraud_documents,
     year: 2022,
     projectType: 'professional',
     industry: 'Finance & Audit',
     laneIds: ['data-analytics', 'business-intelligence'],
+    summary: {
+      en: 'A self-serve Excel/VBA tool that scores an organization\'s fraud risk in minutes, no bespoke software needed.',
+      fr: 'Un outil Excel/VBA en libre-service qui évalue le risque de fraude d\'une organisation en quelques minutes.',
+    },
     description: {
       en: 'Built a financial risk and fraud assessment tool using a custom Excel VBA workbook. The tool allowed organizations to self-evaluate or externally evaluate their processes, generating a standardized risk score and colour-coded highlight report — making complex fraud risk assessment accessible without bespoke software.*',
       fr: 'Développement d\'un outil d\'évaluation du risque de fraude via un classeur Excel VBA personnalisé, permettant aux organisations d\'évaluer leurs processus et de générer un score de risque standardisé.*',
@@ -305,11 +344,15 @@ export const projectsConfig: Project[] = [
       fr: 'Prévision des revenus de salles de cinéma',
     },
     company: { en: 'Academic Project', fr: 'Projet académique' },
-    mediaSrc: movie,
+    mediaSrc: stock_cinema_seats,
     year: 2022,
     projectType: 'academic',
     industry: 'Entertainment & Retail',
     laneIds: ['data-science', 'data-analytics'],
+    summary: {
+      en: 'Modelled post-pandemic ticket and concession pricing strategies to help theatres recover lost revenue.',
+      fr: 'Modélisation de stratégies de tarification post-pandémie pour aider les cinémas à retrouver leurs revenus.',
+    },
     description: {
       en: 'Investigated optimal post-pandemic pricing models for movie theatres using demand modelling and revenue scenario analysis. Quantified the marginal revenue impact of multiple ticket and concession pricing strategies, delivering a comparative framework for operators to evaluate recovery options.',
       fr: 'Investigation des modèles de tarification optimaux post-pandémie pour les salles de cinéma via la modélisation de la demande et l\'analyse de scénarios de revenus.',
@@ -348,11 +391,15 @@ export const projectsConfig: Project[] = [
       fr: 'Modèle financier pour un grand ministère',
     },
     company: { en: 'Professional Project · PwC', fr: 'Projet professionnel · PwC' },
-    mediaSrc: accrual_forecast,
+    mediaSrc: stock_finance_budget,
     year: 2023,
     projectType: 'professional',
     industry: 'Government & Public Sector',
     laneIds: ['business-intelligence', 'data-analytics', 'project-management'],
+    summary: {
+      en: 'A 50-year capital replacement model that surfaced ~$500M in redundant government assets.',
+      fr: 'Un modèle de remplacement d\'actifs sur 50 ans ayant révélé ~500M$ d\'actifs redondants.',
+    },
     description: {
       en: 'Developed a 50-year capital asset replacement financial model for a large federal government department. A Power BI dashboard visualized accrual ceilings and budget requirements, enabling planners to identify ~$500M in redundant assets and optimize replacement scheduling over the next five decades.*',
       fr: 'Développement d\'un modèle financier de remplacement d\'actifs sur 50 ans pour un grand ministère fédéral. Un tableau de bord Power BI a permis d\'identifier ~500M$ d\'actifs redondants.*',
@@ -389,11 +436,15 @@ export const projectsConfig: Project[] = [
       fr: 'Analyse de réseau organisationnel – Traitement des brevets USPTO',
     },
     company: { en: 'Academic Project · McGill University', fr: 'Projet académique · Université McGill' },
-    mediaSrc: network,
+    mediaSrc: stock_network_graph,
     year: 2023,
     projectType: 'academic',
     industry: 'Technology & Academia',
     laneIds: ['data-science', 'data-analytics'],
+    summary: {
+      en: 'Studied whether examiner advice networks at the USPTO speed up or slow down patent decisions.',
+      fr: 'Étude de l\'effet des réseaux de conseil des examinateurs sur la vitesse de traitement des brevets USPTO.',
+    },
     description: {
       en: 'Led a 4-person academic research team over a 6-week engagement to investigate the effect of examiner advice networks on patent processing speed at the USPTO. Applied linear regression, survival analysis, decision tree modelling, and cluster analysis across large-scale patent datasets. Produced nuanced insights into how network centrality and examiner tenure shape institutional decision-making speed.',
       fr: 'Direction d\'une équipe de 4 personnes sur 6 semaines pour étudier l\'effet des réseaux de conseil des examinateurs sur la vitesse de traitement des brevets à l\'USPTO. Application de régressions, analyses de survie et arbres de décision.',
@@ -432,11 +483,15 @@ export const projectsConfig: Project[] = [
       fr: 'Optimisation des déchets & collecte de données – Reserva Conchal',
     },
     company: { en: 'Professional Project · Reserva Conchal', fr: 'Projet professionnel · Reserva Conchal' },
-    mediaSrc: inventory_drain,
+    mediaSrc: stock_resort_waste,
     year: 2023,
     projectType: 'professional',
     industry: 'Hospitality & Sustainability',
     laneIds: ['data-analytics', 'data-engineering', 'project-management'],
+    summary: {
+      en: 'Made a luxury resort\'s biggest waste generation sites visible to operations for the first time.',
+      fr: 'A rendu visibles pour la première fois les principaux sites de génération de déchets d\'un resort de luxe.',
+    },
     description: {
       en: 'Led a team of 3–5 over a sub-3-month engagement to analyze and optimize waste management operations for Reserva Conchal, a luxury resort in Costa Rica. Designed and implemented an automated analytical framework to consolidate waste and resource data across the property, making primary waste generation sites visible to operations management for the first time.',
       fr: 'Direction d\'une équipe de 3 à 5 personnes pour analyser et optimiser la gestion des déchets du resort de luxe Reserva Conchal au Costa Rica. Conception d\'un cadre analytique automatisé pour consolider les données de déchets à travers la propriété.',
@@ -473,11 +528,15 @@ export const projectsConfig: Project[] = [
       fr: 'Outil de prévision des approvisionnements',
     },
     company: { en: 'Professional Project', fr: 'Projet professionnel' },
-    mediaSrc: inventory_drain,
+    mediaSrc: stock_warehouse_boxes,
     year: 2024,
     projectType: 'professional',
     industry: 'Manufacturing & Supply Chain',
     laneIds: ['data-engineering', 'data-science', 'business-intelligence'],
+    summary: {
+      en: 'Forecasts critical material shortages across SQL databases before they stop production.',
+      fr: 'Prévoit les pénuries de matériaux critiques avant qu\'elles n\'arrêtent la production.',
+    },
     description: {
       en: 'Developed a forecasting tool to track critical substrate and rare earth coating material inventory across multiple SQL databases. The tool projected future supply levels, sent automated alerts before thresholds were breached, and visualized forecasted needs — preventing costly production stoppages from supply shortages.*',
       fr: 'Développement d\'un outil de prévision pour suivre les stocks critiques sur plusieurs bases SQL. L\'outil projetait les niveaux d\'approvisionnement futurs et envoyait des alertes automatiques avant les ruptures de stock.*',
@@ -515,11 +574,15 @@ export const projectsConfig: Project[] = [
       fr: 'Modèle d\'équilibrage demande et stocks',
     },
     company: { en: 'Professional Project', fr: 'Projet professionnel' },
-    mediaSrc: demand_supply,
+    mediaSrc: stock_warehouse_shelves,
     year: 2024,
     projectType: 'professional',
     industry: 'Retail & Consumer Goods',
     laneIds: ['data-science', 'data-analytics', 'data-engineering'],
+    summary: {
+      en: 'Freed warehouse space from predictable low-margin goods to make room for higher-margin inventory.',
+      fr: 'A libéré de l\'espace d\'entrepôt occupé par des produits prévisibles pour des articles à plus forte marge.',
+    },
     description: {
       en: 'Built an inventory minimization model using POS sales data and live inventory levels to reduce holding costs for predictable consumer goods (razors, toothbrushes, coffee machines). Reallocated freed inventory space to higher-volatility, higher-margin items — increasing annual revenue.*',
       fr: 'Développement d\'un modèle de minimisation des stocks à partir des données de vente POS pour réduire les coûts de détention et réallouer la capacité vers des articles à forte marge.*',
@@ -557,11 +620,15 @@ export const projectsConfig: Project[] = [
       fr: 'Déploiement BI libre-service – Finance',
     },
     company: { en: 'Professional Project · Coveo', fr: 'Projet professionnel · Coveo' },
-    mediaSrc: workshop,
+    mediaSrc: stock_data_dashboard,
     year: 2024,
     projectType: 'professional',
     industry: 'Technology',
     laneIds: ['business-intelligence', 'data-engineering', 'project-management'],
+    summary: {
+      en: 'Piloted a self-serve Power BI strategy so Coveo\'s marketing team could stop waiting on engineering.',
+      fr: 'A piloté une stratégie Power BI en libre-service pour que le marketing de Coveo n\'attende plus l\'ingénierie.',
+    },
     description: {
       en: 'Led a 6-month engagement as Scrum Master and Project Lead to pilot a Power BI transition and establish a self-serve BI strategy for Coveo\'s marketing organization. Designed and implemented intuitive, scalable dashboards fit for non-technical marketing users, and collaborated with data engineering to build the underlying BI architecture. Delivered a validated pilot and a repeatable self-serve framework.',
       fr: 'Direction d\'un engagement de 6 mois en tant que Scrum Master et Chef de projet pour piloter une transition Power BI et établir une stratégie BI libre-service pour l\'organisation marketing de Coveo.',
@@ -598,11 +665,15 @@ export const projectsConfig: Project[] = [
       fr: 'Détection de points de changement et valeurs aberrantes – Boissons',
     },
     company: { en: 'Professional Project · Molson Coors', fr: 'Projet professionnel · Molson Coors' },
-    mediaSrc: demand_supply,
+    mediaSrc: stock_beverage_factory,
     year: 2024,
     projectType: 'professional',
     industry: 'Food & Beverage',
     laneIds: ['data-science', 'data-analytics', 'project-management'],
+    summary: {
+      en: 'A production-ready model that automatically flags outliers and instability in Molson Coors\' operations data.',
+      fr: 'Un modèle prêt pour la production qui signale automatiquement anomalies et instabilités opérationnelles.',
+    },
     description: {
       en: 'Led the scoping and delivery of a statistical detection system for identifying outliers and periods of instability within Molson Coors\' operational data, managing a team of 2 over a sub-3-month engagement. Translated complex analytical requirements into a production-ready detection model, enabling more accurate identification of change points and outliers — saving the team time and resource in ongoing data quality monitoring.',
       fr: 'Direction de la conception et livraison d\'un système de détection statistique pour identifier les valeurs aberrantes et les périodes d\'instabilité dans les données opérationnelles de Molson Coors sur moins de 3 mois.',
@@ -644,6 +715,10 @@ export const projectsConfig: Project[] = [
     projectType: 'professional',
     industry: 'Technology & Entertainment',
     laneIds: ['business-intelligence', 'data-analytics', 'project-management'],
+    summary: {
+      en: 'Launched an interactive seat-map product for ticket resale, on time and within a $150K budget.',
+      fr: 'Lancement d\'un produit interactif de visualisation de sièges pour la revente, dans les délais et le budget.',
+    },
     description: {
       en: 'Led the scoping, development, and launch of an interactive stadium visualization product for a ticket resale company, managing a team of 2 within a $150K budget over 3–6 months. Defined product requirements in close collaboration with the client, managed stakeholder alignment across product, engineering, and client teams, and successfully launched on time and within financial targets.',
       fr: 'Direction de la conception, du développement et du lancement d\'un produit de visualisation de stade interactif pour une entreprise de revente de billets, avec un budget de 150K$ sur 3 à 6 mois.',
@@ -680,11 +755,15 @@ export const projectsConfig: Project[] = [
       fr: 'Taux de change – Convertisseur et indice de force des devises',
     },
     company: { en: 'Personal Project', fr: 'Projet personnel' },
-    mediaSrc: accrual_forecast,
+    mediaSrc: stock_currency_exchange,
     year: 2026,
     projectType: 'personal',
     industry: 'Finance & Technology',
     laneIds: ['data-analytics', 'business-intelligence'],
+    summary: {
+      en: 'A fast, clutter-free currency converter that also shows how strong a currency is right now.',
+      fr: 'Un convertisseur de devises rapide et épuré qui montre aussi la force actuelle d\'une devise.',
+    },
     description: {
       en: 'An interactive currency conversion tool that lets you convert most major currencies and measure how strong a currency is relative to others. Built to replace existing tools that are slow, cluttered, and lacking context — delivering a fast and informative experience.',
       fr: 'Un outil interactif de conversion de devises permettant de convertir la plupart des grandes devises et de mesurer leur force relative. Conçu pour remplacer les outils existants lents et peu informatifs.',
@@ -728,6 +807,10 @@ export const projectsConfig: Project[] = [
     projectType: 'personal',
     industry: 'Technology & Urban Planning',
     laneIds: ['data-analytics', 'data-science'],
+    summary: {
+      en: 'Maps what\'s reachable by bus and metro from any address, built for house hunting.',
+      fr: 'Cartographie ce qui est accessible en bus et métro depuis une adresse, pour la recherche immobilière.',
+    },
     description: {
       en: 'An interactive tool that maps what is accessible around any address via public transit (buses and metros), designed to help with house hunting. Enter an address and explore nearby transit routes, stops, and catchment areas. More features including noise levels, flood zones, year of construction, walkability scores, and other neighbourhood calculations coming soon.',
       fr: 'Un outil interactif cartographiant ce qui est accessible depuis une adresse via les transports en commun (bus et métros), conçu pour la recherche immobilière. Prochainement : niveaux de bruit, zones inondables, score de marchabilité et plus.',
@@ -772,6 +855,10 @@ export const projectsConfig: Project[] = [
     projectType: 'personal',
     industry: 'Technology & Transportation',
     laneIds: ['data-engineering', 'data-analytics'],
+    summary: {
+      en: 'A serverless AWS pipeline tracking 500+ live SNCF trains a day for under $1/month.',
+      fr: 'Un pipeline AWS serverless suivant plus de 500 trains SNCF en direct par jour pour moins d\'1$/mois.',
+    },
     description: {
       en: 'A fully serverless AWS data pipeline that collects SNCF (French national rail) schedule and real-time delay data every 2 minutes, stores it in S3 and PostgreSQL, and powers an interactive live train map. The map renders 500+ daily trains with animated positions, delay colour-coding, route overlays, and a full-day timeline scrubber.',
       fr: 'Un pipeline de données entièrement serverless sur AWS qui collecte les horaires SNCF et les données de retard en temps réel toutes les 2 minutes, les stocke dans S3 et PostgreSQL, et alimente une carte ferroviaire interactive en direct.',
@@ -814,11 +901,15 @@ export const projectsConfig: Project[] = [
       fr: 'Migration Qlik vers Power BI & infrastructure Databricks',
     },
     company: { en: 'Professional Project · Apotex Pharmaceuticals', fr: 'Projet professionnel · Apotex Pharmaceuticals' },
-    mediaSrc: reversal_finder,
+    mediaSrc: stock_data_center,
     year: 2025,
     projectType: 'professional',
     industry: 'Pharmaceuticals',
     laneIds: ['data-engineering', 'business-intelligence', 'project-management'],
+    summary: {
+      en: 'Migrated 80 Qlik dashboards to Power BI and Apotex\'s data platform to Databricks — $2M saved annually.',
+      fr: 'Migration de 80 tableaux Qlik vers Power BI et de la plateforme de données vers Databricks — 2M$ économisés par an.',
+    },
     description: {
       en: 'Led two concurrent data infrastructure modernization programs at Apotex Pharmaceuticals. Project 1: End-to-end migration of 80 Qlik BI dashboards to Microsoft Power BI, directing a cross-functional team of 5 over 12+ months — achieving $1M in annual cost savings. Project 2: Full migration of the organization\'s data infrastructure to Databricks, delivering $1M in additional annual operational savings and a modernized, scalable data platform.',
       fr: 'Direction de deux programmes de modernisation d\'infrastructure de données chez Apotex Pharmaceuticals : migration de 80 tableaux de bord Qlik vers Power BI (1M$ d\'économies annuelles) et migration complète de l\'infrastructure vers Databricks (1M$ d\'économies supplémentaires).',

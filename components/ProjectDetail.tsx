@@ -74,162 +74,169 @@ export default function ProjectDetail({
     .filter(Boolean) as NonNullable<ReturnType<typeof getArticle>>[]
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+    <div>
 
-      {/* Back link */}
-      <Link
-        href={`/Projects/${locale}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-purple-400 transition-colors mb-8"
-      >
-        <ArrowLeft size={14} />
-        {t.backToProjects}
-      </Link>
+      {/* Banner */}
+      <div className="relative w-full h-64 sm:h-80 md:h-96 overflow-hidden">
+        <Image
+          src={project.mediaSrc}
+          alt={project.title[locale]}
+          fill
+          unoptimized
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
 
-      {/* Hero */}
-      <div className="flex flex-col sm:flex-row items-start gap-6 mb-4">
-        <div className="shrink-0 bg-gray-800/60 rounded-2xl p-4 flex items-center justify-center w-28 h-28">
-          {coverImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={coverImage}
-              alt={project.title[locale]}
-              className="w-20 h-20 object-contain"
-            />
-          ) : (
-            <Image
-              src={project.mediaSrc}
-              alt={project.title[locale]}
-              width={80}
-              height={80}
-              className="object-contain"
-              unoptimized
-            />
-          )}
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-medium text-purple-400 mb-1">{project.company[locale]}</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
-            {project.title[locale]}
-          </h1>
+        {coverImage && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={coverImage}
+            alt=""
+            aria-hidden="true"
+            className="absolute top-6 right-4 sm:right-6 w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xl bg-gray-900/80 border border-gray-700 p-2 shadow-lg"
+          />
+        )}
+
+        <div className="absolute inset-0 flex flex-col justify-end">
+          <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 pb-8">
+            <Link
+              href={`/Projects/${locale}`}
+              className="inline-flex items-center gap-1.5 text-sm text-gray-300 hover:text-purple-300 transition-colors mb-4"
+            >
+              <ArrowLeft size={14} />
+              {t.backToProjects}
+            </Link>
+            <p className="text-sm font-medium text-purple-300 mb-1">{project.company[locale]}</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight mb-3">
+              {project.title[locale]}
+            </h1>
+            <p className="text-gray-200 text-base sm:text-lg max-w-2xl leading-relaxed">
+              {project.summary[locale]}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Description */}
-      <Section title={t.description}>
-        <p className="text-gray-300 leading-relaxed">{project.description[locale]}</p>
-      </Section>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
 
-      {/* Purpose */}
-      <Section title={t.purpose}>
-        <p className="text-gray-300 leading-relaxed">{project.purpose[locale]}</p>
-      </Section>
-
-      {/* How to Use */}
-      <Section title={t.howToUse}>
-        <p className="text-gray-300 leading-relaxed">{project.howToUse[locale]}</p>
-      </Section>
-
-      {/* Architecture */}
-      <Section title={t.architecture}>
-        <p className="text-gray-300 leading-relaxed mb-6">{project.architecture.overview[locale]}</p>
-        {project.architecture.diagramSrc ? (
-          <div className="rounded-xl overflow-hidden border border-gray-700">
-            <Image
-              src={project.architecture.diagramSrc}
-              alt="Architecture diagram"
-              width={900}
-              height={400}
-              className="w-full object-contain"
-              unoptimized
-            />
-          </div>
-        ) : (
-          <ArchitectureDiagram nodes={project.architecture.nodes} />
-        )}
-      </Section>
-
-      {/* Skills */}
-      <Section title={t.skills}>
-        {resolvedSkills.length === 0 ? (
-          <p className="text-sm text-gray-500">{t.noSkills}</p>
-        ) : (
-          <div className="flex flex-wrap gap-3">
-            {resolvedSkills.map((skill) => (
-              <div
-                key={skill.id}
-                className={`flex items-center gap-2 rounded-full border px-3 py-1.5 ${proficiencyColor[skill.proficiency]}`}
-              >
-                <Tag size={12} />
-                <span className="text-xs font-medium">{skill.name}</span>
-                <span className={`text-xs opacity-70`}>
-                  · {proficiencyLabel[skill.proficiency]}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {/* Certifications */}
-      <Section title={t.certifications}>
-        {project.certifications.length === 0 ? (
-          <p className="text-sm text-gray-500">{t.noCerts}</p>
-        ) : (
-          <div className="flex flex-wrap gap-3">
-            {project.certifications.map((cert) => (
-              <div
-                key={cert}
-                className="flex items-center gap-2 rounded-full border border-purple-600/50 bg-purple-900/20 px-3 py-1.5"
-              >
-                <Award size={12} className="text-purple-400" />
-                <span className="text-xs font-medium text-purple-300">{cert}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {/* Gallery */}
-      {galleryImages.length > 0 && (
-        <Section title={t.gallery}>
-          <ProjectGallery images={galleryImages} />
+        {/* Description */}
+        <Section title={t.description}>
+          <p className="text-gray-300 leading-relaxed">{project.description[locale]}</p>
         </Section>
-      )}
 
-      {/* Related Articles */}
-      {resolvedArticles.length > 0 && (
-        <Section title={t.relatedArticles}>
-          <div className="flex flex-col gap-2">
-            {resolvedArticles.map((article) => (
-              <Link
-                key={article.slug}
-                href={getArticlePath(article.slug, locale)}
-                className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/40 px-4 py-3 hover:border-purple-700/50 transition-colors group"
-              >
-                <FileText size={16} className="text-purple-400 shrink-0" />
-                <span className="text-sm text-gray-300 group-hover:text-purple-300 transition-colors">
-                  {article.title[locale] ?? article.title.en}
-                </span>
-              </Link>
-            ))}
-          </div>
+        {/* Purpose */}
+        <Section title={t.purpose}>
+          <p className="text-gray-300 leading-relaxed">{project.purpose[locale]}</p>
         </Section>
-      )}
 
-      {/* External link */}
-      {project.linkUrl && (
-        <div className="border-t border-gray-800 pt-8">
-          <a
-            href={project.linkUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            <ExternalLink size={14} />
-            {project.linkText?.[locale] || t.viewProject}
-          </a>
-        </div>
-      )}
+        {/* How to Use */}
+        <Section title={t.howToUse}>
+          <p className="text-gray-300 leading-relaxed">{project.howToUse[locale]}</p>
+        </Section>
+
+        {/* Architecture */}
+        <Section title={t.architecture}>
+          <p className="text-gray-300 leading-relaxed mb-6">{project.architecture.overview[locale]}</p>
+          {project.architecture.diagramSrc ? (
+            <div className="rounded-xl overflow-hidden border border-gray-700">
+              <Image
+                src={project.architecture.diagramSrc}
+                alt="Architecture diagram"
+                width={900}
+                height={400}
+                className="w-full object-contain"
+                unoptimized
+              />
+            </div>
+          ) : (
+            <ArchitectureDiagram nodes={project.architecture.nodes} />
+          )}
+        </Section>
+
+        {/* Skills */}
+        <Section title={t.skills}>
+          {resolvedSkills.length === 0 ? (
+            <p className="text-sm text-gray-500">{t.noSkills}</p>
+          ) : (
+            <div className="flex flex-wrap gap-3">
+              {resolvedSkills.map((skill) => (
+                <div
+                  key={skill.id}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 ${proficiencyColor[skill.proficiency]}`}
+                >
+                  <Tag size={12} />
+                  <span className="text-xs font-medium">{skill.name}</span>
+                  <span className={`text-xs opacity-70`}>
+                    · {proficiencyLabel[skill.proficiency]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+
+        {/* Certifications */}
+        <Section title={t.certifications}>
+          {project.certifications.length === 0 ? (
+            <p className="text-sm text-gray-500">{t.noCerts}</p>
+          ) : (
+            <div className="flex flex-wrap gap-3">
+              {project.certifications.map((cert) => (
+                <div
+                  key={cert}
+                  className="flex items-center gap-2 rounded-full border border-purple-600/50 bg-purple-900/20 px-3 py-1.5"
+                >
+                  <Award size={12} className="text-purple-400" />
+                  <span className="text-xs font-medium text-purple-300">{cert}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+
+        {/* Gallery */}
+        {galleryImages.length > 0 && (
+          <Section title={t.gallery}>
+            <ProjectGallery images={galleryImages} />
+          </Section>
+        )}
+
+        {/* Related Articles */}
+        {resolvedArticles.length > 0 && (
+          <Section title={t.relatedArticles}>
+            <div className="flex flex-col gap-2">
+              {resolvedArticles.map((article) => (
+                <Link
+                  key={article.slug}
+                  href={getArticlePath(article.slug, locale)}
+                  className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/40 px-4 py-3 hover:border-purple-700/50 transition-colors group"
+                >
+                  <FileText size={16} className="text-purple-400 shrink-0" />
+                  <span className="text-sm text-gray-300 group-hover:text-purple-300 transition-colors">
+                    {article.title[locale] ?? article.title.en}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* External link */}
+        {project.linkUrl && (
+          <div className="border-t border-gray-800 pt-8">
+            <a
+              href={project.linkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              <ExternalLink size={14} />
+              {project.linkText?.[locale] || t.viewProject}
+            </a>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
