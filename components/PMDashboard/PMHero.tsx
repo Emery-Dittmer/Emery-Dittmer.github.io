@@ -1,4 +1,5 @@
 import { pmStats } from '@/lib/linearConfig'
+import { getProcessMetrics } from '@/lib/linearDashboard'
 import { Locale } from '@/lib/i18n'
 
 const copy = {
@@ -6,28 +7,34 @@ const copy = {
     heading: 'Project Management',
     sub: 'A track record of leading data-driven teams, delivering on time, and creating measurable impact.',
     projectsLed: 'Projects Led',
-    peakTeam: 'Peak Team Size',
     largestBudget: 'Largest Budget',
     combinedImpact: 'Combined Impact',
+    delivered: 'Issues Delivered',
+    epicsShipped: 'Epics Shipped',
+    live: 'Live from Linear',
   },
   fr: {
     heading: 'Gestion de projet',
     sub: "Un bilan de direction d'équipes data, de livraisons dans les délais et d'impacts mesurables.",
     projectsLed: 'Projets dirigés',
-    peakTeam: 'Équipe maximale',
     largestBudget: 'Budget le plus élevé',
     combinedImpact: 'Impact combiné',
+    delivered: 'Tâches livrées',
+    epicsShipped: 'Épics livrés',
+    live: 'En direct de Linear',
   },
 }
 
 export default function PMHero({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
+  const m = getProcessMetrics()
 
   const stats = [
-    { label: t.projectsLed,    value: String(pmStats.projectsLed) },
-    { label: t.peakTeam,       value: `${pmStats.peakTeamSize} people` },
-    { label: t.largestBudget,  value: pmStats.largestBudget },
+    { label: t.projectsLed, value: String(pmStats.projectsLed) },
+    { label: t.largestBudget, value: pmStats.largestBudget },
     { label: t.combinedImpact, value: pmStats.combinedImpact },
+    { label: t.delivered, value: String(m.completedIssues), live: true },
+    { label: t.epicsShipped, value: `${m.epicsShipped}/${m.epicsTotal}`, live: true },
   ]
 
   return (
@@ -48,14 +55,24 @@ export default function PMHero({ locale = 'en' }: { locale?: Locale }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-aos="fade-up" data-aos-delay="100">
-          {stats.map(({ label, value }) => (
+        <div
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+          data-aos="fade-up"
+          data-aos-delay="100"
+        >
+          {stats.map(({ label, value, live }) => (
             <div
               key={label}
               className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 text-center"
             >
               <p className="text-3xl font-bold text-white mb-1">{value}</p>
               <p className="text-xs text-gray-400 uppercase tracking-wider">{label}</p>
+              {live && (
+                <p className="mt-1.5 flex items-center justify-center gap-1 text-[10px] text-purple-400/80">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+                  {t.live}
+                </p>
+              )}
             </div>
           ))}
         </div>

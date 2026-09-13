@@ -1,0 +1,55 @@
+# Weekly refresh of the generated Linear data (lib/linear-dashboard.json and
+# public/linear-current.json). Commits only when the data actually changed;
+# the commit to main triggers the normal Pages deploy.
+#
+# Requires the LINEAR_API_KEY repo secret (same one the deploy workflow uses).
+name: Weekly Linear sync
+
+on:
+  schedule:
+    # Mondays 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "linear-sync"
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Fetch Linear data
+        run: node scripts/fetch-linear.mjs
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+      - name: Commit refreshed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # generatedAt changes every run; only commit when the substantive
+          # data (anything other than that timestamp) differs.
+          if git diff --quiet -- lib/linear-dashboard.json public/linear-current.json; then
+            echo "No Linear changes."
+            exit 0
+          fi
+          # Re-check ignoring only the generatedAt line churn.
+          CHANGED=$(git diff -U0 -- lib/linear-dashboard.json public/linear-current.json \
+            | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' | grep -v '"generatedAt"' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "Only the generatedAt timestamp moved — skipping commit."
+            git checkout -- lib/linear-dashboard.json public/linear-current.json
+            exit 0
+          fi
+          git add lib/linear-dashboard.json public/linear-current.json
+          git commit -m "chore: weekly Linear data refresh"
+          git push

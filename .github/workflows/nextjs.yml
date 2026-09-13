@@ -81,6 +81,12 @@ jobs:
         run: node scripts/fetch-sncf-html.mjs
         env:
           SNCF_COLLECTOR_TOKEN: ${{ secrets.SNCF_COLLECTOR_TOKEN }}
+      - name: Refresh Linear data
+        # `next build` is invoked directly below, bypassing npm's prebuild hook,
+        # so the Linear fetch needs its own explicit step here.
+        run: node scripts/fetch-linear.mjs
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
       - name: Inject Mapbox token
         run: sed -i 's/MAPBOX_TOKEN_PLACEHOLDER/${{ secrets.MAPBOX_TOKEN }}/g' public/sncf-map/map.html
       - name: Build with Next.js

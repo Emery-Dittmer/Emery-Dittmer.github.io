@@ -72,8 +72,10 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
 
   const copy = {
     en: {
-      title: 'Delivering data projects end to end',
-      intro: 'Most data work stalls between insight and action. Emery bridges that gap — leading projects from problem definition to production, with the technical depth to build what gets decided.',
+      title: 'I specialize in laying product foundations',
+      intro: 'Then building on those foundations technically to deliver business impact.',
+      cta: 'Have a project to talk about?',
+      ctaLink: 'Let’s chat →',
       skillsToggle: 'See the full skill breakdown',
       exploreHint: 'Click a node to explore',
       items: [
@@ -95,8 +97,10 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
       ],
     },
     fr: {
-      title: 'Livrer des projets data de bout en bout',
-      intro: "La plupart des projets data échouent entre l'analyse et l'action. Emery comble cet écart — pilotant les projets de la définition du problème à la production, avec la profondeur technique pour construire ce qui a été décidé.",
+      title: 'Je me spécialise dans la mise en place de fondations produit',
+      intro: "Puis je construis sur ces fondations, techniquement, pour livrer un impact business.",
+      cta: 'Un projet dont vous aimeriez discuter ?',
+      ctaLink: 'Discutons-en →',
       skillsToggle: 'Voir le détail complet des compétences',
       exploreHint: 'Cliquez sur un nœud pour explorer',
       items: [
@@ -128,7 +132,16 @@ export default function Features({ locale = 'en' }: { locale?: Locale }) {
           {/* Section header */}
           <div className="max-w-3xl mx-auto text-center pb-12 md:pb-16">
             <h2 className="h2 mb-4">{t.title}</h2>
-            <p className="text-xl text-gray-400">{t.intro}</p>
+            <p className="text-xl text-gray-400 mb-4">{t.intro}</p>
+            <p className="text-sm text-gray-500">
+              {t.cta}{' '}
+              <a
+                href={`mailto:emery.dittmer@gmail.com?subject=${encodeURIComponent(t.cta)}`}
+                className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+              >
+                {t.ctaLink}
+              </a>
+            </p>
           </div>
 
           {/* Triangle graphic — square-ish, percentage-based so it scales

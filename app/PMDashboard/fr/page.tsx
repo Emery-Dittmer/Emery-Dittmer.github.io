@@ -8,8 +8,8 @@ export const metadata = {
 import PMHero from '@/components/PMDashboard/PMHero'
 import PMTimeline from '@/components/PMDashboard/PMTimeline'
 import DeliveryTrackRecord from '@/components/PMDashboard/DeliveryTrackRecord'
-import ProjectLeadershipBoard from '@/components/PMDashboard/ProjectLeadershipBoard'
 import ProcessShowcase from '@/components/PMDashboard/ProcessShowcase'
+import IssueExplorer from '@/components/PMDashboard/IssueExplorer'
 
 export default function PMDashboardPage() {
   const locale = 'fr'
@@ -18,8 +18,8 @@ export default function PMDashboardPage() {
       <PMHero locale={locale} />
       <PMTimeline locale={locale} />
       <DeliveryTrackRecord locale={locale} />
-      <ProjectLeadershipBoard locale={locale} />
       <ProcessShowcase locale={locale} />
+      <IssueExplorer locale={locale} />
     </>
   )
 }
