@@ -21,7 +21,7 @@ const CURRENT_PATH = join(__dirname, '..', 'public', 'linear-current.json')
 const DASHBOARD_PATH = join(__dirname, '..', 'lib', 'linear-dashboard.json')
 const EMPTY_CURRENT = { cycle: null, inProgress: [], recentlyDone: [] }
 
-const TEAM_KEY = 'EmeryPersonalProjects'
+const TEAM_KEY = 'EME' // Linear team key for EmeryPersonalProjects, not its display name
 
 const key = process.env.LINEAR_API_KEY
 if (!key || key === 'your_linear_api_key_here') {
@@ -107,20 +107,27 @@ async function writeCurrent() {
 
 // ── PM Dashboard: projects / epics / issues ────────────────────────────────
 
-const DASHBOARD_QUERY = `
-  query Dashboard($teamKey: String!, $after: String) {
-    projects(first: 100, filter: { accessibleTeams: { key: { eq: $teamKey } } }) {
+// Split into two queries — combined, projects + a full page of issues
+// exceeded Linear's query complexity budget.
+const PROJECTS_QUERY = `
+  query Projects($teamKey: String!) {
+    projects(first: 50, filter: { accessibleTeams: { some: { key: { eq: $teamKey } } } }) {
       nodes {
-        id name summary url startDate targetDate
-        state
+        id name description url startDate targetDate
+        status { name type }
         lead { name }
         projectMilestones { nodes { id name targetDate } }
         priority
         createdAt updatedAt completedAt canceledAt
       }
     }
+  }
+`
+
+const ISSUES_QUERY = `
+  query Issues($teamKey: String!, $after: String) {
     team(id: $teamKey) {
-      issues(first: 250, after: $after, orderBy: updatedAt) {
+      issues(first: 100, after: $after, orderBy: updatedAt) {
         pageInfo { hasNextPage endCursor }
         nodes {
           id identifier title url priority
@@ -138,14 +145,14 @@ const DASHBOARD_QUERY = `
 const PRIORITY_NAME = { 0: 'None', 1: 'Urgent', 2: 'High', 3: 'Medium', 4: 'Low' }
 
 async function buildDashboard() {
-  const first = await linear(DASHBOARD_QUERY, { teamKey: TEAM_KEY, after: null })
+  const first = await linear(PROJECTS_QUERY, { teamKey: TEAM_KEY })
 
   const projects = (first.projects?.nodes ?? []).map((p) => ({
     id: p.id,
     name: p.name,
-    summary: p.summary || '',
+    summary: p.description || '',
     url: p.url,
-    status: p.state || 'backlog',
+    status: p.status?.type || 'backlog',
     lead: p.lead?.name ?? null,
     startDate: p.startDate ?? null,
     targetDate: p.targetDate ?? null,
@@ -160,12 +167,14 @@ async function buildDashboard() {
   }))
 
   // Paginate issues.
-  let issueNodes = first.team?.issues?.nodes ?? []
-  let page = first.team?.issues?.pageInfo
+  let issueNodes = []
+  let after = null
+  let page = { hasNextPage: true, endCursor: null }
   while (page?.hasNextPage) {
-    const next = await linear(DASHBOARD_QUERY, { teamKey: TEAM_KEY, after: page.endCursor })
+    const next = await linear(ISSUES_QUERY, { teamKey: TEAM_KEY, after })
     issueNodes = issueNodes.concat(next.team?.issues?.nodes ?? [])
     page = next.team?.issues?.pageInfo
+    after = page?.endCursor
   }
 
   const issues = issueNodes.map((i) => ({
@@ -186,10 +195,12 @@ async function buildDashboard() {
     updatedAt: i.updatedAt,
   }))
 
-  // Derive epics: any issue that is another issue's parent.
+  // Derive epics: any issue that is another issue's parent, or whose title
+  // uses the "Epic: ..." convention (covers epics with no sub-tasks yet,
+  // e.g. a report/write-up tracked as a single issue).
   const parentIds = new Set(issues.filter((i) => i.parentId).map((i) => i.parentId))
   const epics = issues
-    .filter((i) => parentIds.has(i.id))
+    .filter((i) => parentIds.has(i.id) || /^epic:/i.test(i.title))
     .map((e) => {
       const children = issues.filter((c) => c.parentId === e.id)
       const done = children.filter((c) => c.statusType === 'completed').length
