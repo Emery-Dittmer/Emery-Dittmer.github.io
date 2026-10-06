@@ -937,4 +937,103 @@ export const projectsConfig: Project[] = [
     skills: ['time-series-panel-data'],
     certifications: ['Power BI', 'Databricks Associate', 'PSMI', 'CAPM'],
   },
+
+  // ── Task Tracker · 2026 ────────────────────────────────────────────────────
+  {
+    id: 'task-tracker',
+    title: {
+      en: 'Task Tracker — Gantt, Kanban & Sprint Planner',
+      fr: 'Task Tracker — Gantt, Kanban et planification de sprints',
+    },
+    company: { en: 'Personal Project', fr: 'Projet personnel' },
+    // TODO: replace with a real screenshot — reusing the Network Analysis
+    // project's image as a stand-in (every dedicated stock photo in this
+    // file is already claimed by a different project).
+    mediaSrc: stock_network_graph,
+    year: 2026,
+    projectType: 'personal',
+    industry: 'Technology & Project Management',
+    laneIds: ['project-management', 'data-engineering'],
+    summary: {
+      en: 'An offline Mac app for tracking work — one data model, rendered as Gantt, Kanban, calendar, and sprint board.',
+      fr: 'Une application Mac hors ligne pour suivre le travail — un seul modèle de données, affiché en Gantt, Kanban, calendrier et tableau de sprint.',
+    },
+    description: {
+      en: 'A standalone desktop task tracker built on a flexible, Airtable-style data model: typed collections, linked records, rollups, and formulas, rendered through multiple interchangeable views that all write back to the same records. Includes a fully editable, dependency-aware Gantt chart (drag to move or resize, cascading date updates), a Kanban board, a calendar view, sprint planning with baselines and sprint closure, an undo/redo command stack, CSV export, and a built-in AI chat panel for querying and editing data in natural language.',
+      fr: 'Un gestionnaire de tâches de bureau autonome construit sur un modèle de données flexible façon Airtable : collections typées, enregistrements liés, rollups et formules, affichés via plusieurs vues interchangeables qui écrivent toutes dans les mêmes enregistrements. Inclut un diagramme de Gantt entièrement éditable avec dépendances, un tableau Kanban, une vue calendrier, la planification de sprints avec baselines et clôture, une pile annuler/rétablir, l\'export CSV, et un panneau de chat IA intégré.',
+    },
+    purpose: {
+      en: 'Build a single project-tracking tool that behaves like a real desktop app — installs, runs offline, persists to a local file — instead of juggling a separate Gantt tool, kanban board, and spreadsheet that all drift out of sync.',
+      fr: 'Construire un outil unique de suivi de projet qui se comporte comme une vraie application de bureau — installation, fonctionnement hors ligne, persistance locale — plutôt que de jongler entre un outil Gantt, un tableau kanban et une feuille de calcul qui finissent par diverger.',
+    },
+    howToUse: {
+      en: 'Define collections (Tasks, Epics, Products, or any custom hierarchy) with typed fields and links between them. Work the same records through whichever view fits the moment: drag Gantt bars to reschedule with dependencies cascading automatically, move cards across a Kanban board, plan and close sprints, or ask the built-in chat panel to summarize or update records for you.',
+      fr: 'Définissez des collections (tâches, épics, produits, ou toute hiérarchie personnalisée) avec des champs typés et des liens entre elles. Travaillez les mêmes enregistrements via la vue qui convient : glissez les barres de Gantt avec dépendances en cascade, déplacez des cartes sur un tableau Kanban, planifiez et clôturez des sprints, ou demandez au panneau de chat intégré de résumer ou modifier des enregistrements.',
+    },
+    architecture: {
+      overview: {
+        en: 'A Tauri desktop shell wraps a React/TypeScript front end backed by a local SQLite-style store. A single data layer (collections, field definitions, linked records, rollups) feeds every view — Gantt, Kanban, Calendar, Table — so edits in one view are immediately consistent in the others. An undo/redo command stack and a cascade engine keep dependent dates in sync when a bar is dragged.',
+        fr: 'Une coque de bureau Tauri enveloppe un front-end React/TypeScript adossé à un stockage local de type SQLite. Une couche de données unique alimente chaque vue, garantissant la cohérence des modifications entre elles.',
+      },
+      nodes: [
+        { id: '1', label: 'Data Layer',       type: 'storage', technology: 'mysql',  description: 'Collections, field definitions, linked records, rollups & formulas' },
+        { id: '2', label: 'Command Stack',    type: 'process', technology: 'react',  description: 'Undo/redo + cascading dependency updates on date changes' },
+        { id: '3', label: 'Gantt / Kanban / Calendar', type: 'output', technology: 'react', description: 'Interchangeable views over the same records' },
+        { id: '4', label: 'AI Chat Panel',    type: 'service', technology: 'python', description: 'Natural-language queries and edits against the data layer' },
+        { id: '5', label: 'Tauri Shell',      type: 'output',  technology: 'github', description: 'Offline Mac desktop app, local file persistence' },
+      ],
+    },
+    skills: ['building-maintaining-a-project-roadmap', 'running-sprint-planning-retrospectives'],
+    certifications: [],
+  },
+
+  // ── Process Flow Builder · 2026 ────────────────────────────────────────────
+  {
+    id: 'process-flow-builder',
+    title: {
+      en: 'Process Flow Builder',
+      fr: 'Process Flow Builder',
+    },
+    company: { en: 'Personal Project', fr: 'Projet personnel' },
+    // TODO: replace with a real screenshot — reusing the Network Analysis
+    // project's image as a stand-in (every dedicated stock photo in this
+    // file is already claimed by a different project).
+    mediaSrc: stock_network_graph,
+    year: 2026,
+    projectType: 'personal',
+    industry: 'Technology & Process Design',
+    laneIds: ['project-management', 'data-analytics'],
+    summary: {
+      en: 'A tool for building layered, expandable process maps — capability overviews, support flows, decision trees — as a Mac app or in the browser.',
+      fr: 'Un outil pour construire des cartes de processus en couches et extensibles — aperçus de capacités, flux de support, arbres de décision — en app Mac ou dans le navigateur.',
+    },
+    description: {
+      en: 'A diagramming tool purpose-built for process maps that need to go deep without becoming unreadable: every branch expands and collapses independently, steps can cross-link to other branches with dashed or solid arrows, and whole outlines can be pasted in to build many steps at once. Ships two ways from one codebase — a Mac desktop app (offline, saves to a local file) and a web version. Currently at v1.4.0.',
+      fr: 'Un outil de diagrammes conçu pour les cartes de processus qui doivent aller en profondeur sans devenir illisibles : chaque branche se déplie et se replie indépendamment, les étapes peuvent être reliées entre branches par des flèches pointillées ou pleines, et des plans entiers peuvent être collés pour construire de nombreuses étapes d\'un coup. Disponible en app Mac de bureau et en version web depuis la même base de code. Actuellement en v1.4.0.',
+    },
+    purpose: {
+      en: 'Give process documentation a format that scales: flat flowcharts either stay too shallow to be useful or become unreadable once they are not. Layered, collapsible branches let a map serve both the one-sentence overview and the full step-by-step detail from the same artifact.',
+      fr: 'Donner à la documentation des processus un format qui s\'adapte à l\'échelle : les organigrammes plats restent trop superficiels ou deviennent illisibles. Des branches en couches et repliables permettent à une carte de servir à la fois l\'aperçu en une phrase et le détail complet.',
+    },
+    howToUse: {
+      en: 'Select a step and press Tab to add a sub-step one layer deeper, or Enter for a step at the same level. Click a step\'s pill (or press Space) to expand or collapse its branch, and use the toolbar\'s Show 1/2/3/All to reveal the map to a given depth. Paste an indented outline to build many steps at once, link a step to another branch for shared sub-flows, and switch to Free layout to drag steps anywhere. Everything also works offline in the Mac app, saved to a local file.',
+      fr: 'Sélectionnez une étape et appuyez sur Tab pour ajouter une sous-étape, ou Entrée pour une étape au même niveau. Cliquez sur la pastille d\'une étape (ou Espace) pour déplier ou replier sa branche, et utilisez Afficher 1/2/3/Tout dans la barre d\'outils pour révéler la carte jusqu\'à une profondeur donnée. Collez un plan indenté pour construire de nombreuses étapes d\'un coup.',
+    },
+    architecture: {
+      overview: {
+        en: 'A single HTML/JS page holds the whole app — markup, styles, and the tree data model — and is shared verbatim between the web build and the Mac desktop build. The desktop build wraps that page in an Electron shell whose main process handles the native menu, file dialogs, and saving the map to disk; the web build runs the same page as a standalone artifact with no native integration.',
+        fr: 'Une seule page HTML/JS contient toute l\'application — structure, styles et modèle de données en arbre — partagée telle quelle entre la version web et la version Mac. La version de bureau enveloppe cette page dans une coque Electron qui gère le menu natif et la sauvegarde sur disque.',
+      },
+      nodes: [
+        { id: '1', label: 'Shared App Page',  type: 'process', technology: 'react',  description: 'process-flow-builder.html — markup, styles & tree data model, shared by both builds' },
+        { id: '2', label: 'Electron Shell',   type: 'service', technology: 'github', description: 'Native menu, file dialogs, saving maps to a local file' },
+        { id: '3', label: 'Mac Desktop App',  type: 'output',  technology: 'github', description: 'Offline .dmg install, maps.json on disk with automatic backup' },
+        { id: '4', label: 'Web Version',      type: 'output',  technology: 'react',  description: 'Same page served as a standalone web artifact' },
+      ],
+    },
+    skills: ['building-maintaining-a-project-roadmap'],
+    certifications: [],
+    linkUrl: 'https://claude.ai/artifact/3ERPZfeDYCZgLqvT63su9C',
+    linkText: { en: 'Try the web version', fr: 'Essayer la version web' },
+  },
 ]

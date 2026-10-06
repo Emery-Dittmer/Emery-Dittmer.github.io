@@ -264,6 +264,17 @@ export default function Certifications({
 const certsByLocale: Record<string, Cert[]> = {
   en: [
     {
+      name: 'Claude Certified Architect - Professional',
+      image: data_iku, // TODO: replace with Anthropic logo
+      company: 'Issued by: Anthropic',
+      link: 'https://www.credly.com/badges/3c926997-2213-4fa4-96fa-04588b47acba',
+      linktxt: 'View Details',
+      h: 100,
+      year: '2026',
+      domain: 'AI & Compliance',
+      technology: 'Anthropic',
+    },
+    {
       name: 'Agentforce Specialist',
       image: data_iku, // TODO: replace with Salesforce logo
       company: 'Issued by: Salesforce',
@@ -474,6 +485,17 @@ const certsByLocale: Record<string, Cert[]> = {
     },
   ],
   fr: [
+    {
+      name: 'Claude Certified Architect - Professional',
+      image: data_iku, // TODO: replace with Anthropic logo
+      company: 'Délivré par : Anthropic',
+      link: 'https://www.credly.com/badges/3c926997-2213-4fa4-96fa-04588b47acba',
+      linktxt: 'Voir les détails',
+      h: 100,
+      year: '2026',
+      domain: 'AI & Compliance',
+      technology: 'Anthropic',
+    },
     {
       name: 'Agentforce Specialist',
       image: data_iku, // TODO: replace with Salesforce logo
