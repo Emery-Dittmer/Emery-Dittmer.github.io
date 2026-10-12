@@ -1,7 +1,70 @@
 {
-  "generatedAt": "2026-10-06T20:39:57.692Z",
+  "generatedAt": "2026-10-12T14:01:15.236Z",
   "teamKey": "EME",
   "projects": [
+    {
+      "id": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "name": "Apartment Renovation",
+      "summary": "Renovation of the new apartment, planned room by room: kitchen, living room, bedroom.",
+      "url": "https://linear.app/emerypersonalprojects/project/apartment-renovation-5acbf83405f7",
+      "status": "planned",
+      "lead": null,
+      "startDate": null,
+      "targetDate": null,
+      "priority": 0,
+      "milestones": [],
+      "createdAt": "2026-10-11T19:02:52.784Z",
+      "updatedAt": "2026-10-11T19:02:52.784Z",
+      "completedAt": null,
+      "canceledAt": null
+    },
+    {
+      "id": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "name": "Apartment Facts (Global)",
+      "summary": "Enter any address worldwide and get an apartment fact card: energy rating (DPE/EPC), walkability, environmental score and average price per m². Starts with Canada, US, Europe.",
+      "url": "https://linear.app/emerypersonalprojects/project/apartment-facts-global-49e2621d5ba4",
+      "status": "planned",
+      "lead": null,
+      "startDate": "2026-10-12",
+      "targetDate": "2027-06-30",
+      "priority": 0,
+      "milestones": [
+        {
+          "id": "afb71324-d472-4d1c-94a0-375fd3fb5b83",
+          "name": "M5 Website integration & public launch",
+          "targetDate": "2027-06-15"
+        },
+        {
+          "id": "5c0a1542-6dea-4251-a136-a2f995d5c229",
+          "name": "M4 Europe expansion",
+          "targetDate": "2027-05-15"
+        },
+        {
+          "id": "49f3bd05-3214-45f0-a2e4-c48633c38b20",
+          "name": "M3 United States",
+          "targetDate": "2027-03-15"
+        },
+        {
+          "id": "d34b0594-e1cc-4daa-9fd3-20a5e047c73b",
+          "name": "M2 Canada",
+          "targetDate": "2027-01-31"
+        },
+        {
+          "id": "bc28ce2c-54ec-4fc8-9703-922d6ab600d4",
+          "name": "M1 Foundation + France vertical slice",
+          "targetDate": "2026-12-15"
+        },
+        {
+          "id": "e206889f-8a72-46f4-8ded-f2f4f401ab8f",
+          "name": "M0 Discovery & data audit",
+          "targetDate": "2026-10-31"
+        }
+      ],
+      "createdAt": "2026-10-10T08:50:18.086Z",
+      "updatedAt": "2026-10-10T08:56:43.587Z",
+      "completedAt": null,
+      "canceledAt": null
+    },
     {
       "id": "c9330a7d-307e-40cf-b69c-01107392b5b7",
       "name": "Process Flow Builder",
@@ -340,6 +403,138 @@
   ],
   "epics": [
     {
+      "id": "EME-212",
+      "title": "Kitchen",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-212/epic-kitchen",
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 7,
+      "doneCount": 5,
+      "firstActivity": "2026-10-11T19:04:52.054Z",
+      "lastActivity": "2026-10-11T19:04:54.145Z"
+    },
+    {
+      "id": "EME-214",
+      "title": "Bedroom",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-214/epic-bedroom",
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 0,
+      "doneCount": 0,
+      "firstActivity": "2026-10-11T19:03:00.079Z",
+      "lastActivity": "2026-10-11T19:03:00.079Z"
+    },
+    {
+      "id": "EME-213",
+      "title": "Living room",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-213/epic-living-room",
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 0,
+      "doneCount": 0,
+      "firstActivity": "2026-10-11T19:02:59.509Z",
+      "lastActivity": "2026-10-11T19:02:59.509Z"
+    },
+    {
+      "id": "EME-159",
+      "title": "Epic 1: Product definition & data-source audit",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-159/epic-1-product-definition-and-data-source-audit",
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 6,
+      "doneCount": 0,
+      "firstActivity": "2026-10-10T09:05:36.871Z",
+      "lastActivity": "2026-10-10T09:05:36.871Z"
+    },
+    {
+      "id": "EME-166",
+      "title": "Epic 8: Website integration & launch",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-166/epic-8-website-integration-and-launch",
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 4,
+      "doneCount": 0,
+      "firstActivity": "2026-10-10T08:51:11.973Z",
+      "lastActivity": "2026-10-10T08:53:35.859Z"
+    },
+    {
+      "id": "EME-165",
+      "title": "Epic 7: Trust, quality & legal",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-165/epic-7-trust-quality-and-legal",
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 4,
+      "doneCount": 0,
+      "firstActivity": "2026-10-10T08:51:08.963Z",
+      "lastActivity": "2026-10-10T08:53:24.807Z"
+    },
+    {
+      "id": "EME-164",
+      "title": "Epic 6: Average price per m²",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-164/epic-6-average-price-per-m",
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 6,
+      "doneCount": 0,
+      "firstActivity": "2026-10-10T08:51:05.501Z",
+      "lastActivity": "2026-10-10T08:53:05.190Z"
+    },
+    {
+      "id": "EME-163",
+      "title": "Epic 5: Environmental score",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-163/epic-5-environmental-score",
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 7,
+      "doneCount": 0,
+      "firstActivity": "2026-10-10T08:51:02.395Z",
+      "lastActivity": "2026-10-10T08:52:44.060Z"
+    },
+    {
+      "id": "EME-162",
+      "title": "Epic 4: Energy performance (DPE / EPC)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-162/epic-4-energy-performance-dpe-epc",
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 6,
+      "doneCount": 0,
+      "firstActivity": "2026-10-10T08:50:57.989Z",
+      "lastActivity": "2026-10-10T08:52:25.439Z"
+    },
+    {
+      "id": "EME-161",
+      "title": "Epic 3: Walkability & mobility score (universal)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-161/epic-3-walkability-and-mobility-score-universal",
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 4,
+      "doneCount": 0,
+      "firstActivity": "2026-10-10T08:50:54.772Z",
+      "lastActivity": "2026-10-10T08:52:08.772Z"
+    },
+    {
+      "id": "EME-160",
+      "title": "Epic 2: Platform foundation (provider framework, Facts Card UI)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-160/epic-2-platform-foundation-provider-framework-facts-card-ui",
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "childCount": 7,
+      "doneCount": 0,
+      "firstActivity": "2026-10-10T08:50:50.565Z",
+      "lastActivity": "2026-10-10T08:51:53.498Z"
+    },
+    {
       "id": "EME-157",
       "title": "Architecture Report — Building a Real-Time French Train Tracker on AWS",
       "url": "https://linear.app/emerypersonalprojects/issue/EME-157/epic-architecture-report-building-a-real-time-french-train-tracker-on",
@@ -533,6 +728,1189 @@
     }
   ],
   "issues": [
+    {
+      "id": "EME-221",
+      "title": "Install the microwave",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-221/install-the-microwave",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Todo",
+      "statusType": "unstarted",
+      "labels": [],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": "EME-212",
+      "createdAt": "2026-10-11T19:04:55.190Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:04:55.190Z"
+    },
+    {
+      "id": "EME-220",
+      "title": "Build custom shelves in the kitchen",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-220/build-custom-shelves-in-the-kitchen",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Todo",
+      "statusType": "unstarted",
+      "labels": [],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": "EME-212",
+      "createdAt": "2026-10-11T19:04:54.673Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:04:54.673Z"
+    },
+    {
+      "id": "EME-219",
+      "title": "Verify all appliances work",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-219/verify-all-appliances-work",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Done",
+      "statusType": "completed",
+      "labels": [],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": "EME-212",
+      "createdAt": "2026-10-11T19:04:54.128Z",
+      "startedAt": null,
+      "completedAt": "2026-10-11T19:04:54.145Z",
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:04:54.128Z"
+    },
+    {
+      "id": "EME-218",
+      "title": "Install smoke detectors",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-218/install-smoke-detectors",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Done",
+      "statusType": "completed",
+      "labels": [],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": "EME-212",
+      "createdAt": "2026-10-11T19:04:53.673Z",
+      "startedAt": null,
+      "completedAt": "2026-10-11T19:04:53.688Z",
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:04:53.673Z"
+    },
+    {
+      "id": "EME-217",
+      "title": "Set up gas",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-217/set-up-gas",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Done",
+      "statusType": "completed",
+      "labels": [],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": "EME-212",
+      "createdAt": "2026-10-11T19:04:53.129Z",
+      "startedAt": null,
+      "completedAt": "2026-10-11T19:04:53.145Z",
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:04:53.129Z"
+    },
+    {
+      "id": "EME-216",
+      "title": "Water purifier",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-216/water-purifier",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Done",
+      "statusType": "completed",
+      "labels": [],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": "EME-212",
+      "createdAt": "2026-10-11T19:04:52.557Z",
+      "startedAt": null,
+      "completedAt": "2026-10-11T19:04:52.629Z",
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:04:52.557Z"
+    },
+    {
+      "id": "EME-215",
+      "title": "New laundry machine",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-215/new-laundry-machine",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Done",
+      "statusType": "completed",
+      "labels": [],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": "EME-212",
+      "createdAt": "2026-10-11T19:04:52.037Z",
+      "startedAt": null,
+      "completedAt": "2026-10-11T19:04:52.054Z",
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:04:52.037Z"
+    },
+    {
+      "id": "EME-212",
+      "title": "Epic: Kitchen",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-212/epic-kitchen",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": null,
+      "createdAt": "2026-10-11T19:02:58.193Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:04:52.037Z"
+    },
+    {
+      "id": "EME-214",
+      "title": "Epic: Bedroom",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-214/epic-bedroom",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": null,
+      "createdAt": "2026-10-11T19:03:00.079Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:03:00.079Z"
+    },
+    {
+      "id": "EME-213",
+      "title": "Epic: Living room",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-213/epic-living-room",
+      "priority": 0,
+      "priorityName": "None",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "a468f584-56e5-460e-a958-9fecefabc7cd",
+      "parentId": null,
+      "createdAt": "2026-10-11T19:02:59.509Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-11T19:02:59.509Z"
+    },
+    {
+      "id": "EME-211",
+      "title": "Exploration 1: Buyer criteria by country and dataset matrix (Paris, London, San Francisco, Toronto)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-211/exploration-1-buyer-criteria-by-country-and-dataset-matrix-paris",
+      "priority": 1,
+      "priorityName": "Urgent",
+      "status": "In Progress",
+      "statusType": "started",
+      "labels": [
+        "Exploration"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-159",
+      "createdAt": "2026-10-10T09:05:36.727Z",
+      "startedAt": "2026-10-10T09:05:36.871Z",
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T20:55:09.375Z"
+    },
+    {
+      "id": "EME-199",
+      "title": "Canada: price-per-m² source decision and implementation",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-199/canada-price-per-m-source-decision-and-implementation",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-164",
+      "createdAt": "2026-10-10T08:53:11.590Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T09:05:37.059Z"
+    },
+    {
+      "id": "EME-172",
+      "title": "Assemble a ground-truth sample address set (Paris, London, San Francisco, Toronto first)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-172/assemble-a-ground-truth-sample-address-set-paris-london-san-francisco",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-159",
+      "createdAt": "2026-10-10T08:51:43.371Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T09:05:37.044Z"
+    },
+    {
+      "id": "EME-169",
+      "title": "Build the coverage matrix (fact × Canada / US / Europe)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-169/build-the-coverage-matrix-fact-canada-us-europe",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-159",
+      "createdAt": "2026-10-10T08:51:34.931Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T09:05:37.036Z"
+    },
+    {
+      "id": "EME-170",
+      "title": "Licence and terms-of-service review of candidate sources",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-170/licence-and-terms-of-service-review-of-candidate-sources",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-159",
+      "createdAt": "2026-10-10T08:51:37.962Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T09:05:37.035Z"
+    },
+    {
+      "id": "EME-159",
+      "title": "Epic 1: Product definition & data-source audit",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-159/epic-1-product-definition-and-data-source-audit",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:50:48.091Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T09:05:36.727Z"
+    },
+    {
+      "id": "EME-198",
+      "title": "France: DVF sales pipeline to static aggregates",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-198/france-dvf-sales-pipeline-to-static-aggregates",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-164",
+      "createdAt": "2026-10-10T08:53:08.028Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:56:41.069Z"
+    },
+    {
+      "id": "EME-183",
+      "title": "Optional Walk Score API comparison (if licence allows)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-183/optional-walk-score-api-comparison-if-licence-allows",
+      "priority": 4,
+      "priorityName": "Low",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-161",
+      "createdAt": "2026-10-10T08:52:17.706Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:56:35.659Z"
+    },
+    {
+      "id": "EME-178",
+      "title": "Choose a free geocoding approach",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-178/choose-a-free-geocoding-approach",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-160",
+      "createdAt": "2026-10-10T08:52:02.733Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:56:33.140Z"
+    },
+    {
+      "id": "EME-177",
+      "title": "Free-tier proxy and cache for keyed or rate-limited APIs",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-177/free-tier-proxy-and-cache-for-keyed-or-rate-limited-apis",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-160",
+      "createdAt": "2026-10-10T08:51:59.740Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:56:30.801Z"
+    },
+    {
+      "id": "EME-210",
+      "title": "Launch article, social preview image and performance/accessibility pass",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-210/launch-article-social-preview-image-and-performanceaccessibility-pass",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-166",
+      "createdAt": "2026-10-10T08:53:47.054Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:47.054Z"
+    },
+    {
+      "id": "EME-209",
+      "title": "Optional: expose the facts lookup as a tool in the MCP server",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-209/optional-expose-the-facts-lookup-as-a-tool-in-the-mcp-server",
+      "priority": 4,
+      "priorityName": "Low",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-166",
+      "createdAt": "2026-10-10T08:53:41.563Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:41.563Z"
+    },
+    {
+      "id": "EME-208",
+      "title": "Cross-link TransitReach and the facts page",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-208/cross-link-transitreach-and-the-facts-page",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-166",
+      "createdAt": "2026-10-10T08:53:38.536Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:38.536Z"
+    },
+    {
+      "id": "EME-207",
+      "title": "Add the facts page to the personal website next to the transit catchment page",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-207/add-the-facts-page-to-the-personal-website-next-to-the-transit",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-166",
+      "createdAt": "2026-10-10T08:53:35.859Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:35.859Z"
+    },
+    {
+      "id": "EME-166",
+      "title": "Epic 8: Website integration & launch",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-166/epic-8-website-integration-and-launch",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:51:11.973Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:35.859Z"
+    },
+    {
+      "id": "EME-206",
+      "title": "Scheduled data refresh and provider health monitoring",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-206/scheduled-data-refresh-and-provider-health-monitoring",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-165",
+      "createdAt": "2026-10-10T08:53:33.084Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:33.084Z"
+    },
+    {
+      "id": "EME-205",
+      "title": "Disclaimer and privacy notice",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-205/disclaimer-and-privacy-notice",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-165",
+      "createdAt": "2026-10-10T08:53:30.433Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:30.433Z"
+    },
+    {
+      "id": "EME-204",
+      "title": "Accuracy test harness on the sample address set",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-204/accuracy-test-harness-on-the-sample-address-set",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Improvement"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-165",
+      "createdAt": "2026-10-10T08:53:27.795Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:27.795Z"
+    },
+    {
+      "id": "EME-203",
+      "title": "Attribution and licence page, with per-source credits",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-203/attribution-and-licence-page-with-per-source-credits",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-165",
+      "createdAt": "2026-10-10T08:53:24.807Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:24.807Z"
+    },
+    {
+      "id": "EME-165",
+      "title": "Epic 7: Trust, quality & legal",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-165/epic-7-trust-quality-and-legal",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:51:08.963Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:24.807Z"
+    },
+    {
+      "id": "EME-202",
+      "title": "Other European price sources (Netherlands, Italy, Spain, Germany)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-202/other-european-price-sources-netherlands-italy-spain-germany",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-164",
+      "createdAt": "2026-10-10T08:53:21.989Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:21.989Z"
+    },
+    {
+      "id": "EME-201",
+      "title": "UK price per m²: Land Registry sales joined to EPC floor area",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-201/uk-price-per-m-land-registry-sales-joined-to-epc-floor-area",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-164",
+      "createdAt": "2026-10-10T08:53:16.609Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:16.609Z"
+    },
+    {
+      "id": "EME-200",
+      "title": "US: price-per-sq-ft data ingestion and conversion to m²",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-200/us-price-per-sq-ft-data-ingestion-and-conversion-to-m",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-164",
+      "createdAt": "2026-10-10T08:53:14.095Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:14.095Z"
+    },
+    {
+      "id": "EME-197",
+      "title": "Price-per-m² aggregation method",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-197/price-per-m-aggregation-method",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-164",
+      "createdAt": "2026-10-10T08:53:05.190Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:05.190Z"
+    },
+    {
+      "id": "EME-164",
+      "title": "Epic 6: Average price per m²",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-164/epic-6-average-price-per-m",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:51:05.501Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:05.190Z"
+    },
+    {
+      "id": "EME-196",
+      "title": "EU: noise maps and air quality layers",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-196/eu-noise-maps-and-air-quality-layers",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-163",
+      "createdAt": "2026-10-10T08:53:00.254Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:53:00.254Z"
+    },
+    {
+      "id": "EME-195",
+      "title": "US: flood zones and transportation noise",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-195/us-flood-zones-and-transportation-noise",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-163",
+      "createdAt": "2026-10-10T08:52:57.724Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:57.724Z"
+    },
+    {
+      "id": "EME-194",
+      "title": "Canada: flood hazard and air quality",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-194/canada-flood-hazard-and-air-quality",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-163",
+      "createdAt": "2026-10-10T08:52:54.806Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:54.806Z"
+    },
+    {
+      "id": "EME-193",
+      "title": "Green space and heat sub-score (global, OSM and land cover)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-193/green-space-and-heat-sub-score-global-osm-and-land-cover",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-163",
+      "createdAt": "2026-10-10T08:52:52.112Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:52.112Z"
+    },
+    {
+      "id": "EME-192",
+      "title": "France: natural and technological hazards (Géorisques)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-192/france-natural-and-technological-hazards-georisques",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-163",
+      "createdAt": "2026-10-10T08:52:49.402Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:49.402Z"
+    },
+    {
+      "id": "EME-191",
+      "title": "Global air-quality baseline provider",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-191/global-air-quality-baseline-provider",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-163",
+      "createdAt": "2026-10-10T08:52:46.750Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:46.750Z"
+    },
+    {
+      "id": "EME-190",
+      "title": "Environmental score methodology",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-190/environmental-score-methodology",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-163",
+      "createdAt": "2026-10-10T08:52:44.060Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:44.060Z"
+    },
+    {
+      "id": "EME-163",
+      "title": "Epic 5: Environmental score",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-163/epic-5-environmental-score",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:51:02.395Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:44.060Z"
+    },
+    {
+      "id": "EME-189",
+      "title": "Other EU countries: access spike (Germany, Spain, Italy, Belgium)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-189/other-eu-countries-access-spike-germany-spain-italy-belgium",
+      "priority": 4,
+      "priorityName": "Low",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-162",
+      "createdAt": "2026-10-10T08:52:40.585Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:40.585Z"
+    },
+    {
+      "id": "EME-188",
+      "title": "UK, Ireland and Netherlands energy-certificate adapters",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-188/uk-ireland-and-netherlands-energy-certificate-adapters",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-162",
+      "createdAt": "2026-10-10T08:52:37.512Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:37.512Z"
+    },
+    {
+      "id": "EME-187",
+      "title": "US: city benchmarking datasets and estimate fallback",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-187/us-city-benchmarking-datasets-and-estimate-fallback",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-162",
+      "createdAt": "2026-10-10T08:52:34.366Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:34.366Z"
+    },
+    {
+      "id": "EME-186",
+      "title": "Canada: energy data spike and labelled-estimate fallback",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-186/canada-energy-data-spike-and-labelled-estimate-fallback",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-162",
+      "createdAt": "2026-10-10T08:52:31.176Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:31.176Z"
+    },
+    {
+      "id": "EME-185",
+      "title": "France: DPE adapter from ADEME open data",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-185/france-dpe-adapter-from-ademe-open-data",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-162",
+      "createdAt": "2026-10-10T08:52:28.140Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:28.140Z"
+    },
+    {
+      "id": "EME-184",
+      "title": "Normalised EnergyRating model",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-184/normalised-energyrating-model",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-162",
+      "createdAt": "2026-10-10T08:52:25.439Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:25.439Z"
+    },
+    {
+      "id": "EME-162",
+      "title": "Epic 4: Energy performance (DPE / EPC)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-162/epic-4-energy-performance-dpe-epc",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:50:57.989Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:25.439Z"
+    },
+    {
+      "id": "EME-182",
+      "title": "Calibrate walkability against reference addresses",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-182/calibrate-walkability-against-reference-addresses",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Improvement"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-161",
+      "createdAt": "2026-10-10T08:52:14.605Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:14.605Z"
+    },
+    {
+      "id": "EME-181",
+      "title": "Implement walkability scoring on the catchment engine",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-181/implement-walkability-scoring-on-the-catchment-engine",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-161",
+      "createdAt": "2026-10-10T08:52:11.751Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:11.751Z"
+    },
+    {
+      "id": "EME-180",
+      "title": "Design the OSM walkability index",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-180/design-the-osm-walkability-index",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-161",
+      "createdAt": "2026-10-10T08:52:08.772Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:08.772Z"
+    },
+    {
+      "id": "EME-161",
+      "title": "Epic 3: Walkability & mobility score (universal)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-161/epic-3-walkability-and-mobility-score-universal",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:50:54.772Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:08.772Z"
+    },
+    {
+      "id": "EME-179",
+      "title": "Units, currency and locale formatting",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-179/units-currency-and-locale-formatting",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-160",
+      "createdAt": "2026-10-10T08:52:05.738Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:52:05.738Z"
+    },
+    {
+      "id": "EME-176",
+      "title": "Facts Card UI with source, date and confidence on every number",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-176/facts-card-ui-with-source-date-and-confidence-on-every-number",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-160",
+      "createdAt": "2026-10-10T08:51:57.040Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:51:57.040Z"
+    },
+    {
+      "id": "EME-175",
+      "title": "Country and region detection from the selected point",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-175/country-and-region-detection-from-the-selected-point",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-160",
+      "createdAt": "2026-10-10T08:51:53.498Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:51:53.498Z"
+    },
+    {
+      "id": "EME-160",
+      "title": "Epic 2: Platform foundation (provider framework, Facts Card UI)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-160/epic-2-platform-foundation-provider-framework-facts-card-ui",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:50:50.565Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:51:53.498Z"
+    },
+    {
+      "id": "EME-174",
+      "title": "Provider adapter interface and registry",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-174/provider-adapter-interface-and-registry",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-160",
+      "createdAt": "2026-10-10T08:51:50.064Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:51:50.064Z"
+    },
+    {
+      "id": "EME-173",
+      "title": "Extract TransitReach map and address search into a reusable module",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-173/extract-transitreach-map-and-address-search-into-a-reusable-module",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-160",
+      "createdAt": "2026-10-10T08:51:46.091Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:51:46.091Z"
+    },
+    {
+      "id": "EME-171",
+      "title": "Decide repo and hosting strategy",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-171/decide-repo-and-hosting-strategy",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-159",
+      "createdAt": "2026-10-10T08:51:40.946Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:51:40.946Z"
+    },
+    {
+      "id": "EME-168",
+      "title": "Define the Facts Card schema",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-168/define-the-facts-card-schema",
+      "priority": 2,
+      "priorityName": "High",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": "EME-159",
+      "createdAt": "2026-10-10T08:51:31.093Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:51:31.093Z"
+    },
+    {
+      "id": "EME-167",
+      "title": "Epic 9: Future extensions (post-launch)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-167/epic-9-future-extensions-post-launch",
+      "priority": 4,
+      "priorityName": "Low",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Epic"
+      ],
+      "projectId": "df8ef6f3-fd6a-444a-bc25-f201fdd3ed54",
+      "parentId": null,
+      "createdAt": "2026-10-10T08:51:15.343Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-10T08:51:15.343Z"
+    },
     {
       "id": "EME-146",
       "title": "Adjust key KPIs on PM Dashboard",
@@ -3304,8 +4682,8 @@
   ],
   "meta": {
     "source": "linear-api",
-    "projectCount": 17,
-    "issueCount": 158,
-    "epicCount": 16
+    "projectCount": 19,
+    "issueCount": 221,
+    "epicCount": 27
   }
 }
