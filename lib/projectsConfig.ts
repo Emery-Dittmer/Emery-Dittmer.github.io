@@ -46,6 +46,10 @@ export type Project = {
 
   // Slugs into articlesConfig — articles that discuss this project.
   relatedArticleSlugs?: string[]
+
+  // Slugs into productsConfig — the product this project write-up has a
+  // shipped, usable version of.
+  relatedProductIds?: string[]
 }
 
 // ─── Template ─────────────────────────────────────────────────────────────────
@@ -985,6 +989,7 @@ export const projectsConfig: Project[] = [
     },
     skills: ['building-maintaining-a-project-roadmap', 'running-sprint-planning-retrospectives'],
     certifications: [],
+    relatedProductIds: ['task-tracker'],
   },
 
   // ── Process Flow Builder · 2026 ────────────────────────────────────────────
@@ -1035,5 +1040,6 @@ export const projectsConfig: Project[] = [
     certifications: [],
     linkUrl: 'https://claude.ai/artifact/3ERPZfeDYCZgLqvT63su9C',
     linkText: { en: 'Try the web version', fr: 'Essayer la version web' },
+    relatedProductIds: ['process-flow-builder'],
   },
 ]

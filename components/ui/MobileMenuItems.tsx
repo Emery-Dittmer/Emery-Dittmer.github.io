@@ -13,6 +13,7 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav, local
   const copy = {
     en: {
       projects: 'Projects',
+      products: 'Products',
       journey: 'My Story',
       skills: 'Skills',
       articles: 'Articles',
@@ -25,6 +26,7 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav, local
     },
     fr: {
       projects: 'Projets',
+      products: 'Produits',
       journey: 'Mon histoire',
       skills: 'Compétences',
       articles: 'Articles',
@@ -48,6 +50,11 @@ const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ closeMobileNav, local
       <li>
       <Link href={`/Projects/${locale}`} className="flex font-medium w-full text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
         {t.projects}
+        </Link>
+      </li>
+      <li>
+      <Link href={`/Products/${locale}`} className="flex font-medium w-full text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 py-2 justify-center" onClick={closeMobileNav}>
+        {t.products}
         </Link>
       </li>
       <li>

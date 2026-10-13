@@ -18,6 +18,7 @@ export default function Footer() {
           heading: 'Professional',
           links: [
             { label: 'Projects',       href: `/Projects/${locale}` },
+            { label: 'Products',       href: `/Products/${locale}` },
             { label: 'Skills',         href: `/Skills/${locale}` },
             { label: 'PM Dashboard',   href: `/PMDashboard/${locale}` },
             { label: 'Certifications', href: `/Certifications/${locale}` },
@@ -52,6 +53,7 @@ export default function Footer() {
           heading: 'Professionnel',
           links: [
             { label: 'Projets',             href: `/Projects/${locale}` },
+            { label: 'Produits',            href: `/Products/${locale}` },
             { label: 'Compétences',         href: `/Skills/${locale}` },
             { label: 'Tableau de bord PM',  href: `/PMDashboard/${locale}` },
             { label: 'Certifications',      href: `/Certifications/${locale}` },

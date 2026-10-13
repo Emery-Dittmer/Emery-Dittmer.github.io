@@ -2,10 +2,11 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, ExternalLink, Tag, Award, FileText } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Tag, Award, FileText, Package } from 'lucide-react'
 import { Project } from '@/lib/projectsConfig'
 import { skillsConfig } from '@/lib/skillsConfig'
 import { getArticle, getArticlePath } from '@/lib/articlesConfig'
+import { productsConfig } from '@/lib/productsConfig'
 import ArchitectureDiagram from '@/components/ArchitectureDiagram'
 import ProjectGallery from '@/components/ProjectGallery'
 import { Locale } from '@/lib/i18n'
@@ -63,6 +64,7 @@ export default function ProjectDetail({
     noSkills:       locale === 'fr' ? 'Aucune compétence spécifiée.' : 'No skills specified.',
     noCerts:        locale === 'fr' ? 'Aucune certification spécifiée.' : 'No certifications specified.',
     relatedArticles: locale === 'fr' ? 'Articles liés' : 'Related Articles',
+    relatedProducts: locale === 'fr' ? 'Produit associé' : 'Related Product',
   }
 
   const resolvedSkills = project.skills
@@ -72,6 +74,10 @@ export default function ProjectDetail({
   const resolvedArticles = (project.relatedArticleSlugs ?? [])
     .map((slug) => getArticle(slug))
     .filter(Boolean) as NonNullable<ReturnType<typeof getArticle>>[]
+
+  const resolvedProducts = (project.relatedProductIds ?? [])
+    .map((id) => productsConfig.find((p) => p.id === id))
+    .filter(Boolean) as NonNullable<(typeof productsConfig)[number]>[]
 
   return (
     <div>
@@ -215,6 +221,26 @@ export default function ProjectDetail({
                   <FileText size={16} className="text-purple-400 shrink-0" />
                   <span className="text-sm text-gray-300 group-hover:text-purple-300 transition-colors">
                     {article.title[locale] ?? article.title.en}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Related Products */}
+        {resolvedProducts.length > 0 && (
+          <Section title={t.relatedProducts}>
+            <div className="flex flex-col gap-2">
+              {resolvedProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/Products/${locale}/${product.id}`}
+                  className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-900/40 px-4 py-3 hover:border-purple-700/50 transition-colors group"
+                >
+                  <Package size={16} className="text-purple-400 shrink-0" />
+                  <span className="text-sm text-gray-300 group-hover:text-purple-300 transition-colors">
+                    {product.name[locale] ?? product.name.en}
                   </span>
                 </Link>
               ))}

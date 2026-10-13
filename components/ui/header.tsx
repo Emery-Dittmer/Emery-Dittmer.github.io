@@ -15,6 +15,7 @@ export default function Header() {
   const copy = {
     en: {
       projects: 'Projects',
+      products: 'Products',
       journey: 'My Story',
       skills: 'Skills',
       pm: 'PM',
@@ -27,6 +28,7 @@ export default function Header() {
     },
     fr: {
       projects: 'Projets',
+      products: 'Produits',
       journey: 'Mon histoire',
       skills: 'Compétences',
       pm: 'PM',
@@ -72,6 +74,15 @@ export default function Header() {
                   className="font-medium text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
                   >
                   {t.projects}
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href={`/Products/${locale}`}
+                  className="font-medium text-gray-700 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-200 px-4 py-3 flex items-center transition duration-150 ease-in-out"
+                  >
+                  {t.products}
                 </Link>
               </li>
 
