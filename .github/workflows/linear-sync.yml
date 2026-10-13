@@ -1,6 +1,10 @@
 # Weekly refresh of the generated Linear data (lib/linear-dashboard.json and
-# public/linear-current.json). Commits only when the data actually changed;
-# the commit to main triggers the normal Pages deploy.
+# public/linear-current.json). Commits only when the data actually changed.
+#
+# A push made with the default GITHUB_TOKEN does NOT trigger other workflows'
+# `on: push` (GitHub's anti-recursion rule) — so this explicitly dispatches
+# the Pages deploy workflow itself after committing, instead of relying on
+# the push to do it.
 #
 # Requires the LINEAR_API_KEY repo secret (same one the deploy workflow uses).
 name: Weekly Linear sync
@@ -13,6 +17,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: "linear-sync"
@@ -53,3 +58,9 @@ jobs:
           git add lib/linear-dashboard.json public/linear-current.json
           git commit -m "chore: weekly Linear data refresh"
           git push
+          echo "DEPLOY=1" >> "$GITHUB_ENV"
+      - name: Trigger Pages deploy
+        if: env.DEPLOY == '1'
+        run: gh workflow run nextjs.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
