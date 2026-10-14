@@ -15,11 +15,15 @@ export default function ProductIcon({
   product: Product
   size?: number
 }) {
+  // Scale the corner radius with size so large tiles keep an app-icon look
+  // (roughly iOS's ~22% radius) instead of looking under-rounded.
+  const radius = Math.round(size * 0.22)
+
   if (product.icon) {
     return (
       <div
-        className="relative shrink-0 rounded-2xl overflow-hidden shadow-md"
-        style={{ width: size, height: size }}
+        className="relative shrink-0 overflow-hidden shadow-md"
+        style={{ width: size, height: size, borderRadius: radius }}
       >
         <Image src={product.icon} alt="" fill unoptimized className="object-cover" />
       </div>
@@ -30,7 +34,10 @@ export default function ProductIcon({
     const badgeSize = Math.round(size * 0.4)
     return (
       <div className="relative shrink-0" style={{ width: size, height: size }}>
-        <div className="w-full h-full rounded-2xl bg-[#1b1b1f] flex items-center justify-center shadow-md overflow-hidden">
+        <div
+          className="w-full h-full bg-[#1b1b1f] flex items-center justify-center shadow-md overflow-hidden"
+          style={{ borderRadius: radius }}
+        >
           <Image
             src={ObsidianLogo}
             alt=""
@@ -54,8 +61,8 @@ export default function ProductIcon({
   // Fallback: no icon, not an Obsidian plugin — show the banner image cropped square.
   return (
     <div
-      className="relative shrink-0 rounded-2xl overflow-hidden shadow-md"
-      style={{ width: size, height: size }}
+      className="relative shrink-0 overflow-hidden shadow-md"
+      style={{ width: size, height: size, borderRadius: radius }}
     >
       <Image src={product.mediaSrc} alt="" fill unoptimized className="object-cover" />
     </div>

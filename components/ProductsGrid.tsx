@@ -26,19 +26,19 @@ export default function ProductsGrid({ locale = 'en' }: { locale?: Locale }) {
         </div>
 
         <div
-          className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-x-4 gap-y-8"
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10"
           data-aos="fade-up"
         >
           {productsConfig.map((product) => (
             <Link
               key={product.id}
               href={`/Products/${locale}/${product.id}`}
-              className="group flex flex-col items-center gap-2 text-center"
+              className="group flex flex-col items-center gap-3 text-center"
             >
               <div className="transition-transform duration-150 group-hover:scale-105 group-active:scale-95">
-                <ProductIcon product={product} size={88} />
+                <ProductIcon product={product} size={176} />
               </div>
-              <span className="text-xs sm:text-sm font-medium text-gray-300 group-hover:text-purple-300 transition-colors leading-tight line-clamp-2">
+              <span className="text-sm sm:text-base font-medium text-gray-300 group-hover:text-purple-300 transition-colors leading-tight line-clamp-2">
                 {product.name[locale]}
               </span>
             </Link>
