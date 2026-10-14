@@ -38,6 +38,9 @@ export type Product = {
 // },
 
 import stock_network_graph from '@/assets/projects/stock-network-graph.jpg'
+import task_tracker_screenshot from '@/assets/products/task-tracker.png'
+import process_flow_builder_screenshot from '@/assets/products/process-flow-builder.png'
+import chatterbox_icon from '@/assets/products/chatterbox.png'
 
 export const productsConfig: Product[] = [
   // ── Task Tracker · 2026 ────────────────────────────────────────────────────
@@ -62,7 +65,7 @@ export const productsConfig: Product[] = [
     stack: ['Tauri', 'React', 'TypeScript'],
     status: 'active',
     year: 2026,
-    mediaSrc: stock_network_graph,
+    mediaSrc: task_tracker_screenshot,
     repoUrl: 'https://github.com/wivoo-edittmer/task-tracker',
     relatedProjectIds: ['task-tracker'],
   },
@@ -89,7 +92,7 @@ export const productsConfig: Product[] = [
     stack: ['Electron', 'JavaScript', 'HTML/CSS'],
     status: 'shipped',
     year: 2026,
-    mediaSrc: stock_network_graph,
+    mediaSrc: process_flow_builder_screenshot,
     repoUrl: 'https://github.com/wivoo-edittmer/process-flow-builder',
     linkUrl: 'https://claude.ai/artifact/3ERPZfeDYCZgLqvT63su9C',
     linkText: { en: 'Try the web version', fr: 'Essayer la version web' },
@@ -118,6 +121,7 @@ export const productsConfig: Product[] = [
     stack: ['TypeScript', 'Obsidian Plugin API', 'Claude CLI'],
     status: 'shipped',
     year: 2026,
+    // TODO: no screenshot exists in the repo — generic stand-in for now.
     mediaSrc: stock_network_graph,
     repoUrl: 'https://github.com/wivoo-edittmer/wivoo-daily-rollover',
   },
@@ -144,6 +148,7 @@ export const productsConfig: Product[] = [
     stack: ['TypeScript', 'Obsidian Plugin API', 'Claude CLI'],
     status: 'shipped',
     year: 2026,
+    // TODO: no screenshot exists in the repo — generic stand-in for now.
     mediaSrc: stock_network_graph,
     repoUrl: 'https://github.com/wivoo-edittmer/date-delta-recap',
   },
@@ -170,7 +175,7 @@ export const productsConfig: Product[] = [
     stack: ['Electron', 'whisper.cpp', 'Swift', 'Claude CLI'],
     status: 'shipped',
     year: 2026,
-    mediaSrc: stock_network_graph,
+    mediaSrc: chatterbox_icon,
     repoUrl: 'https://github.com/wivoo-edittmer/chatterbox',
   },
 ]
