@@ -121,4 +121,56 @@ export const productsConfig: Product[] = [
     mediaSrc: stock_network_graph,
     repoUrl: 'https://github.com/wivoo-edittmer/wivoo-daily-rollover',
   },
+
+  // ── Date Delta Recap · 2026 ─────────────────────────────────────────────────
+  {
+    id: 'date-delta-recap',
+    name: {
+      en: 'Date Delta Recap',
+      fr: 'Date Delta Recap',
+    },
+    tagline: {
+      en: 'An Obsidian plugin that recaps a date range of daily notes into what got done and what\'s still open.',
+      fr: 'Un plugin Obsidian qui résume une plage de dates de notes quotidiennes : ce qui a été fait et ce qui reste ouvert.',
+    },
+    description: {
+      en: 'An Obsidian plugin that generates a single summary note covering a picked date range of daily notes. It scans every daily note in the window, collects every completed to-do item, and sends the full text to the Claude Code CLI to identify topics that came up on more than one day — each distilled into an Issue / Context / Resolution block, with unresolved items highlighted. Instead of re-reading two weeks of daily notes to remember what happened and what\'s still open, you get one page with both.',
+      fr: 'Un plugin Obsidian qui génère une note de synthèse unique couvrant une plage de dates choisie parmi les notes quotidiennes. Il collecte chaque tâche terminée et envoie le texte complet à la CLI Claude Code pour identifier les sujets récurrents, distillés en blocs Problème / Contexte / Résolution, avec les éléments non résolus mis en évidence.',
+    },
+    howToUse: {
+      en: 'Click the calendar ribbon icon (or run "Generate period recap" from the command palette). Pick a From/To date range in the modal (pre-filled with the last 7 days) and click Generate. The plugin collects completed checkboxes across every daily note in range, pipes the full text to the Claude CLI for recurring-topic analysis, and writes a recap note with a Completed section and a Topics section — opened automatically when done. Settings let you change the Claude binary path, the analysis prompt, and the output folder.',
+      fr: 'Cliquez sur l\'icône calendrier du ruban (ou lancez "Generate period recap" depuis la palette de commandes). Choisissez une plage De/À dans la fenêtre modale et cliquez sur Générer. Le plugin collecte les cases cochées de chaque note quotidienne de la plage, envoie le texte complet à la CLI Claude pour l\'analyse des sujets récurrents, et écrit une note de synthèse.',
+    },
+    stack: ['TypeScript', 'Obsidian Plugin API', 'Claude CLI'],
+    status: 'shipped',
+    year: 2026,
+    mediaSrc: stock_network_graph,
+    repoUrl: 'https://github.com/wivoo-edittmer/date-delta-recap',
+  },
+
+  // ── Chatterbox · 2026 ───────────────────────────────────────────────────────
+  {
+    id: 'chatterbox',
+    name: {
+      en: 'Chatterbox',
+      fr: 'Chatterbox',
+    },
+    tagline: {
+      en: 'A local Mac call recorder with live transcription and an AI summary — audio never leaves the machine.',
+      fr: 'Un enregistreur d\'appels Mac local avec transcription en direct et résumé IA — l\'audio ne quitte jamais la machine.',
+    },
+    description: {
+      en: 'A desktop app for recording calls, showing a live transcript, and generating a quick summary when you\'re done — it listens so you can just chat. Speech-to-text runs fully locally via whisper.cpp; audio never leaves the Mac and temp files are deleted right after each chunk is transcribed. Only the finished text transcript (never audio) is sent to the local Claude CLI to generate the summary. System audio capture (so other call participants are transcribed, not just your own mic) uses a native Core Audio "process tap" helper on macOS 14.4+ for a narrower, non-admin permission, falling back to Electron\'s display-media capture on older macOS, or mic-only with a warning if neither is available.',
+      fr: 'Une application de bureau pour enregistrer des appels, afficher une transcription en direct et générer un résumé rapide une fois terminé. La reconnaissance vocale tourne entièrement en local via whisper.cpp ; l\'audio ne quitte jamais le Mac. Seule la transcription textuelle finale (jamais l\'audio) est envoyée à la CLI Claude locale pour générer le résumé.',
+    },
+    howToUse: {
+      en: 'Start a recording from the app; the live transcript appears as whisper.cpp processes audio locally in chunks. Stop the recording to send the finished transcript to the local Claude CLI for a quick summary, optionally exported to Obsidian. One-time setup builds whisper.cpp and the native system-audio-tap helper (requires cmake); the Claude CLI must already be installed and authenticated on the machine.',
+      fr: 'Démarrez un enregistrement depuis l\'application ; la transcription en direct apparaît au fur et à mesure que whisper.cpp traite l\'audio localement par segments. Arrêtez l\'enregistrement pour envoyer la transcription finale à la CLI Claude locale pour un résumé rapide, exportable vers Obsidian.',
+    },
+    stack: ['Electron', 'whisper.cpp', 'Swift', 'Claude CLI'],
+    status: 'shipped',
+    year: 2026,
+    mediaSrc: stock_network_graph,
+    repoUrl: 'https://github.com/wivoo-edittmer/chatterbox',
+  },
 ]

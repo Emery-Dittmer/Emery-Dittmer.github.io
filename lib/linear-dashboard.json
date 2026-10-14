@@ -1,7 +1,39 @@
 {
-  "generatedAt": "2026-10-13T21:42:04.263Z",
+  "generatedAt": "2026-10-14T17:50:22.294Z",
   "teamKey": "EME",
   "projects": [
+    {
+      "id": "1a00ee19-540b-4c41-93ae-eba7fb1747b3",
+      "name": "Date Delta Recap",
+      "summary": "Obsidian plugin: generate a completed-items and recurring-topics recap across a picked date range of daily notes.",
+      "url": "https://linear.app/emerypersonalprojects/project/date-delta-recap-94c2ffa6c4b7",
+      "status": "completed",
+      "lead": null,
+      "startDate": null,
+      "targetDate": null,
+      "priority": 0,
+      "milestones": [],
+      "createdAt": "2026-10-14T17:50:14.949Z",
+      "updatedAt": "2026-10-14T17:50:14.949Z",
+      "completedAt": "2026-10-14T17:50:15.157Z",
+      "canceledAt": null
+    },
+    {
+      "id": "eb34eecd-0012-4e08-9bd5-62c15dfaee14",
+      "name": "Chatterbox",
+      "summary": "Local macOS call recorder with live whisper.cpp transcription and Claude summaries.",
+      "url": "https://linear.app/emerypersonalprojects/project/chatterbox-c82e1ae1533b",
+      "status": "completed",
+      "lead": null,
+      "startDate": null,
+      "targetDate": null,
+      "priority": 0,
+      "milestones": [],
+      "createdAt": "2026-10-14T17:50:14.320Z",
+      "updatedAt": "2026-10-14T17:50:14.320Z",
+      "completedAt": "2026-10-14T17:50:14.340Z",
+      "canceledAt": null
+    },
     {
       "id": "a468f584-56e5-460e-a958-9fecefabc7cd",
       "name": "Apartment Renovation",
@@ -5001,7 +5033,7 @@
   ],
   "meta": {
     "source": "linear-api",
-    "projectCount": 19,
+    "projectCount": 21,
     "issueCount": 236,
     "epicCount": 32
   }
