@@ -1,7 +1,23 @@
 {
-  "generatedAt": "2026-10-14T17:50:22.294Z",
+  "generatedAt": "2026-10-14T20:16:20.752Z",
   "teamKey": "EME",
   "projects": [
+    {
+      "id": "57181e2b-8b3a-4a15-bb97-bf26736596f8",
+      "name": "Clearnote",
+      "summary": "Local macOS writing coach for meeting recaps, team updates and messages (Tauri + Claude Code CLI).",
+      "url": "https://linear.app/emerypersonalprojects/project/clearnote-14a5ce9faf5e",
+      "status": "completed",
+      "lead": null,
+      "startDate": null,
+      "targetDate": null,
+      "priority": 0,
+      "milestones": [],
+      "createdAt": "2026-10-14T20:16:12.724Z",
+      "updatedAt": "2026-10-14T20:16:12.724Z",
+      "completedAt": "2026-10-14T20:16:12.756Z",
+      "canceledAt": null
+    },
     {
       "id": "1a00ee19-540b-4c41-93ae-eba7fb1747b3",
       "name": "Date Delta Recap",
@@ -5033,7 +5049,7 @@
   ],
   "meta": {
     "source": "linear-api",
-    "projectCount": 21,
+    "projectCount": 22,
     "issueCount": 236,
     "epicCount": 32
   }

@@ -7,6 +7,7 @@ import { Product } from '@/lib/productsConfig'
 import { projectsConfig } from '@/lib/projectsConfig'
 import { Locale } from '@/lib/i18n'
 import ProductIcon from '@/components/ProductIcon'
+import ProjectGallery from '@/components/ProjectGallery'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -40,6 +41,7 @@ export default function ProductDetail({
     howToUse: locale === 'fr' ? 'Comment utiliser' : 'How to Use',
     stack: locale === 'fr' ? 'Stack technique' : 'Stack',
     relatedProjects: locale === 'fr' ? 'Projet associé' : 'Related Project',
+    gallery: locale === 'fr' ? 'Galerie' : 'Gallery',
     viewRepo: locale === 'fr' ? 'Voir le code' : 'View Source',
     viewProduct: locale === 'fr' ? 'Essayer' : 'Try it',
   }
@@ -101,6 +103,13 @@ export default function ProductDetail({
         <Section title={t.howToUse}>
           <p className="text-gray-300 leading-relaxed">{product.howToUse[locale]}</p>
         </Section>
+
+        {/* Gallery */}
+        {product.gallery && product.gallery.length > 0 && (
+          <Section title={t.gallery}>
+            <ProjectGallery images={product.gallery.map((img) => img.src)} />
+          </Section>
+        )}
 
         {/* Stack */}
         <Section title={t.stack}>

@@ -12,6 +12,9 @@ export type Product = {
   status: ProductStatus
   year: number
   mediaSrc: StaticImageData
+  // Real screenshots, shown below the banner when present. Omitted entirely
+  // when there's nothing to show yet.
+  gallery?: StaticImageData[]
   // App icon shown on the card (App Store style) and as a small badge on
   // the detail page. Falls back to the Obsidian logo + a "+" badge when
   // `isObsidianPlugin` is set and no dedicated icon exists.
@@ -42,12 +45,26 @@ export type Product = {
 //   relatedProjectIds: ['my-project-slug'],
 // },
 
+// Distinct stock-photo banner per product (detail-page header).
+import stock_data_dashboard from '@/assets/projects/stock-data-dashboard.jpg'
 import stock_network_graph from '@/assets/projects/stock-network-graph.jpg'
-import task_tracker_screenshot from '@/assets/products/task-tracker.png'
-import process_flow_builder_screenshot from '@/assets/products/process-flow-builder.png'
+import stock_data_center from '@/assets/projects/stock-data-center.jpg'
+import stock_finance_budget from '@/assets/projects/stock-finance-budget.jpg'
+import stock_warehouse_shelves from '@/assets/projects/stock-warehouse-shelves.jpg'
+import stock_accounting_ledger from '@/assets/projects/stock-accounting-ledger.jpg'
+
+// Real screenshots for the gallery.
+import task_tracker_gallery_1 from '@/assets/products/gallery/task-tracker-1.png'
+import pfb_gallery_1 from '@/assets/products/gallery/process-flow-builder-1.png'
+import pfb_gallery_2 from '@/assets/products/gallery/process-flow-builder-2.png'
+import pfb_gallery_3 from '@/assets/products/gallery/process-flow-builder-3.png'
+import pfb_gallery_4 from '@/assets/products/gallery/process-flow-builder-4.png'
+
+// App icons.
 import chatterbox_icon from '@/assets/products/chatterbox.png'
 import task_tracker_icon from '@/assets/products/task-tracker-icon.png'
 import process_flow_builder_icon from '@/assets/products/process-flow-builder-icon.png'
+import clearnote_icon from '@/assets/products/clearnote.png'
 
 export const productsConfig: Product[] = [
   // ── Task Tracker · 2026 ────────────────────────────────────────────────────
@@ -72,7 +89,8 @@ export const productsConfig: Product[] = [
     stack: ['Tauri', 'React', 'TypeScript'],
     status: 'active',
     year: 2026,
-    mediaSrc: task_tracker_screenshot,
+    mediaSrc: stock_data_dashboard,
+    gallery: [task_tracker_gallery_1],
     icon: task_tracker_icon,
     repoUrl: 'https://github.com/wivoo-edittmer/task-tracker',
     relatedProjectIds: ['task-tracker'],
@@ -100,7 +118,8 @@ export const productsConfig: Product[] = [
     stack: ['Electron', 'JavaScript', 'HTML/CSS'],
     status: 'shipped',
     year: 2026,
-    mediaSrc: process_flow_builder_screenshot,
+    mediaSrc: stock_network_graph,
+    gallery: [pfb_gallery_1, pfb_gallery_2, pfb_gallery_3, pfb_gallery_4],
     icon: process_flow_builder_icon,
     repoUrl: 'https://github.com/wivoo-edittmer/process-flow-builder',
     linkUrl: 'https://claude.ai/artifact/3ERPZfeDYCZgLqvT63su9C',
@@ -131,7 +150,7 @@ export const productsConfig: Product[] = [
     status: 'shipped',
     year: 2026,
     // TODO: no screenshot exists in the repo — generic stand-in for now.
-    mediaSrc: stock_network_graph,
+    mediaSrc: stock_warehouse_shelves,
     isObsidianPlugin: true,
     repoUrl: 'https://github.com/wivoo-edittmer/wivoo-daily-rollover',
   },
@@ -159,7 +178,7 @@ export const productsConfig: Product[] = [
     status: 'shipped',
     year: 2026,
     // TODO: no screenshot exists in the repo — generic stand-in for now.
-    mediaSrc: stock_network_graph,
+    mediaSrc: stock_finance_budget,
     isObsidianPlugin: true,
     repoUrl: 'https://github.com/wivoo-edittmer/date-delta-recap',
   },
@@ -186,8 +205,37 @@ export const productsConfig: Product[] = [
     stack: ['Electron', 'whisper.cpp', 'Swift', 'Claude CLI'],
     status: 'shipped',
     year: 2026,
-    mediaSrc: chatterbox_icon,
+    // TODO: no screenshot exists in the repo — generic stand-in for now.
+    mediaSrc: stock_data_center,
     icon: chatterbox_icon,
     repoUrl: 'https://github.com/wivoo-edittmer/chatterbox',
+  },
+
+  // ── Clearnote · 2026 ────────────────────────────────────────────────────────
+  {
+    id: 'clearnote',
+    name: {
+      en: 'Clearnote',
+      fr: 'Clearnote',
+    },
+    tagline: {
+      en: 'A local writing coach for meeting recaps, team updates and everyday work messages.',
+      fr: 'Un coach d\'écriture local pour les comptes-rendus de réunion, les mises à jour d\'équipe et les messages de travail.',
+    },
+    description: {
+      en: 'A local macOS writing coach — think Grammarly, but for clarity and follow-through instead of grammar. It scores a draft from 0–100, names the single biggest fix, and rates it on Clarity, Structure, Tone, Actionability, and Brevity. Problem phrases are highlighted with one-click suggestions, missing owners/dates/decisions are flagged as what readers will ask about, and a polished rewrite is generated for the chosen audience, tone, and format — missing facts show up as placeholders instead of being invented. Runs entirely on the local Claude Code CLI, so there\'s no API key to set up, and keeps a local history of every analyzed draft.',
+      fr: 'Un coach d\'écriture local pour macOS — pensez Grammarly, mais pour la clarté et le suivi plutôt que la grammaire. Il note un brouillon de 0 à 100, nomme la correction la plus importante, et l\'évalue sur la clarté, la structure, le ton, le caractère actionnable et la concision. Fonctionne entièrement sur la CLI Claude Code locale.',
+    },
+    howToUse: {
+      en: 'Select your draft and copy it (⌘C), then press Control+Option+C anywhere — Clearnote comes to the front and analyzes the text right away. Review the score and highlighted suggestions, click Apply on any you want, pick a template (Inform, Update, Alert, Escalate, or your own) and output language, then click Copy on the suggested version and paste it back into Teams, Outlook, or Slack. Closing the window keeps it running in the background so the hotkey still works.',
+      fr: 'Sélectionnez votre brouillon et copiez-le (⌘C), puis appuyez sur Contrôle+Option+C n\'importe où — Clearnote se met au premier plan et analyse le texte immédiatement. Passez en revue le score et les suggestions, cliquez sur Appliquer, choisissez un modèle et une langue de sortie, puis copiez la version suggérée.',
+    },
+    stack: ['Tauri', 'React', 'TypeScript', 'Claude CLI'],
+    status: 'shipped',
+    year: 2026,
+    // TODO: no screenshot exists in the repo — generic stand-in for now.
+    mediaSrc: stock_accounting_ledger,
+    icon: clearnote_icon,
+    repoUrl: 'https://github.com/wivoo-edittmer/clearnote',
   },
 ]
