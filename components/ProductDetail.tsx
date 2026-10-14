@@ -6,6 +6,7 @@ import { ArrowLeft, ExternalLink, Github, FolderOpen } from 'lucide-react'
 import { Product } from '@/lib/productsConfig'
 import { projectsConfig } from '@/lib/projectsConfig'
 import { Locale } from '@/lib/i18n'
+import ProductIcon from '@/components/ProductIcon'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -70,16 +71,19 @@ export default function ProductDetail({
               <ArrowLeft size={14} />
               {t.backToProducts}
             </Link>
-            <div className="flex items-center gap-2 mb-1">
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_STYLE[product.status]}`}
-              >
-                {STATUS_LABEL[product.status][locale]}
-              </span>
+            <div className="flex items-end gap-4 mb-3">
+              <ProductIcon product={product} size={64} />
+              <div>
+                <span
+                  className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold mb-1.5 ${STATUS_STYLE[product.status]}`}
+                >
+                  {STATUS_LABEL[product.status][locale]}
+                </span>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
+                  {product.name[locale]}
+                </h1>
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight mb-3">
-              {product.name[locale]}
-            </h1>
             <p className="text-gray-200 text-base sm:text-lg max-w-2xl leading-relaxed">
               {product.tagline[locale]}
             </p>

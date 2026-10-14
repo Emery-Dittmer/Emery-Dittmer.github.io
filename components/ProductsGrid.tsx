@@ -1,7 +1,8 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { productsConfig, Product } from '@/lib/productsConfig'
 import { Locale } from '@/lib/i18n'
+import ProductIcon from '@/components/ProductIcon'
 
 const STATUS_LABEL: Record<Product['status'], { en: string; fr: string }> = {
   shipped: { en: 'Shipped', fr: 'Livré' },
@@ -29,40 +30,39 @@ export default function ProductsGrid({ locale = 'en' }: { locale?: Locale }) {
 
   return (
     <section className="relative">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-28 pb-16 md:pt-32 md:pb-20">
-        <div className="max-w-3xl mx-auto text-center mb-12">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-28 pb-16 md:pt-32 md:pb-20">
+        <div className="text-center mb-12">
           <h1 className="h1 mb-4">{t.heading}</h1>
           <p className="text-xl text-gray-400">{t.sub}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-aos="fade-up">
+        <div
+          className="rounded-2xl border border-gray-800 bg-gray-900/40 divide-y divide-gray-800 overflow-hidden"
+          data-aos="fade-up"
+        >
           {productsConfig.map((product) => (
             <Link
               key={product.id}
               href={`/Products/${locale}/${product.id}`}
-              className="group rounded-xl border border-gray-800 bg-gray-900/60 overflow-hidden hover:border-purple-700/50 transition-colors flex flex-col"
+              className="group flex items-center gap-4 px-4 sm:px-5 py-4 hover:bg-gray-900/70 transition-colors"
             >
-              <div className="relative w-full h-40 overflow-hidden">
-                <Image
-                  src={product.mediaSrc}
-                  alt={product.name[locale]}
-                  fill
-                  unoptimized
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                <span
-                  className={`absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_STYLE[product.status]}`}
-                >
-                  {STATUS_LABEL[product.status][locale]}
-                </span>
-              </div>
-              <div className="p-5 flex flex-col gap-2 flex-1">
-                <h3 className="text-base font-semibold text-gray-100 group-hover:text-purple-300 transition-colors">
-                  {product.name[locale]}
-                </h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{product.tagline[locale]}</p>
-                <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
+              <ProductIcon product={product} size={56} />
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base font-semibold text-gray-100 group-hover:text-purple-300 transition-colors">
+                    {product.name[locale]}
+                  </h3>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${STATUS_STYLE[product.status]}`}
+                  >
+                    {STATUS_LABEL[product.status][locale]}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400 leading-snug mt-0.5 line-clamp-1">
+                  {product.tagline[locale]}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {product.stack.map((tech) => (
                     <span
                       key={tech}
@@ -73,6 +73,11 @@ export default function ProductsGrid({ locale = 'en' }: { locale?: Locale }) {
                   ))}
                 </div>
               </div>
+
+              <ChevronRight
+                size={18}
+                className="text-gray-600 group-hover:text-purple-400 transition-colors shrink-0"
+              />
             </Link>
           ))}
         </div>

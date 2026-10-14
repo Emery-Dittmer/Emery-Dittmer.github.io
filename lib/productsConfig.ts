@@ -12,6 +12,11 @@ export type Product = {
   status: ProductStatus
   year: number
   mediaSrc: StaticImageData
+  // App icon shown on the card (App Store style) and as a small badge on
+  // the detail page. Falls back to the Obsidian logo + a "+" badge when
+  // `isObsidianPlugin` is set and no dedicated icon exists.
+  icon?: StaticImageData
+  isObsidianPlugin?: boolean
   repoUrl?: string
   linkUrl?: string
   linkText?: { en: string; fr: string }
@@ -41,6 +46,8 @@ import stock_network_graph from '@/assets/projects/stock-network-graph.jpg'
 import task_tracker_screenshot from '@/assets/products/task-tracker.png'
 import process_flow_builder_screenshot from '@/assets/products/process-flow-builder.png'
 import chatterbox_icon from '@/assets/products/chatterbox.png'
+import task_tracker_icon from '@/assets/products/task-tracker-icon.png'
+import process_flow_builder_icon from '@/assets/products/process-flow-builder-icon.png'
 
 export const productsConfig: Product[] = [
   // ── Task Tracker · 2026 ────────────────────────────────────────────────────
@@ -66,6 +73,7 @@ export const productsConfig: Product[] = [
     status: 'active',
     year: 2026,
     mediaSrc: task_tracker_screenshot,
+    icon: task_tracker_icon,
     repoUrl: 'https://github.com/wivoo-edittmer/task-tracker',
     relatedProjectIds: ['task-tracker'],
   },
@@ -93,6 +101,7 @@ export const productsConfig: Product[] = [
     status: 'shipped',
     year: 2026,
     mediaSrc: process_flow_builder_screenshot,
+    icon: process_flow_builder_icon,
     repoUrl: 'https://github.com/wivoo-edittmer/process-flow-builder',
     linkUrl: 'https://claude.ai/artifact/3ERPZfeDYCZgLqvT63su9C',
     linkText: { en: 'Try the web version', fr: 'Essayer la version web' },
@@ -123,6 +132,7 @@ export const productsConfig: Product[] = [
     year: 2026,
     // TODO: no screenshot exists in the repo — generic stand-in for now.
     mediaSrc: stock_network_graph,
+    isObsidianPlugin: true,
     repoUrl: 'https://github.com/wivoo-edittmer/wivoo-daily-rollover',
   },
 
@@ -150,6 +160,7 @@ export const productsConfig: Product[] = [
     year: 2026,
     // TODO: no screenshot exists in the repo — generic stand-in for now.
     mediaSrc: stock_network_graph,
+    isObsidianPlugin: true,
     repoUrl: 'https://github.com/wivoo-edittmer/date-delta-recap',
   },
 
@@ -176,6 +187,7 @@ export const productsConfig: Product[] = [
     status: 'shipped',
     year: 2026,
     mediaSrc: chatterbox_icon,
+    icon: chatterbox_icon,
     repoUrl: 'https://github.com/wivoo-edittmer/chatterbox',
   },
 ]
