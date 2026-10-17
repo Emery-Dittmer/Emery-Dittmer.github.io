@@ -90,18 +90,24 @@ export default function ProductIcon({
   return (
     <div className="shrink-0 flex flex-col" style={{ width: size }}>
       <IconTile product={product} size={size} />
+      {/* A full-size flipped clone, mirrored around its own center like a
+          reflection in water: flipping end-to-end turns "bottom" into
+          "top", so the clone's first `reflectionHeight` px (clipped here)
+          show the tile's bottom edge continuing seamlessly from the real
+          tile above, fading out toward the bottom of this window. */}
       <div
-        className="-mt-1 overflow-hidden select-none pointer-events-none"
+        className="overflow-hidden select-none pointer-events-none"
         style={{
           width: size,
           height: reflectionHeight,
-          transform: 'scaleY(-1)',
           WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.35), transparent 75%)',
           maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.35), transparent 75%)',
         }}
         aria-hidden="true"
       >
-        <IconTile product={product} size={size} />
+        <div style={{ transform: 'scaleY(-1)' }}>
+          <IconTile product={product} size={size} />
+        </div>
       </div>
     </div>
   )
