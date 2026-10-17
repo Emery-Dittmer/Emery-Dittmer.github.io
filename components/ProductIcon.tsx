@@ -4,17 +4,10 @@ import ObsidianLogo from '@/assets/logos/obsidian-logo.svg'
 import { Product } from '@/lib/productsConfig'
 
 /**
- * App-icon tile for a product. Products with a dedicated `icon` use it
- * directly; Obsidian plugins without one fall back to the Obsidian logo
- * with a small "+" badge to signal "this is an addon, not the app itself".
+ * The icon tile itself — shared between the real icon and the reflection
+ * clone beneath it, so the two never drift out of sync.
  */
-export default function ProductIcon({
-  product,
-  size = 56,
-}: {
-  product: Product
-  size?: number
-}) {
+function IconTile({ product, size }: { product: Product; size: number }) {
   // Scale the corner radius with size so large tiles keep an app-icon look
   // (roughly iOS's ~22% radius) instead of looking under-rounded.
   const radius = Math.round(size * 0.22)
@@ -22,7 +15,7 @@ export default function ProductIcon({
   if (product.icon) {
     return (
       <div
-        className="relative shrink-0 overflow-hidden shadow-md"
+        className="relative overflow-hidden shadow-md"
         style={{ width: size, height: size, borderRadius: radius }}
       >
         <Image src={product.icon} alt="" fill unoptimized className="object-cover" />
@@ -33,7 +26,7 @@ export default function ProductIcon({
   if (product.isObsidianPlugin) {
     const badgeSize = Math.round(size * 0.4)
     return (
-      <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <div className="relative" style={{ width: size, height: size }}>
         <div
           className="w-full h-full bg-[#1b1b1f] flex items-center justify-center shadow-md overflow-hidden"
           style={{ borderRadius: radius }}
@@ -61,10 +54,55 @@ export default function ProductIcon({
   // Fallback: no icon, not an Obsidian plugin — show the banner image cropped square.
   return (
     <div
-      className="relative shrink-0 overflow-hidden shadow-md"
+      className="relative overflow-hidden shadow-md"
       style={{ width: size, height: size, borderRadius: radius }}
     >
       <Image src={product.mediaSrc} alt="" fill unoptimized className="object-cover" />
+    </div>
+  )
+}
+
+/**
+ * App-icon tile for a product, with a Mac-Dock-style reflection fading out
+ * underneath. Products with a dedicated `icon` use it directly; Obsidian
+ * plugins without one fall back to the Obsidian logo with a small "+"
+ * badge to signal "this is an addon, not the app itself".
+ */
+export default function ProductIcon({
+  product,
+  size = 56,
+  reflection = false,
+}: {
+  product: Product
+  size?: number
+  reflection?: boolean
+}) {
+  if (!reflection) {
+    return (
+      <div className="shrink-0">
+        <IconTile product={product} size={size} />
+      </div>
+    )
+  }
+
+  const reflectionHeight = Math.round(size * 0.55)
+
+  return (
+    <div className="shrink-0 flex flex-col" style={{ width: size }}>
+      <IconTile product={product} size={size} />
+      <div
+        className="-mt-1 overflow-hidden select-none pointer-events-none"
+        style={{
+          width: size,
+          height: reflectionHeight,
+          transform: 'scaleY(-1)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.35), transparent 75%)',
+          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.35), transparent 75%)',
+        }}
+        aria-hidden="true"
+      >
+        <IconTile product={product} size={size} />
+      </div>
     </div>
   )
 }

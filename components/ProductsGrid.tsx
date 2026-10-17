@@ -33,12 +33,12 @@ export default function ProductsGrid({ locale = 'en' }: { locale?: Locale }) {
             <Link
               key={product.id}
               href={`/Products/${locale}/${product.id}`}
-              className="group flex flex-col items-center gap-3 text-center"
+              className="group flex flex-col items-center text-center"
             >
               <div className="transition-transform duration-150 group-hover:scale-105 group-active:scale-95">
-                <ProductIcon product={product} size={176} />
+                <ProductIcon product={product} size={176} reflection />
               </div>
-              <span className="text-sm sm:text-base font-medium text-gray-300 group-hover:text-purple-300 transition-colors leading-tight line-clamp-2">
+              <span className="mt-2 text-sm sm:text-base font-medium text-gray-300 group-hover:text-purple-300 transition-colors leading-tight line-clamp-2">
                 {product.name[locale]}
               </span>
             </Link>
