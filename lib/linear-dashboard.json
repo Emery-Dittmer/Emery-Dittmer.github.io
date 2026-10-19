@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T20:16:20.752Z",
+  "generatedAt": "2026-10-19T11:42:12.556Z",
   "teamKey": "EME",
   "projects": [
     {
@@ -836,6 +836,44 @@
     }
   ],
   "issues": [
+    {
+      "id": "EME-91",
+      "title": "Trenitalia and IDFM/Transilien trip_ids don't match stop_times, so stop_sequence stays unresolvable",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-91/trenitalia-and-idfmtransilien-tripids-dont-match-stoptimes-so",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Done",
+      "statusType": "completed",
+      "labels": [
+        "Bug"
+      ],
+      "projectId": "157b20f6-6bed-430e-a565-016b898af0d3",
+      "parentId": null,
+      "createdAt": "2026-07-21T17:20:26.657Z",
+      "startedAt": null,
+      "completedAt": "2026-08-20T16:05:49.975Z",
+      "canceledAt": null,
+      "updatedAt": "2026-10-17T20:35:46.087Z"
+    },
+    {
+      "id": "EME-116",
+      "title": "Infrastructure: build the paid API (auth, rate limiting, billing)",
+      "url": "https://linear.app/emerypersonalprojects/issue/EME-116/infrastructure-build-the-paid-api-auth-rate-limiting-billing",
+      "priority": 3,
+      "priorityName": "Medium",
+      "status": "Backlog",
+      "statusType": "backlog",
+      "labels": [
+        "Feature"
+      ],
+      "projectId": "157b20f6-6bed-430e-a565-016b898af0d3",
+      "parentId": "EME-114",
+      "createdAt": "2026-08-08T08:37:04.495Z",
+      "startedAt": null,
+      "completedAt": null,
+      "canceledAt": null,
+      "updatedAt": "2026-10-17T20:35:45.907Z"
+    },
     {
       "id": "EME-236",
       "title": "Update the electrical for the mirror",
@@ -2638,25 +2676,6 @@
       "updatedAt": "2026-08-30T08:26:52.769Z"
     },
     {
-      "id": "EME-91",
-      "title": "Trenitalia and IDFM/Transilien trip_ids don't match stop_times, so stop_sequence stays unresolvable",
-      "url": "https://linear.app/emerypersonalprojects/issue/EME-91/trenitalia-and-idfmtransilien-trip-ids-dont-match-stop-times-so-stop",
-      "priority": 3,
-      "priorityName": "Medium",
-      "status": "Done",
-      "statusType": "completed",
-      "labels": [
-        "Bug"
-      ],
-      "projectId": "157b20f6-6bed-430e-a565-016b898af0d3",
-      "parentId": null,
-      "createdAt": "2026-07-21T17:20:26.657Z",
-      "startedAt": null,
-      "completedAt": "2026-08-20T16:05:49.975Z",
-      "canceledAt": null,
-      "updatedAt": "2026-08-29T17:21:19.499Z"
-    },
-    {
       "id": "EME-92",
       "title": "Some RT stop_time_updates reference StopArea: ids that don't exist in stop_times (only StopPoint: ids do)",
       "url": "https://linear.app/emerypersonalprojects/issue/EME-92/some-rt-stop-time-updates-reference-stoparea-ids-that-dont-exist-in",
@@ -3492,25 +3511,6 @@
       "completedAt": null,
       "canceledAt": null,
       "updatedAt": "2026-08-08T08:44:53.855Z"
-    },
-    {
-      "id": "EME-116",
-      "title": "Infrastructure: build the paid API (auth, rate limiting, billing)",
-      "url": "https://linear.app/emerypersonalprojects/issue/EME-116/infrastructure-build-the-paid-api-auth-rate-limiting-billing",
-      "priority": 3,
-      "priorityName": "Medium",
-      "status": "Backlog",
-      "statusType": "backlog",
-      "labels": [
-        "Feature"
-      ],
-      "projectId": "157b20f6-6bed-430e-a565-016b898af0d3",
-      "parentId": "EME-114",
-      "createdAt": "2026-08-08T08:37:04.495Z",
-      "startedAt": null,
-      "completedAt": null,
-      "canceledAt": null,
-      "updatedAt": "2026-08-08T08:37:24.394Z"
     },
     {
       "id": "EME-113",
