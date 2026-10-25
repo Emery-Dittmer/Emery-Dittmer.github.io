@@ -13,6 +13,7 @@ import { Locale } from '@/lib/i18n'
 import { STATUS_STYLE, statusLabel } from './projectStatus'
 import ProjectOverviewCard from './ProjectOverviewCard'
 import { useDashboardFilter } from './DashboardFilterContext'
+import DashboardFilterButton from './DashboardFilterButton'
 
 const copy = {
   en: {
@@ -340,9 +341,12 @@ export default function PMTimeline({ locale = 'en' }: { locale?: Locale }) {
   return (
     <section className="relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-10">
-        <div className="mb-6" data-aos="fade-up">
-          <h2 className="h2 mb-1">{t.heading}</h2>
-          <p className="text-gray-400 text-sm">{t.sub}</p>
+        <div className="flex items-start justify-between gap-4 mb-6" data-aos="fade-up">
+          <div>
+            <h2 className="h2 mb-1">{t.heading}</h2>
+            <p className="text-gray-400 text-sm">{t.sub}</p>
+          </div>
+          <DashboardFilterButton locale={locale} />
         </div>
 
         <div
