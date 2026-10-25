@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from 'react'
 import { ArrowUpDown, ExternalLink } from 'lucide-react'
-import { dashboardData, getProjectViews } from '@/lib/linearDashboard'
+import { dashboardData, getProjectViews, getFilteredIssues } from '@/lib/linearDashboard'
 import { Locale } from '@/lib/i18n'
+import { useDashboardFilter } from './DashboardFilterContext'
 
 const copy = {
   en: {
@@ -58,6 +59,7 @@ const STATUS_DOT: Record<string, string> = {
 
 export default function IssueExplorer({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
+  const { filter: dashboardFilter } = useDashboardFilter()
   const projectName = useMemo(
     () => new Map(getProjectViews(locale).map((p) => [p.id, p.name])),
     [locale],
@@ -74,13 +76,15 @@ export default function IssueExplorer({ locale = 'en' }: { locale?: Locale }) {
   const [sort, setSort] = useState<SortKey>('updated')
   const [asc, setAsc] = useState(false)
 
+  const baseIssues = useMemo(() => getFilteredIssues(dashboardFilter), [dashboardFilter])
+
   const statuses = useMemo(
-    () => [...new Set(dashboardData.issues.map((i) => i.status).filter(Boolean))] as string[],
-    [],
+    () => [...new Set(baseIssues.map((i) => i.status).filter(Boolean))] as string[],
+    [baseIssues],
   )
 
   const rows = useMemo(() => {
-    let list = dashboardData.issues.slice()
+    let list = baseIssues.slice()
     if (q.trim()) {
       const needle = q.toLowerCase()
       list = list.filter(
@@ -108,7 +112,7 @@ export default function IssueExplorer({ locale = 'en' }: { locale?: Locale }) {
       }
     })
     return list
-  }, [q, project, status, priority, sort, asc])
+  }, [baseIssues, q, project, status, priority, sort, asc])
 
   const toggleSort = (key: SortKey) => {
     if (sort === key) setAsc((v) => !v)
@@ -178,7 +182,7 @@ export default function IssueExplorer({ locale = 'en' }: { locale?: Locale }) {
         </div>
 
         <p className="text-[11px] text-gray-500 mb-2">
-          {t.showing(rows.length, dashboardData.issues.length)}
+          {t.showing(rows.length, baseIssues.length)}
         </p>
 
         <div

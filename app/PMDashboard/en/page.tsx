@@ -10,16 +10,17 @@ import PMTimeline from '@/components/PMDashboard/PMTimeline'
 import DeliveryTrackRecord from '@/components/PMDashboard/DeliveryTrackRecord'
 import ProcessShowcase from '@/components/PMDashboard/ProcessShowcase'
 import IssueExplorer from '@/components/PMDashboard/IssueExplorer'
+import { DashboardFilterProvider } from '@/components/PMDashboard/DashboardFilterContext'
 
 export default function PMDashboardPage() {
   const locale = 'en'
   return (
-    <>
+    <DashboardFilterProvider>
       <PMHero locale={locale} />
       <PMTimeline locale={locale} />
       <DeliveryTrackRecord locale={locale} />
       <ProcessShowcase locale={locale} />
       <IssueExplorer locale={locale} />
-    </>
+    </DashboardFilterProvider>
   )
 }

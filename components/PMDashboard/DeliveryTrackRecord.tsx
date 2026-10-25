@@ -1,6 +1,9 @@
-import { dashboardData, getProjectViews, getEpicReferenceUrl } from '@/lib/linearDashboard'
+'use client'
+
+import { getProjectViews, getEpicReferenceUrl, getFilteredEpics } from '@/lib/linearDashboard'
 import { Locale } from '@/lib/i18n'
 import { fmtDate } from './projectStatus'
+import { useDashboardFilter } from './DashboardFilterContext'
 
 const copy = {
   en: {
@@ -21,9 +24,10 @@ const copy = {
 
 export default function DeliveryTrackRecord({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
+  const { filter } = useDashboardFilter()
   const projectName = new Map(getProjectViews(locale).map((p) => [p.id, p.name]))
 
-  const epics = [...dashboardData.epics]
+  const epics = getFilteredEpics(filter)
     .sort((a, b) => (b.lastActivity ?? '').localeCompare(a.lastActivity ?? ''))
 
   return (

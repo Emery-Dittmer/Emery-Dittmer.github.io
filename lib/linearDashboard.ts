@@ -265,16 +265,57 @@ export type TimelineModel = {
   rows: ProjectTimelineRow[]
 }
 
-export function getTimelineModel(locale: Locale): TimelineModel {
+// ── Dashboard-wide filter (single project + custom date range) ─────────────
+
+export type DashboardFilter = {
+  projectId: string | null // null = all projects
+  dateFrom: string | null // YYYY-MM-DD, inclusive
+  dateTo: string | null // YYYY-MM-DD, inclusive
+}
+
+export const EMPTY_DASHBOARD_FILTER: DashboardFilter = {
+  projectId: null,
+  dateFrom: null,
+  dateTo: null,
+}
+
+/** The date an issue is judged by for filtering: when it happened, in order of preference. */
+function issueEffectiveDate(i: LinearIssue): string | null {
+  return i.completedAt ?? i.startedAt ?? i.createdAt ?? null
+}
+
+function matchesDateRange(iso: string | null, filter: DashboardFilter): boolean {
+  if (!iso) return true
+  const day = iso.slice(0, 10)
+  if (filter.dateFrom && day < filter.dateFrom) return false
+  if (filter.dateTo && day > filter.dateTo) return false
+  return true
+}
+
+function matchesFilter(i: LinearIssue, filter: DashboardFilter): boolean {
+  if (filter.projectId && i.projectId !== filter.projectId) return false
+  return matchesDateRange(issueEffectiveDate(i), filter)
+}
+
+export function getTimelineModel(
+  locale: Locale,
+  filter: DashboardFilter = EMPTY_DASHBOARD_FILTER,
+): TimelineModel {
   const now = new Date().toISOString()
-  const projectViews = getProjectViews(locale)
+  const projectViews = getProjectViews(locale).filter(
+    (p) => !filter.projectId || p.id === filter.projectId,
+  )
   const rows: ProjectTimelineRow[] = []
 
   for (const project of projectViews) {
-    const projectIssues = dashboardData.issues.filter((i) => i.projectId === project.id)
+    const projectIssues = dashboardData.issues.filter(
+      (i) => i.projectId === project.id && matchesFilter(i, filter),
+    )
     if (projectIssues.length === 0) continue
 
     const epicIds = new Set(dashboardData.epics.filter((e) => e.projectId === project.id).map((e) => e.id))
+
+    const hasDateFilter = Boolean(filter.dateFrom || filter.dateTo)
 
     const epics: EpicTimelineRow[] = dashboardData.epics
       .filter((e) => e.projectId === project.id)
@@ -284,6 +325,18 @@ export function getTimelineModel(locale: Locale): TimelineModel {
           .map((issue) => ({ issue, span: issueSpan(issue, now) }))
           .filter((x): x is { issue: LinearIssue; span: Span } => x.span !== null)
           .sort((a, b) => a.span.start.localeCompare(b.span.start))
+        // With a date filter active, an epic whose own children all fall
+        // outside the range (and whose own activity window — for a
+        // childless, single-issue epic — doesn't overlap it either) has
+        // nothing to show — drop it.
+        if (
+          hasDateFilter &&
+          kids.length === 0 &&
+          !matchesDateRange(e.firstActivity, filter) &&
+          !matchesDateRange(e.lastActivity, filter)
+        ) {
+          return null
+        }
         const override = epicDateOverrides[e.id]
         const span: Span = override
           ? { start: override.start, end: override.end, open: false }
@@ -295,6 +348,7 @@ export function getTimelineModel(locale: Locale): TimelineModel {
             }
         return { epic: e, span, children: kids, referenceUrl: getEpicReferenceUrl(e) }
       })
+      .filter((x): x is EpicTimelineRow => x !== null)
       .sort((a, b) => a.span.start.localeCompare(b.span.start))
 
     const looseIssues = projectIssues
@@ -329,9 +383,12 @@ export function getTimelineModel(locale: Locale): TimelineModel {
 
 // Issues delivered (completed) in a given calendar month, for the timeline's
 // month rollup. `monthKey` is "YYYY-MM".
-export function getDeliveredByMonth(projectId?: string): { month: string; issues: LinearIssue[] }[] {
+export function getDeliveredByMonth(
+  projectId?: string,
+  filter: DashboardFilter = EMPTY_DASHBOARD_FILTER,
+): { month: string; issues: LinearIssue[] }[] {
   const pool = dashboardData.issues.filter(
-    (i) => i.completedAt && (!projectId || i.projectId === projectId),
+    (i) => i.completedAt && (!projectId || i.projectId === projectId) && matchesFilter(i, filter),
   )
   const byMonth = new Map<string, LinearIssue[]>()
   for (const issue of pool) {
@@ -345,10 +402,36 @@ export function getDeliveredByMonth(projectId?: string): { month: string; issues
     .sort((a, b) => a.month.localeCompare(b.month))
 }
 
+/** All issues matching the dashboard filter — the shared source for the
+ * Issue Explorer table and any other per-issue view. */
+export function getFilteredIssues(filter: DashboardFilter = EMPTY_DASHBOARD_FILTER): LinearIssue[] {
+  return dashboardData.issues.filter((i) => matchesFilter(i, filter))
+}
+
+/** Epics matching the dashboard filter — by project, and (when a date range
+ * is set) only those with at least one matching child issue, or whose own
+ * activity window (for childless epics) overlaps the range. */
+export function getFilteredEpics(filter: DashboardFilter = EMPTY_DASHBOARD_FILTER): LinearEpic[] {
+  const hasDateFilter = Boolean(filter.dateFrom || filter.dateTo)
+  return dashboardData.epics.filter((e) => {
+    if (filter.projectId && e.projectId !== filter.projectId) return false
+    if (!hasDateFilter) return true
+    const hasMatchingChild = dashboardData.issues.some(
+      (i) => i.parentId === e.id && matchesFilter(i, filter),
+    )
+    if (hasMatchingChild) return true
+    // Childless epic (e.g. a single-issue report): judge it by its own
+    // first/last activity window overlapping the filter's date range.
+    return (
+      matchesDateRange(e.firstActivity, filter) || matchesDateRange(e.lastActivity, filter)
+    )
+  })
+}
+
 // ── Aggregate metrics ──────────────────────────────────────────────────────
 
-export function getProcessMetrics() {
-  const issues = dashboardData.issues
+export function getProcessMetrics(filter: DashboardFilter = EMPTY_DASHBOARD_FILTER) {
+  const issues = getFilteredIssues(filter)
   const completed = issues.filter((i) => i.statusType === 'completed')
   const withCycleTime = completed.filter((i) => i.startedAt && i.completedAt)
   const avgCycleDays =
@@ -359,7 +442,7 @@ export function getProcessMetrics() {
         }, 0) / withCycleTime.length
       : 0
 
-  const months = getDeliveredByMonth()
+  const months = getDeliveredByMonth(filter.projectId ?? undefined, filter)
   const activeMonths = months.filter((m) => m.issues.length > 0)
   const avgPerMonth =
     activeMonths.length > 0
@@ -376,6 +459,8 @@ export function getProcessMetrics() {
     .sort((a, b) => b[1] - a[1])
     .map(([name, count]) => ({ name, count }))
 
+  const epics = getFilteredEpics(filter)
+
   return {
     totalIssues: issues.length,
     completedIssues: completed.length,
@@ -384,9 +469,9 @@ export function getProcessMetrics() {
     avgDeliveredPerMonth: Math.round(avgPerMonth * 10) / 10,
     activeMonths: activeMonths.length,
     topLabels,
-    epicsShipped: dashboardData.epics.filter((e) => e.statusType === 'completed').length,
-    epicsTotal: dashboardData.epics.length,
-    deliveryStart: getDeliveredByMonth()[0]?.month ?? null,
+    epicsShipped: epics.filter((e) => e.statusType === 'completed').length,
+    epicsTotal: epics.length,
+    deliveryStart: months[0]?.month ?? null,
     generatedAt: dashboardData.generatedAt,
   }
 }

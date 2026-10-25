@@ -1,6 +1,10 @@
+'use client'
+
 import { pmStats } from '@/lib/linearConfig'
 import { getProcessMetrics } from '@/lib/linearDashboard'
 import { Locale } from '@/lib/i18n'
+import { useDashboardFilter } from './DashboardFilterContext'
+import DashboardFilterButton from './DashboardFilterButton'
 
 const copy = {
   en: {
@@ -27,7 +31,8 @@ const copy = {
 
 export default function PMHero({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
-  const m = getProcessMetrics()
+  const { filter } = useDashboardFilter()
+  const m = getProcessMetrics(filter)
 
   const stats = [
     { label: t.projectsLed, value: String(pmStats.projectsLed) },
@@ -40,6 +45,9 @@ export default function PMHero({ locale = 'en' }: { locale?: Locale }) {
   return (
     <section className="relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-8">
+        <div className="flex justify-end mb-2" data-aos="fade-up">
+          <DashboardFilterButton locale={locale} />
+        </div>
         <div className="text-center mb-10" data-aos="fade-up">
           <h1 className="h1 mb-4">{t.heading}</h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">{t.sub}</p>

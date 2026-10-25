@@ -1,5 +1,8 @@
+'use client'
+
 import { getProcessMetrics } from '@/lib/linearDashboard'
 import { Locale } from '@/lib/i18n'
+import { useDashboardFilter } from './DashboardFilterContext'
 
 const copy = {
   en: {
@@ -34,7 +37,8 @@ const LABEL_COLORS: Record<string, string> = {
 
 export default function ProcessShowcase({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
-  const m = getProcessMetrics()
+  const { filter } = useDashboardFilter()
+  const m = getProcessMetrics(filter)
   const labelTotal = m.topLabels.reduce((s, l) => s + l.count, 0)
 
   return (

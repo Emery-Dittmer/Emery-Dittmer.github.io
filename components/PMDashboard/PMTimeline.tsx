@@ -12,6 +12,7 @@ import {
 import { Locale } from '@/lib/i18n'
 import { STATUS_STYLE, statusLabel } from './projectStatus'
 import ProjectOverviewCard from './ProjectOverviewCard'
+import { useDashboardFilter } from './DashboardFilterContext'
 
 const copy = {
   en: {
@@ -327,7 +328,8 @@ function ProjectRow({
 
 export default function PMTimeline({ locale = 'en' }: { locale?: Locale }) {
   const t = copy[locale]
-  const model = useMemo(() => getTimelineModel(locale), [locale])
+  const { filter } = useDashboardFilter()
+  const model = useMemo(() => getTimelineModel(locale, filter), [locale, filter])
   const scale = useScale(model.rangeStart, model.rangeEnd)
   const ticks = useMemo(
     () => monthTicks(scale.lo, scale.hi, locale),
